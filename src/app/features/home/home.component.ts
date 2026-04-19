@@ -1,78 +1,171 @@
-import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+﻿import { CommonModule } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { CarouselModule } from 'primeng/carousel';
+import { ChipModule } from 'primeng/chip';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { SkeletonModule } from 'primeng/skeleton';
+import { TagModule } from 'primeng/tag';
+import { catchError, forkJoin, map, of } from 'rxjs';
 import { ListingResponse } from '../listings/models/listing.model';
-import { ListingDetailCardComponent } from '../listings/components/listing-detail-card/listing-detail-card.component';
-import { ListingSearchFormComponent } from '../listings/components/listing-search-form/listing-search-form.component';
 import { ListingService } from '../listings/services/listing.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, ListingSearchFormComponent, ListingDetailCardComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CardModule,
+    ButtonModule,
+    SelectButtonModule,
+    InputTextModule,
+    IconFieldModule,
+    InputIconModule,
+    ChipModule,
+    TagModule,
+    SkeletonModule,
+    MessageModule,
+    CarouselModule
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent {
-  private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
+export class HomeComponent implements OnInit {
   private readonly listingService = inject(ListingService);
 
-  readonly lookupForm = this.fb.nonNullable.group({
-    id: [1, [Validators.required, Validators.min(1)]]
-  });
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly listings = signal<ListingResponse[]>([]);
 
-  readonly loadingLookup = signal(false);
-  readonly lookedUpListing = signal<ListingResponse | null>(null);
-  readonly lookupError = signal<string | null>(null);
-  readonly summary = computed(() => {
-    const listing = this.lookedUpListing();
-    if (!listing) {
-      return null;
-    }
+  readonly searchText = signal('');
+  readonly selectedPropertyType = signal<'ALL' | 'APARTMENT' | 'HOUSE' | 'ROOM'>('ALL');
+  readonly selectedListingType = signal<'ALL' | 'RENT' | 'SALE'>('ALL');
 
-    return `${listing.features.propertyType} • ${listing.listingType} • ${listing.address.city}`;
-  });
-
-  readonly highlights = [
-    'Byty, domy a izby na jednom mieste',
-    'Priamy JWT flow cez Keycloak',
-    'Publikovanie ponuky cez chránený backend endpoint'
+  readonly propertyTypeOptions = [
+    { label: 'Any type', value: 'ALL' },
+    { label: 'Apartment', value: 'APARTMENT' },
+    { label: 'House', value: 'HOUSE' },
+    { label: 'Room', value: 'ROOM' }
   ];
 
-  readonly categories = [
-    { title: 'Byty', text: 'Mestské bývanie, garsónky aj väčšie rodinné byty.' },
-    { title: 'Domy', text: 'Rodinné domy, novostavby a väčšie nehnuteľnosti.' },
-    { title: 'Izby', text: 'Jednoduché bývanie pre študentov alebo jednotlivcov.' }
+  readonly listingTypeOptions = [
+    { label: 'Any deal', value: 'ALL' },
+    { label: 'Rent', value: 'RENT' },
+    { label: 'Sale', value: 'SALE' }
   ];
 
-  searchById(): void {
-    if (this.lookupForm.invalid) {
-      this.lookupForm.markAllAsTouched();
-      return;
-    }
+  readonly filteredListings = computed(() =>
+    this.listings().filter((item) => {
+      const query = this.searchText().trim().toLowerCase();
+      const propertyFilter = this.selectedPropertyType();
+      const listingFilter = this.selectedListingType();
 
-    this.loadingLookup.set(true);
-    this.lookupError.set(null);
+      const matchesQuery =
+        !query
+        || item.title.toLowerCase().includes(query)
+        || item.address.city.toLowerCase().includes(query)
+        || item.address.country.toLowerCase().includes(query);
+      const matchesProperty = propertyFilter === 'ALL' || item.features.propertyType === propertyFilter;
+      const matchesListingType = listingFilter === 'ALL' || item.listingType === listingFilter;
 
-    const id = this.lookupForm.getRawValue().id;
-    this.listingService.getById(id).subscribe({
-      next: (listing) => {
-        this.lookedUpListing.set(listing);
-        this.loadingLookup.set(false);
+      return matchesQuery && matchesProperty && matchesListingType;
+    })
+  );
+  readonly firstCity = computed(() => this.filteredListings()[0]?.address.city ?? 'Popular');
+
+  readonly featuredListings = computed(() => this.filteredListings().slice(0, 12));
+  readonly extraListings = computed(() => this.filteredListings().slice(12, 24));
+
+  readonly responsiveOptions = [
+    { breakpoint: '1400px', numVisible: 6, numScroll: 1 },
+    { breakpoint: '1200px', numVisible: 4, numScroll: 1 },
+    { breakpoint: '900px', numVisible: 3, numScroll: 1 },
+    { breakpoint: '640px', numVisible: 1, numScroll: 1 }
+  ];
+
+  ngOnInit(): void {
+    this.loadListings();
+  }
+
+  loadListings(): void {
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.listingService.getAll().pipe(
+      map((response) => this.toArray(response)),
+      catchError(() => this.fetchByIdRange())
+    ).subscribe({
+      next: (items) => {
+        this.listings.set(items);
+        if (!items.length) {
+          this.error.set('No listings were returned by the backend list endpoints.');
+        }
+        this.loading.set(false);
       },
       error: (error) => {
-        this.lookedUpListing.set(null);
-        this.lookupError.set(this.toMessage(error));
-        this.loadingLookup.set(false);
+        this.listings.set([]);
+        this.error.set(this.toMessage(error));
+        this.loading.set(false);
       }
     });
   }
 
-  openListings(): void {
-    const id = this.lookupForm.getRawValue().id;
-    void this.router.navigate(['/listings'], { queryParams: { id } });
+  setSearchText(value: string): void {
+    this.searchText.set(value);
+  }
+
+  setPropertyType(value: 'ALL' | 'APARTMENT' | 'HOUSE' | 'ROOM'): void {
+    this.selectedPropertyType.set(value);
+  }
+
+  setListingType(value: 'ALL' | 'RENT' | 'SALE'): void {
+    this.selectedListingType.set(value);
+  }
+
+  scoreFromId(id: number): string {
+    return (4.7 + ((id % 4) * 0.07)).toFixed(2);
+  }
+
+  imageUrl(id: number): string {
+    return `https://picsum.photos/seed/rental-${id}/540/540`;
+  }
+
+  private fetchByIdRange() {
+    const probes = Array.from({ length: 24 }, (_, index) => index + 1).map((id) =>
+      this.listingService.getById(id).pipe(catchError(() => of(null)))
+    );
+
+    return forkJoin(probes).pipe(
+      map((items) => items.filter((item): item is ListingResponse => item !== null))
+    );
+  }
+
+  private toArray(value: unknown): ListingResponse[] {
+    if (Array.isArray(value)) {
+      return value as ListingResponse[];
+    }
+
+    if (value && typeof value === 'object') {
+      const wrapped = value as { content?: ListingResponse[]; items?: ListingResponse[]; data?: ListingResponse[] };
+      if (Array.isArray(wrapped.content)) {
+        return wrapped.content;
+      }
+      if (Array.isArray(wrapped.items)) {
+        return wrapped.items;
+      }
+      if (Array.isArray(wrapped.data)) {
+        return wrapped.data;
+      }
+    }
+
+    return [];
   }
 
   private toMessage(error: unknown): string {

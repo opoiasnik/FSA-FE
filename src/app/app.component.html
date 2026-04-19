@@ -1,32 +1,49 @@
-<nav class="site-nav">
-  <div class="nav-start">
-    <a routerLink="/home" routerLinkActive="active">Home</a>
-    <a routerLink="/listings" routerLinkActive="active">Listings</a>
-    <a *ngIf="isAuthenticated() && isOwner()" routerLink="/listings/create" routerLinkActive="active">Owner Studio</a>
-  </div>
+<p-toolbar styleClass="app-toolbar">
+  <ng-template #start>
+    <div class="brand">FSA Rental</div>
+    <nav class="main-nav">
+      <a pButton routerLink="/home" routerLinkActive="active-link" [text]="true" label="Home"></a>
+      <a pButton routerLink="/listings" routerLinkActive="active-link" [text]="true" label="Listings"></a>
+      <a
+        *ngIf="isAuthenticated() && isOwner()"
+        pButton
+        routerLink="/listings/create"
+        routerLinkActive="active-link"
+        [text]="true"
+        label="Owner Studio">
+      </a>
+    </nav>
+  </ng-template>
 
-  <div class="nav-end">
-    <div class="session-pill" [class.live]="isAuthenticated()">
-      {{ isAuthenticated() ? 'Authenticated user' : 'Guest visitor' }}
+  <ng-template #end>
+    <div class="toolbar-actions">
+      <p-tag [severity]="isAuthenticated() ? 'success' : 'secondary'" [value]="isAuthenticated() ? 'Logged in' : 'Guest'"></p-tag>
+      <button pButton type="button" icon="pi pi-sign-in" label="Login" *ngIf="!isAuthenticated()" (click)="login()"></button>
+      <button pButton type="button" icon="pi pi-sign-out" label="Logout" severity="contrast" *ngIf="isAuthenticated()" (click)="logout()"></button>
     </div>
-    <span class="token-time" *ngIf="tokenExpiresAt() && isAuthenticated()">Token: {{ tokenExpiresAt() }}</span>
-    <button class="button ghost" type="button" *ngIf="!isAuthenticated()" (click)="login()">Login</button>
-    <button class="button ghost danger" type="button" *ngIf="isAuthenticated()" (click)="logout()">Logout</button>
-  </div>
-</nav>
+  </ng-template>
+</p-toolbar>
 
-<main class="main-wrapper">
-  <section class="user-strip" *ngIf="user() as currentUser">
-    <strong>{{ currentUser.name || currentUser.username }}</strong>
-    <span>{{ currentUser.email }}</span>
-    <span>Role: {{ currentUser.roles.join(', ') || 'none' }}</span>
-  </section>
+<main class="app-content">
+  <p-card *ngIf="user() as currentUser" styleClass="user-card">
+    <div class="user-meta">
+      <p-avatar icon="pi pi-user" shape="circle"></p-avatar>
+      <div>
+        <strong>{{ currentUser.name || currentUser.username }}</strong>
+        <div>{{ currentUser.email }}</div>
+        <small>Role: {{ currentUser.roles.join(', ') || 'none' }}</small>
+      </div>
+      <small *ngIf="tokenExpiresAt() && isAuthenticated()">Token expires: {{ tokenExpiresAt() }}</small>
+    </div>
+  </p-card>
 
-  <p *ngIf="isAuthenticated() && !isOwner()" class="message">
-    Owner Studio is available only for the OWNER role.
-  </p>
+  <p-message
+    *ngIf="isAuthenticated() && !isOwner()"
+    severity="warn"
+    text="Owner Studio is available only for the OWNER role.">
+  </p-message>
 
-  <p *ngIf="authError()" class="message error">{{ authError() }}</p>
+  <p-message *ngIf="authError()" severity="error" [text]="authError() || ''"></p-message>
 
   <router-outlet></router-outlet>
 </main>

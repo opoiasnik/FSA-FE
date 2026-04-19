@@ -1,48 +1,96 @@
-<section class="hero">
-  <div class="hero-copy">
-    <p class="eyebrow">Vybrať správne je kľúčové</p>
-    <h1>Nájdi nehnuteľnosť alebo publikuj vlastnú ponuku.</h1>
-    <p class="lead">
-      Frontend je rozdelený po stránkach podobne ako `Akademy_Frontend`: samostatná home,
-      samostatná listings page a samostatná owner page pre vytvorenie ponuky.
-    </p>
-
-    <div class="hero-highlights">
-      <div *ngFor="let item of highlights">{{ item }}</div>
-    </div>
-  </div>
-
-  <div class="search-card">
-    <p class="search-title">Hľadať nehnuteľnosť</p>
-    <app-listing-search-form
-      [form]="lookupForm"
-      [loading]="loadingLookup()"
-      [submitLabel]="'Načítať detail'"
-      [secondaryLabel]="'Otvoriť stránku listingov'"
-      (submitted)="searchById()"
-      (secondaryAction)="openListings()">
-    </app-listing-search-form>
-
-    <p class="microcopy">Verejný endpoint: <code>GET /api/listings/&#123;id&#125;</code>.</p>
-    <p *ngIf="lookupError()" class="message error">{{ lookupError() }}</p>
+﻿<section class="bnb-top-nav">
+  <div class="mode-tabs">
+    <a pButton [text]="true" icon="pi pi-home" label="Homes"></a>
+    <a pButton [text]="true" icon="pi pi-map" label="Experiences"></a>
+    <a pButton [text]="true" icon="pi pi-briefcase" label="Services"></a>
   </div>
 </section>
 
-<section class="categories">
-  <article class="category-card" *ngFor="let category of categories">
-    <h2>{{ category.title }}</h2>
-    <p>{{ category.text }}</p>
-  </article>
+<section class="search-shell">
+  <div class="search-cell">
+    <small>Where</small>
+    <input pInputText [ngModel]="searchText()" (ngModelChange)="setSearchText($event)" placeholder="Search destinations" />
+  </div>
+  <div class="search-cell">
+    <small>Property</small>
+    <p-selectbutton
+      [options]="propertyTypeOptions"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="selectedPropertyType()"
+      (ngModelChange)="setPropertyType($event)">
+    </p-selectbutton>
+  </div>
+  <div class="search-cell">
+    <small>Deal</small>
+    <p-selectbutton
+      [options]="listingTypeOptions"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="selectedListingType()"
+      (ngModelChange)="setListingType($event)">
+    </p-selectbutton>
+  </div>
+  <button pButton type="button" icon="pi pi-search" [rounded]="true" severity="danger" (click)="loadListings()"></button>
 </section>
 
-<section class="preview" *ngIf="lookedUpListing() as listing">
-  <div class="preview-head">
-    <div>
-      <p class="eyebrow">Nájdená ponuka</p>
-      <h2>{{ summary() || listing.title }}</h2>
-    </div>
-    <a routerLink="/listings" [queryParams]="{ id: listing.id }" class="button ghost">Prejsť na detail</a>
+<p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
+
+<section *ngIf="loading()" class="loading-grid">
+  <p-skeleton width="100%" height="260px"></p-skeleton>
+  <p-skeleton width="100%" height="260px"></p-skeleton>
+  <p-skeleton width="100%" height="260px"></p-skeleton>
+  <p-skeleton width="100%" height="260px"></p-skeleton>
+</section>
+
+<section *ngIf="!loading()">
+  <div class="section-head">
+    <h2>{{ firstCity() }}: homes</h2>
   </div>
 
-  <app-listing-detail-card [listing]="listing"></app-listing-detail-card>
+  <p-carousel
+    [value]="featuredListings()"
+    [numVisible]="7"
+    [numScroll]="1"
+    [circular]="false"
+    [showIndicators]="false"
+    [responsiveOptions]="responsiveOptions">
+    <ng-template let-item pTemplate="item">
+      <article class="listing-tile">
+        <div class="tile-media">
+          <img [src]="imageUrl(item.id)" [alt]="item.title" loading="lazy" />
+          <p-chip label="Guest favorite"></p-chip>
+          <button pButton type="button" icon="pi pi-heart" [rounded]="true" [text]="true" severity="contrast"></button>
+        </div>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.price.amount }} {{ item.price.currency }} for 2 nights · ★ {{ scoreFromId(item.id) }}</p>
+      </article>
+    </ng-template>
+  </p-carousel>
+</section>
+
+<section *ngIf="!loading() && extraListings().length">
+  <div class="section-head">
+    <h2>Recommended stays</h2>
+  </div>
+
+  <p-carousel
+    [value]="extraListings()"
+    [numVisible]="7"
+    [numScroll]="1"
+    [circular]="false"
+    [showIndicators]="false"
+    [responsiveOptions]="responsiveOptions">
+    <ng-template let-item pTemplate="item">
+      <article class="listing-tile">
+        <div class="tile-media">
+          <img [src]="imageUrl(item.id + 250)" [alt]="item.title" loading="lazy" />
+          <p-chip label="Guest favorite"></p-chip>
+          <button pButton type="button" icon="pi pi-heart" [rounded]="true" [text]="true" severity="contrast"></button>
+        </div>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.price.amount }} {{ item.price.currency }} for 2 nights · ★ {{ scoreFromId(item.id + 7) }}</p>
+      </article>
+    </ng-template>
+  </p-carousel>
 </section>
