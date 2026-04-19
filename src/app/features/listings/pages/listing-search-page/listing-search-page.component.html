@@ -1,0 +1,36 @@
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Listings page</p>
+    <h1>Detail a vyhľadávanie ponuky</h1>
+  </div>
+
+  <app-listing-search-form
+    [form]="lookupForm"
+    [loading]="loading()"
+    [submitLabel]="'Vyhľadať'"
+    (submitted)="loadListing()">
+  </app-listing-search-form>
+</section>
+
+<article class="listing-panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Detail ponuky</p>
+      <h2>{{ summary() }}</h2>
+    </div>
+    <span class="chip">Public API</span>
+  </div>
+
+  <p *ngIf="error()" class="message error">{{ error() }}</p>
+
+  <ng-container *ngIf="listing() as item; else emptyListing">
+    <app-listing-detail-card [listing]="item"></app-listing-detail-card>
+  </ng-container>
+
+  <ng-template #emptyListing>
+    <div class="empty-state">
+      <strong>Zatiaľ nič nie je načítané.</strong>
+      <p>Zadaj ID existujúcej ponuky a frontend načíta detail z backendu.</p>
+    </div>
+  </ng-template>
+</article>

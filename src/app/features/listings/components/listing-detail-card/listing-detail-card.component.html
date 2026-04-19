@@ -1,0 +1,20 @@
+<div class="property-hero">
+  <div>
+    <span class="offer-tag">{{ listing.listingType }}</span>
+    <h3>{{ listing.title }}</h3>
+    <p>{{ listing.address.street }}, {{ listing.address.city }}, {{ listing.address.country }}</p>
+  </div>
+  <div class="price-box">
+    <strong>{{ listing.price.amount }} {{ listing.price.currency }}</strong>
+    <span>{{ listing.features.area || 'n/a' }} m²</span>
+  </div>
+</div>
+
+<div class="property-facts">
+  <div><span>Typ</span><strong>{{ listing.features.propertyType }}</strong></div>
+  <div><span>Izby</span><strong>{{ listing.features.roomCount || 'n/a' }}</strong></div>
+  <div><span>Poschodie</span><strong>{{ listing.features.floor || 'n/a' }}</strong></div>
+  <div><span>Stav</span><strong>{{ listing.status }}</strong></div>
+</div>
+
+<p class="description">{{ listing.description }}</p>

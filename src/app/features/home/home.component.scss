@@ -1,0 +1,151 @@
+.hero,
+.categories,
+.preview,
+.hero-highlights,
+.search-actions,
+.preview-head,
+.property-hero {
+  display: grid;
+  gap: 18px;
+}
+
+.hero {
+  grid-template-columns: 1.4fr 0.95fr;
+  margin-bottom: 24px;
+}
+
+.hero-copy,
+.search-card,
+.preview,
+.category-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+}
+
+.hero-copy {
+  padding: 40px;
+  background:
+    linear-gradient(135deg, rgba(212, 72, 47, 0.07), transparent 55%),
+    linear-gradient(180deg, #fffefc 0%, #fff9f5 100%);
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  max-width: 12ch;
+  margin-bottom: 18px;
+  font-size: clamp(2.8rem, 5vw, 5.2rem);
+  line-height: 0.95;
+}
+
+.lead,
+.microcopy,
+.category-card p {
+  color: var(--text-muted);
+}
+
+.hero-highlights {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.hero-highlights div,
+.category-card {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--border);
+}
+
+.search-card,
+.preview {
+  padding: 24px;
+}
+
+.search-form,
+label {
+  display: grid;
+  gap: 10px;
+}
+
+.search-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.categories {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 24px;
+}
+
+.preview-head {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.property-hero {
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  padding: 24px;
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(212, 72, 47, 0.09), rgba(212, 72, 47, 0.02)),
+    #fff;
+  border: 1px solid var(--border);
+}
+
+.offer-tag {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.price-box {
+  display: grid;
+  gap: 6px;
+  text-align: right;
+}
+
+.message.error {
+  background: #fff1ee;
+  color: var(--danger);
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+code {
+  font-family: Consolas, "Courier New", monospace;
+}
+
+@media (max-width: 1024px) {
+  .hero,
+  .categories,
+  .hero-highlights,
+  .search-actions,
+  .preview-head,
+  .property-hero {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    max-width: none;
+  }
+}

@@ -1,0 +1,118 @@
+.page-head,
+.lookup-form,
+.panel-head,
+.property-hero,
+.property-facts {
+  display: grid;
+  gap: 16px;
+}
+
+.page-head {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  margin-bottom: 24px;
+}
+
+.lookup-form {
+  grid-template-columns: minmax(220px, 280px) auto;
+  align-items: end;
+}
+
+.listing-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.panel-head {
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+.chip {
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.property-hero {
+  grid-template-columns: 1fr auto;
+  padding: 24px;
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(212, 72, 47, 0.09), rgba(212, 72, 47, 0.02)),
+    #fff;
+  border: 1px solid var(--border);
+}
+
+.offer-tag {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.price-box {
+  display: grid;
+  gap: 6px;
+  text-align: right;
+}
+
+.property-facts {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 18px 0;
+}
+
+.property-facts div,
+.empty-state {
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+
+.property-facts span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.description {
+  color: var(--text-muted);
+  line-height: 1.72;
+}
+
+.message.error {
+  background: #fff1ee;
+  color: var(--danger);
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+@media (max-width: 1024px) {
+  .page-head,
+  .lookup-form,
+  .panel-head,
+  .property-hero,
+  .property-facts {
+    grid-template-columns: 1fr;
+  }
+}

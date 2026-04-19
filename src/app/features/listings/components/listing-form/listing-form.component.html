@@ -1,0 +1,90 @@
+<form [formGroup]="form" (ngSubmit)="submitted.emit()" class="form-grid">
+  <label class="wide">
+    Názov ponuky
+    <input type="text" formControlName="title">
+  </label>
+
+  <label class="wide">
+    Popis
+    <textarea rows="4" formControlName="description"></textarea>
+  </label>
+
+  <label>
+    Ponuka
+    <select formControlName="listingType">
+      <option value="RENT">Prenájom</option>
+      <option value="SALE">Predaj</option>
+    </select>
+  </label>
+
+  <label>
+    Typ nehnuteľnosti
+    <select formControlName="propertyType">
+      <option value="APARTMENT">Apartment</option>
+      <option value="HOUSE">House</option>
+      <option value="ROOM">Room</option>
+    </select>
+  </label>
+
+  <label>
+    Ulica
+    <input type="text" formControlName="street">
+  </label>
+
+  <label>
+    Mesto
+    <input type="text" formControlName="city">
+  </label>
+
+  <label>
+    PSČ
+    <input type="text" formControlName="postalCode">
+  </label>
+
+  <label>
+    Krajina
+    <input type="text" formControlName="country">
+  </label>
+
+  <label>
+    Cena
+    <input type="number" step="0.01" formControlName="amount">
+  </label>
+
+  <label>
+    Mena
+    <input type="text" formControlName="currency">
+  </label>
+
+  <label>
+    Rozloha m²
+    <input type="number" step="0.1" formControlName="area">
+  </label>
+
+  <label>
+    Počet izieb
+    <input type="number" formControlName="roomCount">
+  </label>
+
+  <label>
+    Poschodie
+    <input type="number" formControlName="floor">
+  </label>
+
+  <label class="toggle">
+    <input type="checkbox" formControlName="furnished">
+    Zariadené
+  </label>
+
+  <label class="toggle">
+    <input type="checkbox" formControlName="parkingAvailable">
+    Parkovanie
+  </label>
+
+  <div class="wide action-row">
+    <button class="button accent" type="submit" [disabled]="submitting">
+      {{ submitting ? 'Ukladám...' : 'Publikovať ponuku' }}
+    </button>
+    <span class="muted">Prístup aj validáciu nechávame na backend.</span>
+  </div>
+</form>

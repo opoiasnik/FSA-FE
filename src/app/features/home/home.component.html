@@ -1,0 +1,48 @@
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">Vybrať správne je kľúčové</p>
+    <h1>Nájdi nehnuteľnosť alebo publikuj vlastnú ponuku.</h1>
+    <p class="lead">
+      Frontend je rozdelený po stránkach podobne ako `Akademy_Frontend`: samostatná home,
+      samostatná listings page a samostatná owner page pre vytvorenie ponuky.
+    </p>
+
+    <div class="hero-highlights">
+      <div *ngFor="let item of highlights">{{ item }}</div>
+    </div>
+  </div>
+
+  <div class="search-card">
+    <p class="search-title">Hľadať nehnuteľnosť</p>
+    <app-listing-search-form
+      [form]="lookupForm"
+      [loading]="loadingLookup()"
+      [submitLabel]="'Načítať detail'"
+      [secondaryLabel]="'Otvoriť stránku listingov'"
+      (submitted)="searchById()"
+      (secondaryAction)="openListings()">
+    </app-listing-search-form>
+
+    <p class="microcopy">Verejný endpoint: <code>GET /api/listings/&#123;id&#125;</code>.</p>
+    <p *ngIf="lookupError()" class="message error">{{ lookupError() }}</p>
+  </div>
+</section>
+
+<section class="categories">
+  <article class="category-card" *ngFor="let category of categories">
+    <h2>{{ category.title }}</h2>
+    <p>{{ category.text }}</p>
+  </article>
+</section>
+
+<section class="preview" *ngIf="lookedUpListing() as listing">
+  <div class="preview-head">
+    <div>
+      <p class="eyebrow">Nájdená ponuka</p>
+      <h2>{{ summary() || listing.title }}</h2>
+    </div>
+    <a routerLink="/listings" [queryParams]="{ id: listing.id }" class="button ghost">Prejsť na detail</a>
+  </div>
+
+  <app-listing-detail-card [listing]="listing"></app-listing-detail-card>
+</section>

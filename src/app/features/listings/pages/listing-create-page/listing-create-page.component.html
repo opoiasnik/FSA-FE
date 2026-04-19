@@ -1,0 +1,26 @@
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Owner studio</p>
+    <h1>Publikovať novú ponuku</h1>
+  </div>
+  <p class="hint">
+    Formulár zostáva dostupný vždy. Ak bude problém s tokenom alebo rolou, chybu vráti backend.
+  </p>
+</section>
+
+<article class="owner-panel">
+  <app-listing-form
+    [form]="createForm"
+    [submitting]="creating()"
+    (submitted)="createListing()">
+  </app-listing-form>
+
+  <p *ngIf="createError()" class="message error">{{ createError() }}</p>
+
+  <div class="result-card" *ngIf="createdListing() as listing">
+    <strong>Ponuka bola vytvorená</strong>
+    <span>ID: {{ listing.id }}</span>
+    <span>{{ listing.title }}</span>
+    <span>{{ listing.price.amount }} {{ listing.price.currency }}</span>
+  </div>
+</article>

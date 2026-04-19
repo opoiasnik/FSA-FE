@@ -1,0 +1,32 @@
+<nav class="site-nav">
+  <div class="nav-start">
+    <a routerLink="/home" routerLinkActive="active">Home</a>
+    <a routerLink="/listings" routerLinkActive="active">Listings</a>
+    <a *ngIf="isAuthenticated() && isOwner()" routerLink="/listings/create" routerLinkActive="active">Owner Studio</a>
+  </div>
+
+  <div class="nav-end">
+    <div class="session-pill" [class.live]="isAuthenticated()">
+      {{ isAuthenticated() ? 'Authenticated user' : 'Guest visitor' }}
+    </div>
+    <span class="token-time" *ngIf="tokenExpiresAt() && isAuthenticated()">Token: {{ tokenExpiresAt() }}</span>
+    <button class="button ghost" type="button" *ngIf="!isAuthenticated()" (click)="login()">Login</button>
+    <button class="button ghost danger" type="button" *ngIf="isAuthenticated()" (click)="logout()">Logout</button>
+  </div>
+</nav>
+
+<main class="main-wrapper">
+  <section class="user-strip" *ngIf="user() as currentUser">
+    <strong>{{ currentUser.name || currentUser.username }}</strong>
+    <span>{{ currentUser.email }}</span>
+    <span>Role: {{ currentUser.roles.join(', ') || 'none' }}</span>
+  </section>
+
+  <p *ngIf="isAuthenticated() && !isOwner()" class="message">
+    Owner Studio is available only for the OWNER role.
+  </p>
+
+  <p *ngIf="authError()" class="message error">{{ authError() }}</p>
+
+  <router-outlet></router-outlet>
+</main>

@@ -1,0 +1,44 @@
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.wide,
+.action-row {
+  grid-column: 1 / -1;
+}
+
+.toggle {
+  align-items: center;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  min-height: 48px;
+}
+
+.toggle input {
+  width: 18px;
+  height: 18px;
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.muted,
+label {
+  color: var(--text-muted);
+}
+
+@media (max-width: 1024px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
