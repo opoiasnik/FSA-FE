@@ -3,7 +3,7 @@
     <div class="header-left">
       <a routerLink="/home" class="brand">
         <i class="pi pi-home"></i>
-        <span>FSA Rental</span>
+        <span>RentArea</span>
       </a>
     </div>
 
@@ -20,10 +20,10 @@
         <span class="user-name" *ngIf="user() as currentUser">
           {{ currentUser.name || currentUser.username }}
         </span>
-        <button pButton type="button" icon="pi pi-sign-out" label="Logout" severity="secondary" [text]="true" (click)="logout()"></button>
+        <button pButton type="button" icon="pi pi-sign-out" label="Logout" [text]="true" class="auth-btn" (click)="logout()"></button>
       </ng-container>
       <ng-template #guestActions>
-        <button pButton type="button" icon="pi pi-sign-in" label="Login" (click)="login()"></button>
+        <button pButton type="button" icon="pi pi-sign-in" label="Login" [text]="true" class="auth-btn" (click)="login()"></button>
       </ng-template>
     </div>
   </div>

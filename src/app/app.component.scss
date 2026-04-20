@@ -79,6 +79,34 @@
   font-size: 0.95rem;
 }
 
+:host ::ng-deep .auth-btn.p-button,
+:host ::ng-deep .auth-btn.p-button.p-button-text {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--text) !important;
+  padding: 0.4rem 0.6rem !important;
+  font-weight: 500 !important;
+}
+
+:host ::ng-deep .auth-btn.p-button:hover,
+:host ::ng-deep .auth-btn.p-button.p-button-text:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: var(--accent) !important;
+}
+
+:host ::ng-deep .auth-btn.p-button:hover .p-button-icon,
+:host ::ng-deep .auth-btn.p-button:hover .p-button-label {
+  color: var(--accent) !important;
+}
+
+:host ::ng-deep .auth-btn.p-button .p-button-icon,
+:host ::ng-deep .auth-btn.p-button .p-button-label {
+  color: var(--text) !important;
+}
+
 .app-content {
   width: min(1760px, 100%);
   margin: 0 auto;
