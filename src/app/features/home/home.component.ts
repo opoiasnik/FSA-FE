@@ -11,7 +11,7 @@ import { MessageModule } from 'primeng/message';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
-import { catchError, forkJoin, map, of } from 'rxjs';
+import { map } from 'rxjs';
 import { ListingResponse } from '../listings/models/listing.model';
 import { ListingService } from '../listings/services/listing.service';
 
@@ -97,13 +97,12 @@ export class HomeComponent implements OnInit {
     this.error.set(null);
 
     this.listingService.getAll().pipe(
-      map((response) => this.toArray(response)),
-      catchError(() => this.fetchByIdRange())
+      map((response) => this.toArray(response))
     ).subscribe({
       next: (items) => {
         this.listings.set(items);
         if (!items.length) {
-          this.error.set('No listings were returned by the backend list endpoints.');
+          this.error.set('No listings were returned by the backend featured endpoint.');
         }
         this.loading.set(false);
       },
@@ -133,16 +132,6 @@ export class HomeComponent implements OnInit {
 
   imageUrl(id: number): string {
     return `https://picsum.photos/seed/rental-${id}/540/540`;
-  }
-
-  private fetchByIdRange() {
-    const probes = Array.from({ length: 24 }, (_, index) => index + 1).map((id) =>
-      this.listingService.getById(id).pipe(catchError(() => of(null)))
-    );
-
-    return forkJoin(probes).pipe(
-      map((items) => items.filter((item): item is ListingResponse => item !== null))
-    );
   }
 
   private toArray(value: unknown): ListingResponse[] {

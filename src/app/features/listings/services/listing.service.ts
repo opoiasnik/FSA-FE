@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CreateListingRequest, ListingResponse } from '../models/listing.model';
 
@@ -8,12 +8,8 @@ import { CreateListingRequest, ListingResponse } from '../models/listing.model';
 export class ListingService {
   private readonly http = inject(HttpClient);
 
-  getAll(): Observable<unknown> {
-    return this.http.get<unknown>(environment.apiBaseUrl).pipe(
-      catchError(() => this.http.get<unknown>(`${environment.apiBaseUrl}/all`)),
-      catchError(() => this.http.get<unknown>(`${environment.apiBaseUrl}/active`)),
-      catchError(() => this.http.get<unknown>(`${environment.apiBaseUrl}/search`))
-    );
+  getAll(): Observable<ListingResponse[]> {
+    return this.http.get<ListingResponse[]>(`${environment.apiBaseUrl}/featured`);
   }
 
   getById(id: number): Observable<ListingResponse> {
