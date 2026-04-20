@@ -29,6 +29,7 @@ export class UserService {
 
     const accessToken = this.oauthService.getAccessToken();
     const accessTokenClaims = this.readAccessTokenClaims(accessToken);
+    //console.log('Access Token Claims:', accessTokenClaims);
 
     if (!accessToken || !accessTokenClaims) {
       this.userState.set(undefined);
@@ -60,9 +61,10 @@ export class UserService {
   }
 
   isUserLoggedIn(): boolean {
+    const currentUser = this.userState();
     const token = this.oauthService.getAccessToken();
     const expiration = this.oauthService.getAccessTokenExpiration();
-    return !!token && expiration > Date.now();
+    return !!currentUser && !!token && expiration > Date.now();
   }
 
   hasRole(role: string): boolean {
@@ -70,6 +72,7 @@ export class UserService {
   }
 
   getAccessTokenExpiration(): number {
+    this.userState();
     return this.oauthService.getAccessTokenExpiration();
   }
 
