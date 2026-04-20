@@ -1,37 +1,50 @@
-﻿<section class="bnb-top-nav">
+<section class="bnb-top-nav">
   <div class="mode-tabs">
-    <a pButton [text]="true" icon="pi pi-home" label="Homes"></a>
-    <a pButton [text]="true" icon="pi pi-map" label="Experiences"></a>
-    <a pButton [text]="true" icon="pi pi-briefcase" label="Services"></a>
+    <button type="button" class="mode-tab active">
+      <i class="pi pi-home"></i>
+      <span>Homes</span>
+    </button>
+    <button type="button" class="mode-tab">
+      <i class="pi pi-map"></i>
+      <span>Experiences</span>
+    </button>
+    <button type="button" class="mode-tab">
+      <i class="pi pi-briefcase"></i>
+      <span>Services</span>
+    </button>
   </div>
 </section>
 
 <section class="search-shell">
-  <div class="search-cell">
+  <div class="search-cell search-cell--input">
     <small>Where</small>
     <input pInputText [ngModel]="searchText()" (ngModelChange)="setSearchText($event)" placeholder="Search destinations" />
   </div>
+  <div class="search-divider"></div>
   <div class="search-cell">
     <small>Property</small>
     <p-selectbutton
       [options]="propertyTypeOptions"
       optionLabel="label"
       optionValue="value"
+      [allowEmpty]="false"
       [ngModel]="selectedPropertyType()"
       (ngModelChange)="setPropertyType($event)">
     </p-selectbutton>
   </div>
+  <div class="search-divider"></div>
   <div class="search-cell">
     <small>Deal</small>
     <p-selectbutton
       [options]="listingTypeOptions"
       optionLabel="label"
       optionValue="value"
+      [allowEmpty]="false"
       [ngModel]="selectedListingType()"
       (ngModelChange)="setListingType($event)">
     </p-selectbutton>
   </div>
-  <button pButton type="button" icon="pi pi-search" [rounded]="true" severity="danger" (click)="loadListings()"></button>
+  <button pButton type="button" icon="pi pi-search" [rounded]="true" class="search-btn" (click)="loadListings()"></button>
 </section>
 
 <p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
@@ -59,8 +72,8 @@
       <article class="listing-tile">
         <div class="tile-media">
           <img [src]="imageUrl(item.id)" [alt]="item.title" loading="lazy" />
-          <p-chip label="Guest favorite"></p-chip>
-          <button pButton type="button" icon="pi pi-heart" [rounded]="true" [text]="true" severity="contrast"></button>
+          <span class="favorite-chip">Guest favorite</span>
+          <button pButton type="button" icon="pi pi-heart" [rounded]="true" [text]="true" class="favorite-btn"></button>
         </div>
         <h3>{{ item.title }}</h3>
         <p>{{ item.price.amount }} {{ item.price.currency }} for 2 nights · ★ {{ scoreFromId(item.id) }}</p>
@@ -85,8 +98,8 @@
       <article class="listing-tile">
         <div class="tile-media">
           <img [src]="imageUrl(item.id + 250)" [alt]="item.title" loading="lazy" />
-          <p-chip label="Guest favorite"></p-chip>
-          <button pButton type="button" icon="pi pi-heart" [rounded]="true" [text]="true" severity="contrast"></button>
+          <span class="favorite-chip">Guest favorite</span>
+          <button pButton type="button" icon="pi pi-heart" [rounded]="true" [text]="true" class="favorite-btn"></button>
         </div>
         <h3>{{ item.title }}</h3>
         <p>{{ item.price.amount }} {{ item.price.currency }} for 2 nights · ★ {{ scoreFromId(item.id + 7) }}</p>

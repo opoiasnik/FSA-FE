@@ -2,65 +2,108 @@
   display: block;
 }
 
-:host ::ng-deep .app-toolbar {
+.app-header {
   position: sticky;
   top: 0;
   z-index: 50;
-  margin: 1rem auto;
-  width: min(1280px, calc(100% - 2rem));
-  border-radius: 999px;
-  border: 1px solid var(--app-border);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
 }
 
-.brand {
-  margin-right: 0.75rem;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #ff385c;
+.header-inner {
+  max-width: 1760px;
+  margin: 0 auto;
+  padding: 1rem 2.5rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-.main-nav,
-.toolbar-actions {
+.header-left {
   display: flex;
-  gap: 0.5rem;
   align-items: center;
 }
 
-:host ::ng-deep .active-link.p-button,
-:host ::ng-deep .active-link .p-button {
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+
+  i {
+    font-size: 1.4rem;
+  }
+}
+
+.header-center {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-item {
+  padding: 0.55rem 1rem;
   border-radius: 999px;
-  background: #111827;
-  color: #fff;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--surface-soft);
+  }
+
+  &.active {
+    background: var(--accent);
+    color: #fff;
+  }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.user-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.95rem;
 }
 
 .app-content {
-  width: min(1280px, calc(100% - 2rem));
+  width: min(1760px, 100%);
   margin: 0 auto;
-  padding-bottom: 3rem;
+  padding: 1.5rem 2.5rem 3rem;
   display: grid;
   gap: 1rem;
 }
 
-.user-meta {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-
 @media (max-width: 960px) {
-  :host ::ng-deep .app-toolbar .p-toolbar {
-    flex-direction: column;
+  .header-inner {
+    grid-template-columns: 1fr;
     gap: 0.75rem;
+    padding: 0.9rem 1.25rem;
   }
 
-  .main-nav,
-  .toolbar-actions {
-    width: 100%;
-    justify-content: center;
+  .header-center {
+    order: 3;
     flex-wrap: wrap;
+  }
+
+  .header-right {
+    justify-content: center;
+  }
+
+  .app-content {
+    padding: 1rem 1.25rem 2rem;
   }
 }

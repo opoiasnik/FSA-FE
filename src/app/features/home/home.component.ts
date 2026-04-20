@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { CarouselModule } from 'primeng/carousel';
-import { ChipModule } from 'primeng/chip';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
@@ -28,7 +27,6 @@ import { ListingService } from '../listings/services/listing.service';
     InputTextModule,
     IconFieldModule,
     InputIconModule,
-    ChipModule,
     TagModule,
     SkeletonModule,
     MessageModule,
