@@ -1,0 +1,10 @@
+<section class="hero">
+  <img [src]="image" [alt]="alt || title" class="hero__image" />
+  <div class="hero__overlay">
+    <div class="hero__slot">
+      <ng-content></ng-content>
+    </div>
+    <h1 *ngIf="title" class="hero__title">{{ title }}</h1>
+    <p *ngIf="subtitle" class="hero__subtitle">{{ subtitle }}</p>
+  </div>
+</section>

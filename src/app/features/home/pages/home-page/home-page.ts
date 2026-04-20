@@ -1,41 +1,31 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { CarouselModule } from 'primeng/carousel';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
-import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
-import { SelectButtonModule } from 'primeng/selectbutton';
 import { SkeletonModule } from 'primeng/skeleton';
-import { TagModule } from 'primeng/tag';
 import { map } from 'rxjs';
-import { ListingResponse } from '../listings/models/listing.model';
-import { ListingService } from '../listings/services/listing.service';
+import { HeroSection } from '../../../../shared/component/hero-section/hero-section';
+import { SearchFilters } from '../../../../shared/component/search-filters/search-filters';
+import { ListingResponse } from '../../../listings/models/listing.model';
+import { ListingService } from '../../../listings/services/listing.service';
+import { ListingsCarousel } from '../../components/listings-carousel/listings-carousel';
+import { ModeTabs } from '../../components/mode-tabs/mode-tabs';
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-home-page',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    CardModule,
-    ButtonModule,
-    SelectButtonModule,
-    InputTextModule,
-    IconFieldModule,
-    InputIconModule,
-    TagModule,
     SkeletonModule,
     MessageModule,
-    CarouselModule
+    HeroSection,
+    SearchFilters,
+    ModeTabs,
+    ListingsCarousel
   ],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
+  templateUrl: './home-page.html',
+  styleUrl: './home-page.scss'
 })
-export class HomeComponent implements OnInit {
+export class HomePage implements OnInit {
   private readonly listingService = inject(ListingService);
 
   readonly loading = signal(false);
@@ -45,19 +35,6 @@ export class HomeComponent implements OnInit {
   readonly searchText = signal('');
   readonly selectedPropertyType = signal<'ALL' | 'APARTMENT' | 'HOUSE' | 'ROOM'>('ALL');
   readonly selectedListingType = signal<'ALL' | 'RENT' | 'SALE'>('ALL');
-
-  readonly propertyTypeOptions = [
-    { label: 'Any type', value: 'ALL' },
-    { label: 'Apartment', value: 'APARTMENT' },
-    { label: 'House', value: 'HOUSE' },
-    { label: 'Room', value: 'ROOM' }
-  ];
-
-  readonly listingTypeOptions = [
-    { label: 'Any deal', value: 'ALL' },
-    { label: 'Rent', value: 'RENT' },
-    { label: 'Sale', value: 'SALE' }
-  ];
 
   readonly filteredListings = computed(() =>
     this.listings().filter((item) => {
@@ -80,13 +57,6 @@ export class HomeComponent implements OnInit {
 
   readonly featuredListings = computed(() => this.filteredListings().slice(0, 12));
   readonly extraListings = computed(() => this.filteredListings().slice(12, 24));
-
-  readonly responsiveOptions = [
-    { breakpoint: '1400px', numVisible: 6, numScroll: 1 },
-    { breakpoint: '1200px', numVisible: 4, numScroll: 1 },
-    { breakpoint: '900px', numVisible: 3, numScroll: 1 },
-    { breakpoint: '640px', numVisible: 1, numScroll: 1 }
-  ];
 
   ngOnInit(): void {
     this.loadListings();
@@ -124,14 +94,6 @@ export class HomeComponent implements OnInit {
 
   setListingType(value: 'ALL' | 'RENT' | 'SALE'): void {
     this.selectedListingType.set(value);
-  }
-
-  scoreFromId(id: number): string {
-    return (4.7 + ((id % 4) * 0.07)).toFixed(2);
-  }
-
-  imageUrl(id: number): string {
-    return `https://picsum.photos/seed/rental-${id}/540/540`;
   }
 
   private toArray(value: unknown): ListingResponse[] {

@@ -1,0 +1,79 @@
+:host {
+  display: block;
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  margin: 0 auto 2.5rem;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  aspect-ratio: 16 / 6;
+  min-height: 320px;
+  max-height: 520px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.hero__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2.5rem 3rem;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.2) 45%,
+    rgba(0, 0, 0, 0) 80%
+  );
+  color: #fff;
+}
+
+.hero__slot {
+  margin-bottom: 6rem;
+}
+
+.hero__slot:empty {
+  display: none;
+}
+
+.hero__title {
+  margin: 0;
+  font-size: clamp(1.75rem, 3.5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.hero__subtitle {
+  margin: 0.75rem 0 0;
+  font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+  font-weight: 400;
+  max-width: 640px;
+  opacity: 0.92;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    border-radius: 1rem;
+    aspect-ratio: 4 / 3;
+  }
+
+  .hero__overlay {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .hero__slot {
+    margin-bottom: 2rem;
+  }
+}

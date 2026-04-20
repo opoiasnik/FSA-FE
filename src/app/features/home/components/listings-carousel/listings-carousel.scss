@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.section-head {
+  margin: 0.5rem 0 1rem;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+:host ::ng-deep .p-carousel .p-carousel-content {
+  overflow: visible;
+}

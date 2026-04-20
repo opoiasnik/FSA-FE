@@ -1,0 +1,16 @@
+<article class="listing-tile">
+  <div class="tile-media">
+    <img [src]="imageUrl" [alt]="listing.title" loading="lazy" />
+    <span *ngIf="badge" class="favorite-chip">{{ badge }}</span>
+    <button
+      pButton
+      type="button"
+      icon="pi pi-heart"
+      [rounded]="true"
+      [text]="true"
+      class="favorite-btn">
+    </button>
+  </div>
+  <h3>{{ listing.title }}</h3>
+  <p>{{ listing.price.amount }} {{ listing.price.currency }} for 2 nights · ★ {{ score }}</p>
+</article>

@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+.loading-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1000px) {
+  .loading-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .loading-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,42 @@
+<section class="search-shell">
+  <div class="search-cell search-cell--input">
+    <small>Where</small>
+    <input
+      pInputText
+      [ngModel]="searchText"
+      (ngModelChange)="onSearchText($event)"
+      placeholder="Search destinations" />
+  </div>
+  <div class="search-divider"></div>
+  <div class="search-cell">
+    <small>Property</small>
+    <p-selectbutton
+      [options]="propertyTypeOptions"
+      optionLabel="label"
+      optionValue="value"
+      [allowEmpty]="false"
+      [ngModel]="propertyType"
+      (ngModelChange)="onPropertyType($event)">
+    </p-selectbutton>
+  </div>
+  <div class="search-divider"></div>
+  <div class="search-cell">
+    <small>Deal</small>
+    <p-selectbutton
+      [options]="listingTypeOptions"
+      optionLabel="label"
+      optionValue="value"
+      [allowEmpty]="false"
+      [ngModel]="listingType"
+      (ngModelChange)="onListingType($event)">
+    </p-selectbutton>
+  </div>
+  <button
+    pButton
+    type="button"
+    icon="pi pi-search"
+    [rounded]="true"
+    class="search-btn"
+    (click)="onSearch()">
+  </button>
+</section>

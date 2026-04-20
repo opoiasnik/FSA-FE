@@ -1,0 +1,13 @@
+<section class="bnb-top-nav">
+  <div class="mode-tabs">
+    <button
+      *ngFor="let tab of tabs"
+      type="button"
+      class="mode-tab"
+      [class.active]="active === tab.id"
+      (click)="select(tab.id)">
+      <i [class]="tab.icon"></i>
+      <span>{{ tab.label }}</span>
+    </button>
+  </div>
+</section>

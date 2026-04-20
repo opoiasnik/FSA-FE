@@ -1,0 +1,39 @@
+<app-mode-tabs></app-mode-tabs>
+
+<app-hero-section
+  image="hero.jpg"
+  title="Find your next home"
+  subtitle="Discover apartments, houses and rooms for rent or sale across the country.">
+  <app-search-filters
+    [searchText]="searchText()"
+    [propertyType]="selectedPropertyType()"
+    [listingType]="selectedListingType()"
+    (searchTextChange)="setSearchText($event)"
+    (propertyTypeChange)="setPropertyType($event)"
+    (listingTypeChange)="setListingType($event)"
+    (search)="loadListings()">
+  </app-search-filters>
+</app-hero-section>
+
+<p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
+
+<section *ngIf="loading()" class="loading-grid">
+  <p-skeleton width="100%" height="260px"></p-skeleton>
+  <p-skeleton width="100%" height="260px"></p-skeleton>
+  <p-skeleton width="100%" height="260px"></p-skeleton>
+  <p-skeleton width="100%" height="260px"></p-skeleton>
+</section>
+
+<app-listings-carousel
+  *ngIf="!loading()"
+  [title]="firstCity() + ': homes'"
+  [items]="featuredListings()">
+</app-listings-carousel>
+
+<app-listings-carousel
+  *ngIf="!loading()"
+  title="Recommended stays"
+  [items]="extraListings()"
+  [imageSeedOffset]="250"
+  [scoreSeedOffset]="7">
+</app-listings-carousel>

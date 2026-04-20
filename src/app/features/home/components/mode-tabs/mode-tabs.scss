@@ -1,0 +1,52 @@
+:host {
+  display: block;
+}
+
+.bnb-top-nav {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 1.25rem;
+}
+
+.mode-tabs {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.mode-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.25rem;
+  background: transparent;
+  border: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+
+  i {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    color: var(--text);
+  }
+
+  &.active {
+    color: var(--text);
+    border-bottom-color: var(--text);
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 640px) {
+  .mode-tabs {
+    gap: 0.75rem;
+    width: 100%;
+    justify-content: space-around;
+  }
+}
