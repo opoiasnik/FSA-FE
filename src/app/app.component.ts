@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
+import { RouterOutlet } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { UserService } from './core/services/user.service';
+import { AppFooter } from './shared/component/app-footer/app-footer';
+import { AppHeader } from './shared/component/app-header/app-header';
 
 @Component({
   selector: 'app-root',
@@ -11,10 +12,9 @@ import { UserService } from './core/services/user.service';
   imports: [
     CommonModule,
     RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
-    ButtonModule,
-    MessageModule
+    MessageModule,
+    AppHeader,
+    AppFooter
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -22,7 +22,6 @@ import { UserService } from './core/services/user.service';
 export class AppComponent implements OnInit {
   private readonly userService = inject(UserService);
 
-  readonly user = this.userService.getUserSignal();
   readonly isAuthenticated = computed(() => this.userService.isUserLoggedIn());
   readonly isOwner = computed(() => this.userService.hasRole('OWNER'));
   readonly authError = signal<string | null>(null);
@@ -31,15 +30,6 @@ export class AppComponent implements OnInit {
     this.userService.tryLogin().catch((error: unknown) => {
       this.authError.set(this.toMessage(error));
     });
-  }
-
-  login(): void {
-    this.authError.set(null);
-    this.userService.login(window.location.pathname + window.location.search);
-  }
-
-  logout(): void {
-    this.userService.logout();
   }
 
   private toMessage(error: unknown): string {

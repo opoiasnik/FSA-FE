@@ -3,12 +3,14 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { map } from 'rxjs';
-import { HeroSection } from '../../../../shared/component/hero-section/hero-section';
-import { SearchFilters } from '../../../../shared/component/search-filters/search-filters';
 import { ListingResponse } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
+import { HeroSection } from '../../components/hero-section/hero-section';
 import { ListingsCarousel } from '../../components/listings-carousel/listings-carousel';
 import { ModeTabs } from '../../components/mode-tabs/mode-tabs';
+import { PopularRegions } from '../../components/popular-regions/popular-regions';
+import { PropertyTypes } from '../../components/property-types/property-types';
+import { SearchFilters } from '../../components/search-filters/search-filters';
 
 @Component({
   selector: 'app-home-page',
@@ -20,7 +22,9 @@ import { ModeTabs } from '../../components/mode-tabs/mode-tabs';
     HeroSection,
     SearchFilters,
     ModeTabs,
-    ListingsCarousel
+    ListingsCarousel,
+    PropertyTypes,
+    PopularRegions
   ],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss'

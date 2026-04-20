@@ -1,0 +1,40 @@
+<footer class="footer">
+  <div class="footer__inner">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <div class="footer__logo">
+          <i class="pi pi-home"></i>
+          <span>RentArea</span>
+        </div>
+        <p class="footer__tagline">
+          The real-estate marketplace for long-term rentals and property sales across Slovakia.
+        </p>
+        <ul class="footer__social">
+          <li *ngFor="let item of social">
+            <a [attr.aria-label]="item.label" class="footer__social-link">
+              <i [class]="item.icon"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div *ngFor="let column of columns" class="footer__column">
+        <h4>{{ column.title }}</h4>
+        <ul>
+          <li *ngFor="let link of column.links">
+            <a>{{ link }}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span>© 2025 – {{ year }} RentArea. All rights reserved.</span>
+      <nav class="footer__meta">
+        <a>Privacy</a>
+        <a>Terms</a>
+        <a>Cookies</a>
+      </nav>
+    </div>
+  </div>
+</footer>

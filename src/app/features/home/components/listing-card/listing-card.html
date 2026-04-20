@@ -12,5 +12,9 @@
     </button>
   </div>
   <h3>{{ listing.title }}</h3>
-  <p>{{ listing.price.amount }} {{ listing.price.currency }} for 2 nights · ★ {{ score }}</p>
+  <p class="listing-tile__location">{{ location }}</p>
+  <p class="listing-tile__price">
+    {{ listing.price.amount }} {{ listing.price.currency }}{{ priceSuffix }}
+    <span class="listing-tile__deal">· {{ listing.listingType === 'RENT' ? 'For rent' : 'For sale' }}</span>
+  </p>
 </article>

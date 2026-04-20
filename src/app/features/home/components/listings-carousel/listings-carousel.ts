@@ -15,7 +15,6 @@ export class ListingsCarousel {
   @Input({ required: true }) title!: string;
   @Input({ required: true }) items: ListingResponse[] = [];
   @Input() imageSeedOffset = 0;
-  @Input() scoreSeedOffset = 0;
 
   readonly responsiveOptions = [
     { breakpoint: '1400px', numVisible: 6, numScroll: 1 },

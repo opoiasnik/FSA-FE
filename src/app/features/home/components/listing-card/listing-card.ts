@@ -13,15 +13,18 @@ import { ListingResponse } from '../../../listings/models/listing.model';
 export class ListingCard {
   @Input({ required: true }) listing!: ListingResponse;
   @Input() imageSeedOffset = 0;
-  @Input() scoreSeedOffset = 0;
-  @Input() badge = 'Guest favorite';
+  @Input() badge = 'Top offer';
 
   get imageUrl(): string {
     return `https://picsum.photos/seed/rental-${this.listing.id + this.imageSeedOffset}/540/540`;
   }
 
-  get score(): string {
-    const id = this.listing.id + this.scoreSeedOffset;
-    return (4.7 + ((id % 4) * 0.07)).toFixed(2);
+  get priceSuffix(): string {
+    return this.listing.listingType === 'RENT' ? '/month' : '';
+  }
+
+  get location(): string {
+    const { city, country } = this.listing.address;
+    return [city, country].filter(Boolean).join(', ');
   }
 }

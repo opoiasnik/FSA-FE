@@ -1,33 +1,4 @@
-<header class="app-header">
-  <div class="header-inner">
-    <div class="header-left">
-      <a routerLink="/home" class="brand">
-        <i class="pi pi-home"></i>
-        <span>RentArea</span>
-      </a>
-    </div>
-
-    <nav class="header-center">
-      <a routerLink="/home" routerLinkActive="active" class="nav-item">Home</a>
-      <a routerLink="/listings" routerLinkActive="active" class="nav-item">Listings</a>
-      <a *ngIf="isAuthenticated() && isOwner()" routerLink="/listings/create" routerLinkActive="active" class="nav-item">
-        Owner Studio
-      </a>
-    </nav>
-
-    <div class="header-right">
-      <ng-container *ngIf="isAuthenticated(); else guestActions">
-        <span class="user-name" *ngIf="user() as currentUser">
-          {{ currentUser.name || currentUser.username }}
-        </span>
-        <button pButton type="button" icon="pi pi-sign-out" label="Logout" [text]="true" class="auth-btn" (click)="logout()"></button>
-      </ng-container>
-      <ng-template #guestActions>
-        <button pButton type="button" icon="pi pi-sign-in" label="Login" [text]="true" class="auth-btn" (click)="login()"></button>
-      </ng-template>
-    </div>
-  </div>
-</header>
+<app-header></app-header>
 
 <main class="app-content">
   <p-message
@@ -40,3 +11,5 @@
 
   <router-outlet></router-outlet>
 </main>
+
+<app-footer></app-footer>

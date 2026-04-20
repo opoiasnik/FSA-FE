@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
-export type HomeMode = 'homes' | 'experiences' | 'services';
+export type HomeMode = 'listings' | 'favorites' | 'viewings' | 'messages';
 
 @Component({
   selector: 'app-mode-tabs',
@@ -11,13 +11,14 @@ export type HomeMode = 'homes' | 'experiences' | 'services';
   styleUrl: './mode-tabs.scss'
 })
 export class ModeTabs {
-  @Input() active: HomeMode = 'homes';
+  @Input() active: HomeMode = 'listings';
   @Output() readonly activeChange = new EventEmitter<HomeMode>();
 
   readonly tabs: { id: HomeMode; label: string; icon: string }[] = [
-    { id: 'homes', label: 'Homes', icon: 'pi pi-home' },
-    { id: 'experiences', label: 'Experiences', icon: 'pi pi-map' },
-    { id: 'services', label: 'Services', icon: 'pi pi-briefcase' }
+    { id: 'listings', label: 'Listings', icon: 'pi pi-home' },
+    { id: 'favorites', label: 'Favorites', icon: 'pi pi-heart' },
+    { id: 'viewings', label: 'Viewings', icon: 'pi pi-calendar' },
+    { id: 'messages', label: 'Messages', icon: 'pi pi-comments' }
   ];
 
   select(tab: HomeMode): void {

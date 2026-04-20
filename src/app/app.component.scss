@@ -2,135 +2,16 @@
   display: block;
 }
 
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: #fff;
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
-}
-
-.header-inner {
-  max-width: 1760px;
-  margin: 0 auto;
-  padding: 1rem 2.5rem;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--accent);
-  text-decoration: none;
-
-  i {
-    font-size: 1.4rem;
-  }
-}
-
-.header-center {
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-item {
-  padding: 0.55rem 1rem;
-  border-radius: 999px;
-  color: var(--text);
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: background-color 0.15s ease;
-
-  &:hover {
-    background: var(--surface-soft);
-  }
-
-  &.active {
-    background: var(--accent);
-    color: #fff;
-  }
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-.user-name {
-  font-weight: 600;
-  color: var(--text);
-  font-size: 0.95rem;
-}
-
-:host ::ng-deep .auth-btn.p-button,
-:host ::ng-deep .auth-btn.p-button.p-button-text {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  color: var(--text) !important;
-  padding: 0.4rem 0.6rem !important;
-  font-weight: 500 !important;
-}
-
-:host ::ng-deep .auth-btn.p-button:hover,
-:host ::ng-deep .auth-btn.p-button.p-button-text:hover {
-  background: transparent !important;
-  background-color: transparent !important;
-  color: var(--accent) !important;
-}
-
-:host ::ng-deep .auth-btn.p-button:hover .p-button-icon,
-:host ::ng-deep .auth-btn.p-button:hover .p-button-label {
-  color: var(--accent) !important;
-}
-
-:host ::ng-deep .auth-btn.p-button .p-button-icon,
-:host ::ng-deep .auth-btn.p-button .p-button-label {
-  color: var(--text) !important;
-}
-
 .app-content {
   width: min(1760px, 100%);
   margin: 0 auto;
   padding: 1.5rem 2.5rem 3rem;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
 }
 
 @media (max-width: 960px) {
-  .header-inner {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-    padding: 0.9rem 1.25rem;
-  }
-
-  .header-center {
-    order: 3;
-    flex-wrap: wrap;
-  }
-
-  .header-right {
-    justify-content: center;
-  }
-
   .app-content {
     padding: 1rem 1.25rem 2rem;
   }

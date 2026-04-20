@@ -2,8 +2,8 @@
 
 <app-hero-section
   image="hero.jpg"
-  title="Find your next home"
-  subtitle="Discover apartments, houses and rooms for rent or sale across the country.">
+  title="Find a place to live"
+  subtitle="Browse apartments, houses and land for long-term rent or sale across Slovakia.">
   <app-search-filters
     [searchText]="searchText()"
     [propertyType]="selectedPropertyType()"
@@ -26,14 +26,17 @@
 
 <app-listings-carousel
   *ngIf="!loading()"
-  [title]="firstCity() + ': homes'"
+  [title]="firstCity() + ': featured properties'"
   [items]="featuredListings()">
 </app-listings-carousel>
 
 <app-listings-carousel
   *ngIf="!loading()"
-  title="Recommended stays"
+  title="Recommended listings"
   [items]="extraListings()"
-  [imageSeedOffset]="250"
-  [scoreSeedOffset]="7">
+  [imageSeedOffset]="250">
 </app-listings-carousel>
+
+<app-property-types></app-property-types>
+
+<app-popular-regions></app-popular-regions>

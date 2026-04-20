@@ -1,0 +1,14 @@
+<section class="regions">
+  <h2 class="regions__title">{{ title }}</h2>
+
+  <div class="regions__marquee">
+    <ul class="regions__track">
+      <li *ngFor="let region of loop; let i = index" class="regions__item" [attr.aria-hidden]="i >= regions.length ? true : null">
+        <a class="regions__link" [attr.tabindex]="i >= regions.length ? -1 : null">
+          <span class="regions__code">{{ region.code }}</span>
+          <span class="regions__name">Listings {{ region.name }}</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</section>

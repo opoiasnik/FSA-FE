@@ -62,10 +62,26 @@
   line-height: 1.3;
   font-weight: 600;
   color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.listing-tile p {
-  margin: 0.2rem 0 0;
+.listing-tile__location {
+  margin: 0.15rem 0 0;
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-size: 0.85rem;
+}
+
+.listing-tile__price {
+  margin: 0.25rem 0 0;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.listing-tile__deal {
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-left: 0.15rem;
 }

@@ -1,0 +1,16 @@
+<section class="property-types">
+  <header class="property-types__head">
+    <h2>{{ title }}</h2>
+    <p>{{ subtitle }}</p>
+  </header>
+
+  <ul class="property-types__grid">
+    <li *ngFor="let card of cards" class="property-types__card">
+      <div class="property-types__icon">
+        <i [class]="card.icon"></i>
+      </div>
+      <h3>{{ card.label }}</h3>
+      <p>{{ card.description }}</p>
+    </li>
+  </ul>
+</section>
