@@ -3,6 +3,7 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { UserService } from '../../../core/services/user.service';
+import { Avatar } from '../avatar/avatar';
 
 @Component({
   selector: 'app-header',
@@ -11,7 +12,8 @@ import { UserService } from '../../../core/services/user.service';
     CommonModule,
     RouterLink,
     RouterLinkActive,
-    ButtonModule
+    ButtonModule,
+    Avatar
   ],
   templateUrl: './app-header.html',
   styleUrl: './app-header.scss'

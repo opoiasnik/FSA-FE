@@ -1,0 +1,68 @@
+<section class="favs">
+  <header class="favs__head">
+    <div>
+      <div class="ra-eyebrow">Your shortlist</div>
+      <h1>Saved properties</h1>
+      <p>{{ saved().length }} saved · synced to this device</p>
+    </div>
+    <div class="favs__tabs">
+      <button type="button" class="tab" [class.tab--on]="tab() === 'ALL'" (click)="tab.set('ALL')">
+        All <span class="tab__count">{{ counts().ALL }}</span>
+      </button>
+      <button type="button" class="tab" [class.tab--on]="tab() === 'RENT'" (click)="tab.set('RENT')">
+        Rent <span class="tab__count">{{ counts().RENT }}</span>
+      </button>
+      <button type="button" class="tab" [class.tab--on]="tab() === 'SALE'" (click)="tab.set('SALE')">
+        Buy <span class="tab__count">{{ counts().SALE }}</span>
+      </button>
+    </div>
+  </header>
+
+  <section *ngIf="savedSearches().length" class="favs__searches">
+    <div class="favs__searches-head">
+      <h2>Saved searches</h2>
+      <p>We'll ping you when new matches appear.</p>
+    </div>
+    <div class="favs__searches-list">
+      <button *ngFor="let s of savedSearches()" type="button" class="saved-search">
+        <i class="pi pi-bell"></i>
+        <div>
+          <div class="saved-search__label">{{ s.label }}</div>
+          <div class="saved-search__count">{{ s.count }} active matches</div>
+        </div>
+      </button>
+    </div>
+  </section>
+
+  <p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
+
+  <div *ngIf="loading()" class="grid">
+    <p-skeleton *ngFor="let _ of [1,2,3,4]" width="100%" height="240px"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading()" class="grid">
+    <article *ngFor="let item of filtered()" class="card" (click)="open(item.id)">
+      <div class="card__media">
+        <app-photo-placeholder [seed]="item.id" [rounded]="0"></app-photo-placeholder>
+        <button type="button" class="card__remove" (click)="remove($event, item.id)" aria-label="Remove from favourites">
+          <i class="pi pi-heart-fill"></i>
+        </button>
+      </div>
+      <div class="card__body">
+        <h3>{{ item.title }}</h3>
+        <p class="card__loc">{{ shortLocation(item) }}</p>
+        <p class="card__price">{{ formatPrice(item) }}</p>
+      </div>
+    </article>
+
+    <app-empty-state
+      *ngIf="!filtered().length"
+      icon="pi-heart"
+      title="Nothing saved yet"
+      body="Tap the heart on any listing to build your shortlist."
+      cta="Browse listings"
+      (ctaClick)="browse()"
+      class="empty">
+    </app-empty-state>
+  </div>
+</section>

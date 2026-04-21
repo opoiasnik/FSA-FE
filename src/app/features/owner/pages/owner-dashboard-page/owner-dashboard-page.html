@@ -1,0 +1,89 @@
+<section class="dash">
+  <header class="dash__head">
+    <div>
+      <div class="ra-eyebrow">Owner studio</div>
+      <h1>Your properties at a glance</h1>
+      <p>Live performance across your active and draft listings.</p>
+    </div>
+    <button type="button" class="ra-btn" (click)="createListing()">
+      <i class="pi pi-plus"></i>Publish a listing
+    </button>
+  </header>
+
+  <p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
+
+  <div class="dash__stats">
+    <div *ngFor="let s of statCards()" class="ra-card stat">
+      <div class="stat__label">{{ s.label }}</div>
+      <div class="stat__value">{{ s.value }}</div>
+      <div class="stat__delta" [class.up]="s.tone === 'up'" [class.down]="s.tone === 'down'">
+        <i class="pi" [ngClass]="s.tone === 'up' ? 'pi-arrow-up' : s.tone === 'down' ? 'pi-arrow-down' : 'pi-minus'"></i>
+        {{ s.delta }}
+      </div>
+    </div>
+  </div>
+
+  <div class="dash__row">
+    <div class="ra-card dash__chart">
+      <div class="dash__chart-head">
+        <h2>Views · last 14 days</h2>
+        <span class="ra-pill ra-pill--success">+12%</span>
+      </div>
+      <svg viewBox="0 0 320 80" preserveAspectRatio="none" class="dash__chart-svg">
+        <path [attr.d]="trendPath()" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </div>
+
+    <div class="ra-card dash__viewings">
+      <div class="dash__viewings-head">
+        <h2>Upcoming viewings</h2>
+        <span>{{ viewings().length }} this week</span>
+      </div>
+      <ul>
+        <li *ngFor="let v of viewings()">
+          <div>
+            <strong>{{ v.who }}</strong>
+            <p>{{ viewingListing(v)?.title || 'Listing' }} · {{ v.when }}</p>
+          </div>
+          <span class="ra-pill" [class.ra-pill--success]="v.status === 'confirmed'">{{ v.status }}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="ra-card dash__list">
+    <div class="dash__list-head">
+      <h2>Your listings</h2>
+      <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm">Export CSV</button>
+    </div>
+
+    <div *ngIf="loading()" class="skeleton-rows">
+      <p-skeleton *ngFor="let _ of [1,2,3]" width="100%" height="54px"></p-skeleton>
+    </div>
+
+    <table *ngIf="!loading() && listings().length" class="dash__table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Location</th>
+          <th>Price</th>
+          <th>Deal</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let l of listings()" (click)="openListing(l.id)">
+          <td>{{ l.title }}</td>
+          <td>{{ shortLocation(l) }}</td>
+          <td>{{ formatPrice(l) }}</td>
+          <td>{{ l.listingType === 'RENT' ? 'Rent' : 'Sale' }}</td>
+          <td><span class="ra-pill ra-pill--success">{{ l.status || 'ACTIVE' }}</span></td>
+          <td class="dash__table-actions"><i class="pi pi-chevron-right"></i></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="!loading() && !listings().length" class="dash__empty">You haven't published a listing yet.</p>
+  </div>
+</section>

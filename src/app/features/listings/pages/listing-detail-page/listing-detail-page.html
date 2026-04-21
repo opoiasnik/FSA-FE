@@ -1,0 +1,123 @@
+<section class="detail">
+  <nav class="breadcrumb">
+    <a routerLink="/home">Home</a>
+    <i class="pi pi-angle-right"></i>
+    <a routerLink="/listings">Listings</a>
+    <i class="pi pi-angle-right"></i>
+    <span *ngIf="listing() as item">For {{ item.listingType === 'RENT' ? 'rent' : 'sale' }}</span>
+  </nav>
+
+  <p-message *ngIf="error()" severity="error" [text]="error() || ''"></p-message>
+
+  <div *ngIf="loading()" class="skeleton-gallery">
+    <p-skeleton width="100%" height="440px"></p-skeleton>
+  </div>
+
+  <ng-container *ngIf="listing() as item">
+    <div class="gallery">
+      <app-photo-placeholder class="gallery__main" [seed]="item.id" [rounded]="0" [label]="'Main photo'"></app-photo-placeholder>
+      <app-photo-placeholder [seed]="item.id + 1" [rounded]="0" [label]="'photo 2'"></app-photo-placeholder>
+      <app-photo-placeholder [seed]="item.id + 2" [rounded]="0" [label]="'photo 3'"></app-photo-placeholder>
+      <app-photo-placeholder [seed]="item.id + 3" [rounded]="0" [label]="'photo 4'"></app-photo-placeholder>
+      <app-photo-placeholder [seed]="item.id + 4" [rounded]="0" [label]="'photo 5'">
+        <button type="button" class="gallery__all ra-btn ra-btn--ghost ra-btn--sm">
+          <i class="pi pi-images"></i>Show all photos
+        </button>
+      </app-photo-placeholder>
+    </div>
+
+    <div class="layout">
+      <main class="content">
+        <div class="title-row">
+          <div>
+            <span class="ra-pill ra-pill--accent">For {{ item.listingType === 'RENT' ? 'rent' : 'sale' }}</span>
+            <h1>{{ item.title }}</h1>
+            <p class="address">
+              <i class="pi pi-map-marker"></i>{{ fullAddress() }}
+            </p>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm"><i class="pi pi-share-alt"></i>Share</button>
+            <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="toggleSave()">
+              <i class="pi" [class.pi-heart-fill]="saved()" [class.pi-heart]="!saved()" [style.color]="saved() ? 'var(--accent)' : ''"></i>
+              {{ saved() ? 'Saved' : 'Save' }}
+            </button>
+            <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm"><i class="pi pi-flag"></i>Report</button>
+          </div>
+        </div>
+
+        <div class="facts">
+          <div class="fact" *ngFor="let f of facts()">
+            <i class="pi" [ngClass]="f.icon"></i>
+            <div class="fact__label">{{ f.label }}</div>
+            <div class="fact__value">{{ f.value }}</div>
+          </div>
+        </div>
+
+        <section class="block">
+          <h2>About this home</h2>
+          <p>{{ item.description }}</p>
+        </section>
+
+        <section class="block">
+          <h2>What's included</h2>
+          <div class="amenities">
+            <div *ngFor="let a of amenities" class="amenity" [class.amenity--off]="!hasAmenity(a.key)">
+              <i class="pi" [ngClass]="a.icon"></i>
+              <span>{{ a.label }}</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2>Where you'll be</h2>
+          <div class="map-wrap">
+            <app-map-stub *ngIf="mapPin().length" [pins]="mapPin()" [selectedId]="item.id" [showPrices]="false"></app-map-stub>
+            <div *ngIf="!mapPin().length" class="map-empty">Coordinates not provided for this listing.</div>
+          </div>
+          <p class="address-hint">{{ fullAddress() }}</p>
+        </section>
+      </main>
+
+      <aside class="sidebar" *ngIf="owner() as own">
+        <div class="ra-card sidebar__card">
+          <div class="price-row">
+            <span class="price-row__amount">{{ priceAmount() }}</span>
+            <span class="price-row__suffix">{{ item.listingType === 'RENT' ? 'per month' : 'total' }}</span>
+          </div>
+          <div class="price-row__sub" *ngIf="pricePerSqm()">approx. {{ pricePerSqm() }}</div>
+
+          <div class="owner">
+            <app-avatar [name]="own.name" [hue]="own.avatarHue" [size]="44" [verified]="own.verified"></app-avatar>
+            <div class="owner__meta">
+              <div class="owner__name">{{ own.name }}</div>
+              <div class="owner__role">{{ own.role }}</div>
+            </div>
+            <div class="owner__rating">
+              <span><i class="pi pi-star-fill"></i> {{ own.rating.toFixed(1) }}</span>
+              <div>{{ own.responseRate }}% response</div>
+            </div>
+          </div>
+
+          <div class="sidebar__actions">
+            <button type="button" class="ra-btn ra-btn--lg" (click)="openMessages()">
+              <i class="pi pi-send"></i>Message {{ own.name.split(' ')[0] }}
+            </button>
+            <button type="button" class="ra-btn ra-btn--ghost ra-btn--lg">
+              <i class="pi pi-calendar"></i>Book a viewing
+            </button>
+            <button type="button" class="ra-btn ra-btn--text">
+              <i class="pi pi-phone"></i>Show phone number
+            </button>
+          </div>
+
+          <div class="sidebar__notice">
+            <i class="pi pi-shield"></i>
+            Owner verified via government ID. Never wire money before a viewing.
+          </div>
+        </div>
+      </aside>
+    </div>
+  </ng-container>
+</section>

@@ -1,20 +1,5 @@
-:root {
-  --app-surface: #ffffff;
-  --app-muted: #6b7280;
-  --app-border: #e5e7eb;
-  --app-bg: #f7f7f7;
-  --surface: #ffffff;
-  --surface-soft: #f9fafb;
-  --border: #e5e7eb;
-  --text: #1f2937;
-  --text-muted: #6b7280;
-  --accent: #ff385c;
-  --accent-dark: #e31c5f;
-  --accent-soft: #fff1f4;
-  --success: #0f766e;
-  --danger: #b91c1c;
-  --shadow: 0 14px 28px rgba(17, 24, 39, 0.08);
-}
+@use './tokens';
+@use './primitives';
 
 * {
   box-sizing: border-box;
@@ -28,8 +13,9 @@ body {
     radial-gradient(circle at 15% 0%, rgba(255, 56, 92, 0.08), transparent 34%),
     radial-gradient(circle at 85% 8%, rgba(255, 180, 162, 0.18), transparent 42%),
     var(--app-bg);
-  color: #1f2937;
-  font-family: "Segoe UI", "Inter", sans-serif;
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
@@ -38,4 +24,28 @@ body {
 
 a {
   color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
 }

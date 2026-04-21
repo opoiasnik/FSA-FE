@@ -1,0 +1,109 @@
+<section class="profile">
+  <header class="profile__head">
+    <app-avatar [name]="user()?.name || form.firstName + ' ' + form.lastName" [hue]="200" [verified]="true" [size]="72"></app-avatar>
+    <div>
+      <div class="ra-eyebrow">Your account</div>
+      <h1>{{ user()?.name || form.firstName + ' ' + form.lastName }}</h1>
+      <p>{{ form.email }} · Member since 2024</p>
+    </div>
+  </header>
+
+  <div class="profile__layout">
+    <nav class="profile__tabs">
+      <button *ngFor="let t of tabs"
+              type="button"
+              class="profile__tab"
+              [class.profile__tab--on]="tab() === t.id"
+              (click)="switch(t.id)">
+        <i class="pi" [ngClass]="t.icon"></i>
+        {{ t.label }}
+      </button>
+    </nav>
+
+    <div class="ra-card profile__panel">
+      <ng-container [ngSwitch]="tab()">
+
+        <div *ngSwitchCase="'profile'">
+          <h2>Personal info</h2>
+          <p class="profile__sub">Information you can share with owners you message.</p>
+          <div class="grid-2">
+            <label class="field"><span>First name</span><input class="ra-input" [(ngModel)]="form.firstName" /></label>
+            <label class="field"><span>Last name</span><input class="ra-input" [(ngModel)]="form.lastName" /></label>
+            <label class="field span-2"><span>Email</span><input class="ra-input" [(ngModel)]="form.email" /></label>
+            <label class="field"><span>Phone</span><input class="ra-input" [(ngModel)]="form.phone" /></label>
+            <label class="field span-2"><span>Short bio</span><textarea class="ra-input" rows="4" [(ngModel)]="form.bio"></textarea></label>
+          </div>
+          <div class="profile__actions">
+            <button type="button" class="ra-btn">Save changes</button>
+          </div>
+        </div>
+
+        <div *ngSwitchCase="'verification'">
+          <h2>Verification</h2>
+          <p class="profile__sub">Verified accounts are trusted faster and appear higher in owner inboxes.</p>
+          <div class="verify">
+            <div class="verify__bar">
+              <div class="verify__fill" [style.width.%]="verificationProgress()"></div>
+            </div>
+            <p>{{ verificationProgress() }}% complete</p>
+          </div>
+          <ul class="verify__list">
+            <li *ngFor="let s of verificationSteps" [class.done]="s.done">
+              <i class="pi" [ngClass]="s.done ? 'pi-check-circle' : 'pi-circle'"></i>
+              <span>{{ s.label }}</span>
+              <button type="button" class="ra-btn ra-btn--sm ra-btn--ghost" *ngIf="!s.done">Verify</button>
+            </li>
+          </ul>
+        </div>
+
+        <div *ngSwitchCase="'payments'">
+          <h2>Payment methods</h2>
+          <p class="profile__sub">Used for deposits and paid listing boosts.</p>
+          <ul class="cards">
+            <li *ngFor="let c of paymentMethods" class="pay-card">
+              <div>
+                <strong>{{ c.brand }} ···· {{ c.last4 }}</strong>
+                <p>Expires {{ c.exp }}</p>
+              </div>
+              <span *ngIf="c.primary" class="ra-pill ra-pill--success">Default</span>
+            </li>
+          </ul>
+          <button type="button" class="ra-btn ra-btn--ghost"><i class="pi pi-plus"></i>Add card</button>
+        </div>
+
+        <div *ngSwitchCase="'notifications'">
+          <h2>Notifications</h2>
+          <p class="profile__sub">Pick how each update reaches you.</p>
+          <table class="notif">
+            <thead>
+              <tr><th>Event</th><th>Email</th><th>Push</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let n of notifications">
+                <td>
+                  <strong>{{ n.label }}</strong>
+                  <p>{{ n.body }}</p>
+                </td>
+                <td><input type="checkbox" [(ngModel)]="n.channels.email" /></td>
+                <td><input type="checkbox" [(ngModel)]="n.channels.push" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngSwitchCase="'security'">
+          <h2>Security</h2>
+          <p class="profile__sub">Signed in with Keycloak. Password and 2FA are managed there.</p>
+          <div class="security">
+            <p-message severity="info" text="Account, password and two-factor are handled by your identity provider."></p-message>
+            <ul class="security__list">
+              <li><i class="pi pi-desktop"></i> <div><strong>This device</strong><p>Chrome · Bratislava · now</p></div></li>
+              <li><i class="pi pi-mobile"></i> <div><strong>iPhone 15</strong><p>Safari · 3 days ago</p></div></li>
+            </ul>
+          </div>
+        </div>
+
+      </ng-container>
+    </div>
+  </div>
+</section>

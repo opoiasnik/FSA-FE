@@ -1,0 +1,82 @@
+<section class="inbox">
+  <p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
+
+  <div class="inbox__grid" *ngIf="!loading()">
+    <aside class="inbox__threads">
+      <header class="inbox__threads-head">
+        <h2>Messages</h2>
+        <span>{{ threads().length }} conversations</span>
+      </header>
+
+      <app-empty-state *ngIf="!threads().length"
+        icon="pi-inbox"
+        title="Inbox is quiet"
+        body="Open a listing and reach out to start a conversation.">
+      </app-empty-state>
+
+      <button *ngFor="let t of threads()"
+              type="button"
+              class="thread"
+              [class.thread--on]="selectedId() === t.threadId"
+              (click)="select(t.threadId)">
+        <app-avatar [name]="t.peer.name" [hue]="t.peer.avatarHue" [verified]="t.peer.verified" [size]="44"></app-avatar>
+        <div class="thread__body">
+          <div class="thread__top">
+            <strong>{{ t.peer.name }}</strong>
+            <time>{{ t.lastAt | date:'shortTime' }}</time>
+          </div>
+          <p>{{ t.preview }}</p>
+        </div>
+        <span *ngIf="t.unread" class="thread__badge">{{ t.unread }}</span>
+      </button>
+    </aside>
+
+    <section class="inbox__conversation" *ngIf="selected() as conv; else pickOne">
+      <header class="inbox__conv-head">
+        <app-avatar [name]="conv.peer.name" [hue]="conv.peer.avatarHue" [verified]="conv.peer.verified" [size]="40"></app-avatar>
+        <div>
+          <strong>{{ conv.peer.name }}</strong>
+          <p>{{ conv.peer.role }} · Responds {{ conv.peer.responseRate }}% of messages</p>
+        </div>
+      </header>
+
+      <div class="inbox__messages">
+        <div *ngFor="let m of conv.messages" class="bubble" [class.bubble--me]="m.from === 'me'">
+          <p>{{ m.text }}</p>
+          <time>{{ m.at | date:'shortTime' }}</time>
+        </div>
+      </div>
+
+      <footer class="inbox__composer">
+        <input class="ra-input"
+               placeholder="Write a message…"
+               [ngModel]="draft()"
+               (ngModelChange)="draft.set($event)"
+               (keydown.enter)="send()" />
+        <button type="button" class="ra-btn" (click)="send()" [disabled]="!draft().trim()">
+          <i class="pi pi-send"></i>Send
+        </button>
+      </footer>
+    </section>
+
+    <ng-template #pickOne>
+      <section class="inbox__conversation inbox__conversation--empty">
+        <app-empty-state icon="pi-comments" title="Pick a conversation" body="Select a thread on the left to read it here."></app-empty-state>
+      </section>
+    </ng-template>
+
+    <aside class="inbox__listing" *ngIf="selectedListing() as l">
+      <button type="button" class="listing-preview" (click)="openListing(l.id)">
+        <div class="listing-preview__media">
+          <app-photo-placeholder [seed]="l.id" [rounded]="0"></app-photo-placeholder>
+        </div>
+        <div class="listing-preview__body">
+          <h3>{{ l.title }}</h3>
+          <p>{{ shortLocation(l) }}</p>
+          <p class="listing-preview__price">{{ formatPrice(l) }}</p>
+          <span class="ra-btn ra-btn--ghost ra-btn--sm">Open listing</span>
+        </div>
+      </button>
+    </aside>
+  </div>
+</section>

@@ -1,36 +1,102 @@
-<section class="page-head">
-  <div>
-    <p class="eyebrow">Listings page</p>
-    <h1>Detail a vyhľadávanie ponuky</h1>
+<section class="search">
+  <form [formGroup]="filtersForm" class="search-pill">
+    <div class="search-pill__where">
+      <div class="search-pill__label">Where</div>
+      <input class="ra-input search-pill__input" formControlName="q" placeholder="City, district, postal code" />
+    </div>
+    <div class="search-pill__divider"></div>
+    <div class="search-pill__seg">
+      <div class="search-pill__label">Property</div>
+      <div class="seg">
+        <button *ngFor="let opt of [['ALL','All'],['APARTMENT','Flat'],['HOUSE','House'],['ROOM','Room']]"
+                type="button" class="seg__btn"
+                [class.seg__btn--on]="filtersForm.controls.propertyType.value === opt[0]"
+                (click)="filtersForm.controls.propertyType.setValue($any(opt[0]))">{{ opt[1] }}</button>
+      </div>
+    </div>
+    <div class="search-pill__divider"></div>
+    <div class="search-pill__seg">
+      <div class="search-pill__label">Deal</div>
+      <div class="seg">
+        <button *ngFor="let opt of [['ALL','All'],['RENT','Rent'],['SALE','Buy']]"
+                type="button" class="seg__btn"
+                [class.seg__btn--on]="filtersForm.controls.listingType.value === opt[0]"
+                (click)="filtersForm.controls.listingType.setValue($any(opt[0]))">{{ opt[1] }}</button>
+      </div>
+    </div>
+    <button type="button" class="search-pill__submit" (click)="load()">
+      <i class="pi pi-search"></i>
+    </button>
+  </form>
+
+  <div class="filter-chips">
+    <button *ngFor="let f of filterChips" type="button" class="chip">
+      {{ f }}<i class="pi pi-chevron-down"></i>
+    </button>
+    <div class="filter-chips__spacer"></div>
+    <button type="button" class="chip chip--strong">
+      <i class="pi pi-sliders-h"></i>All filters
+    </button>
   </div>
 
-  <app-listing-search-form
-    [form]="lookupForm"
-    [loading]="loading()"
-    [submitLabel]="'Vyhľadať'"
-    (submitted)="loadListing()">
-  </app-listing-search-form>
-</section>
-
-<article class="listing-panel">
-  <div class="panel-head">
+  <div class="results-head">
     <div>
-      <p class="eyebrow">Detail ponuky</p>
-      <h2>{{ summary() }}</h2>
+      <h1>{{ filtersForm.controls.q.value || 'Slovakia' }} · properties</h1>
+      <p>{{ results().length }} properties · updated just now</p>
     </div>
-    <span class="chip">Public API</span>
+    <label class="sort">
+      Sort by
+      <select class="ra-input" [ngModel]="sort()" (ngModelChange)="sort.set($any($event))" [ngModelOptions]="{standalone: true}">
+        <option value="relevance">Most relevant</option>
+        <option value="price-asc">Price: low → high</option>
+        <option value="price-desc">Price: high → low</option>
+        <option value="newest">Newest first</option>
+      </select>
+    </label>
   </div>
 
-  <p *ngIf="error()" class="message error">{{ error() }}</p>
+  <p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
 
-  <ng-container *ngIf="listing() as item; else emptyListing">
-    <app-listing-detail-card [listing]="item"></app-listing-detail-card>
-  </ng-container>
+  <div *ngIf="loading()" class="skeleton-grid">
+    <p-skeleton *ngFor="let _ of [1,2,3,4,5,6]" width="100%" height="220px"></p-skeleton>
+  </div>
 
-  <ng-template #emptyListing>
-    <div class="empty-state">
-      <strong>Zatiaľ nič nie je načítané.</strong>
-      <p>Zadaj ID existujúcej ponuky a frontend načíta detail z backendu.</p>
+  <div *ngIf="!loading()" class="split">
+    <div class="split__list">
+      <article *ngFor="let item of results()"
+               class="card"
+               (click)="openDetail(item.id)"
+               (mouseenter)="selectedId.set(item.id)"
+               (mouseleave)="selectedId.set(null)">
+        <div class="card__media">
+          <app-photo-placeholder [seed]="item.id" [rounded]="0"></app-photo-placeholder>
+          <button type="button" class="card__save" (click)="toggleSave($event, item.id)">
+            <i class="pi" [ngClass]="isSaved(item.id) ? 'pi-heart-fill' : 'pi-heart'"
+               [style.color]="isSaved(item.id) ? 'var(--accent)' : '#fff'"></i>
+          </button>
+          <div class="card__meta-chip">
+            {{ item.features.propertyType.toLowerCase() }}
+            <ng-container *ngIf="item.features.area">· {{ item.features.area }} m²</ng-container>
+            <ng-container *ngIf="item.features.roomCount">· {{ item.features.roomCount }} rm</ng-container>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="card__title-row">
+            <h3>{{ item.title }}</h3>
+            <span class="card__deal">{{ item.listingType === 'RENT' ? 'rent' : 'sale' }}</span>
+          </div>
+          <p class="card__loc">{{ shortLocation(item) }}</p>
+          <p class="card__price">{{ formatPrice(item) }}</p>
+        </div>
+      </article>
+
+      <div *ngIf="!results().length" class="no-results">
+        No listings match your filters. Try widening the search.
+      </div>
     </div>
-  </ng-template>
-</article>
+
+    <aside class="split__map">
+      <app-map-stub [pins]="mapPins()" [selectedId]="selectedId()" (pinSelect)="selectedId.set($event); openDetail($event)"></app-map-stub>
+    </aside>
+  </div>
+</section>

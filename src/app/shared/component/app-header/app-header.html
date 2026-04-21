@@ -9,10 +9,24 @@
 
     <nav class="header-center">
       <a routerLink="/home" routerLinkActive="active" class="nav-item">Home</a>
-      <a routerLink="/listings" routerLinkActive="active" class="nav-item">Listings</a>
+      <a routerLink="/listings" routerLinkActive="active" class="nav-item">Explore</a>
+      <a
+        *ngIf="isAuthenticated()"
+        routerLink="/favourites"
+        routerLinkActive="active"
+        class="nav-item">
+        Saved
+      </a>
+      <a
+        *ngIf="isAuthenticated()"
+        routerLink="/messages"
+        routerLinkActive="active"
+        class="nav-item">
+        Inbox
+      </a>
       <a
         *ngIf="isAuthenticated() && isOwner()"
-        routerLink="/listings/create"
+        routerLink="/owner"
         routerLinkActive="active"
         class="nav-item">
         Owner Studio
@@ -21,9 +35,10 @@
 
     <div class="header-right">
       <ng-container *ngIf="isAuthenticated(); else guestActions">
-        <span class="user-name" *ngIf="user() as currentUser">
-          {{ currentUser.name || currentUser.username }}
-        </span>
+        <a routerLink="/profile" class="user-chip" *ngIf="user() as currentUser">
+          <app-avatar [name]="currentUser.name || currentUser.username" [hue]="200" [verified]="true" [size]="32"></app-avatar>
+          <span class="user-chip__name">{{ currentUser.name || currentUser.username }}</span>
+        </a>
         <button
           pButton
           type="button"

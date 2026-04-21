@@ -1,0 +1,199 @@
+:host { display: block; }
+
+.detail {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 8px 40px;
+}
+
+.breadcrumb {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+
+  a { cursor: pointer; }
+  a:hover { color: var(--accent); }
+  i { font-size: 10px; }
+  span { color: var(--text); }
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: 220px 220px;
+  gap: 6px;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 28px;
+
+  app-photo-placeholder { width: 100%; height: 100%; }
+  .gallery__main { grid-row: span 2; }
+}
+
+.gallery__all {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: max-content;
+  height: max-content;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 40px;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+
+  h1 { margin: 8px 0 6px; font-size: 28px; font-weight: 700; letter-spacing: -0.01em; }
+  .address {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    i { font-size: 12px; margin-right: 6px; }
+  }
+}
+
+.actions { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.fact {
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+
+  i { font-size: 14px; color: var(--text-muted); }
+  &__label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  &__value { font-size: 14px; font-weight: 700; margin-top: 2px; }
+}
+
+.block {
+  margin: 28px 0;
+
+  h2 { margin: 0 0 14px; font-size: 18px; font-weight: 700; }
+  p { font-size: 14px; line-height: 1.75; margin: 0; }
+}
+
+.amenities {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.amenity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  font-size: 14px;
+
+  &--off {
+    color: var(--text-faint);
+    span { text-decoration: line-through; }
+  }
+}
+
+.map-wrap {
+  height: 320px;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.map-empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--surface-soft);
+  border-radius: var(--r-lg);
+  border: 1px dashed var(--border);
+}
+
+.address-hint {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.sidebar { position: sticky; top: 88px; align-self: start; }
+
+.sidebar__card { padding: 22px; }
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+
+  &__amount { font-size: 28px; font-weight: 700; }
+  &__suffix { font-size: 13px; color: var(--text-muted); }
+  &__sub { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
+}
+
+.owner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+
+  &__meta { flex: 1; min-width: 0; }
+  &__name { font-size: 14px; font-weight: 600; }
+  &__role { font-size: 12px; color: var(--text-muted); }
+  &__rating {
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-muted);
+    i { color: var(--accent); margin-right: 2px; }
+    span { font-weight: 600; color: var(--text); font-size: 13px; }
+  }
+}
+
+.sidebar__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.sidebar__notice {
+  margin-top: 18px;
+  padding: 14px;
+  background: var(--surface-soft);
+  border-radius: var(--r-md);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+
+  i { color: var(--success); margin-right: 6px; }
+}
+
+@media (max-width: 960px) {
+  .layout { grid-template-columns: 1fr; }
+  .gallery { grid-template-columns: 1fr 1fr; grid-template-rows: 200px 200px; }
+  .gallery .gallery__main { grid-column: span 2; grid-row: auto; }
+  .facts { grid-template-columns: repeat(3, 1fr); }
+  .sidebar { position: static; }
+}

@@ -1,26 +1,164 @@
-<section class="page-head">
-  <div>
-    <p class="eyebrow">Owner studio</p>
-    <h1>Publikovať novú ponuku</h1>
+<section class="wizard">
+  <div class="wizard__head">
+    <div>
+      <div class="ra-eyebrow">Owner studio</div>
+      <h1>Publish a new listing</h1>
+      <p>Your draft auto-saves. You can leave and come back.</p>
+    </div>
+    <div class="wizard__head-actions">
+      <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm">Save draft</button>
+      <button type="button" class="ra-btn ra-btn--sm" (click)="publish()" [disabled]="creating()">
+        <i class="pi pi-check"></i>Publish
+      </button>
+    </div>
   </div>
-  <p class="hint">
-    Formulár zostáva dostupný vždy. Ak bude problém s tokenom alebo rolou, chybu vráti backend.
-  </p>
+
+  <div class="stepper">
+    <div *ngFor="let s of steps; let i = index"
+         class="stepper__item"
+         [class.stepper__item--active]="i === currentStep()"
+         [class.stepper__item--done]="i < currentStep()"
+         (click)="goTo(i)">
+      <div class="stepper__index">Step {{ i + 1 }}</div>
+      <div class="stepper__title">{{ s.title }}</div>
+    </div>
+  </div>
+
+  <div class="ra-card wizard__panel">
+    <h2>{{ activeStep().title }}</h2>
+    <p class="wizard__sub">{{ activeStep().sub }}</p>
+
+    <form [formGroup]="form" class="wizard__form">
+      <!-- Basics -->
+      <div *ngIf="activeStep().id === 'basics'" class="grid-2">
+        <label class="field span-2">
+          <span>Listing title</span>
+          <input class="ra-input" formControlName="title" />
+          <small>Up to 80 characters. Be descriptive.</small>
+        </label>
+        <label class="field">
+          <span>Deal type</span>
+          <select class="ra-input" formControlName="listingType">
+            <option value="RENT">For rent</option>
+            <option value="SALE">For sale</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Property type</span>
+          <select class="ra-input" formControlName="propertyType">
+            <option value="APARTMENT">Apartment</option>
+            <option value="HOUSE">House</option>
+            <option value="ROOM">Room</option>
+          </select>
+        </label>
+        <label class="field span-2">
+          <span>Description</span>
+          <textarea class="ra-input" rows="6" formControlName="description"></textarea>
+          <small>Mention the neighbourhood, building, what's nearby, any quirks.</small>
+        </label>
+      </div>
+
+      <!-- Location -->
+      <div *ngIf="activeStep().id === 'location'" class="grid-2">
+        <label class="field span-2">
+          <span>Street & number</span>
+          <input class="ra-input" formControlName="street" />
+        </label>
+        <label class="field"><span>City</span><input class="ra-input" formControlName="city" /></label>
+        <label class="field"><span>District</span><input class="ra-input" formControlName="district" /></label>
+        <label class="field"><span>Postal code</span><input class="ra-input" formControlName="postalCode" /></label>
+        <label class="field"><span>Country</span><input class="ra-input" formControlName="country" /></label>
+      </div>
+
+      <!-- Details -->
+      <div *ngIf="activeStep().id === 'details'" class="grid-4">
+        <label class="field"><span>Area (m²)</span><input type="number" class="ra-input" formControlName="area" /></label>
+        <label class="field"><span>Rooms</span><input type="number" class="ra-input" formControlName="roomCount" /></label>
+        <label class="field"><span>Floor</span><input type="number" class="ra-input" formControlName="floor" /></label>
+        <label class="field">
+          <span>Energy class</span>
+          <select class="ra-input" formControlName="energyClass">
+            <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
+          </select>
+        </label>
+
+        <div class="amenities span-4">
+          <div class="amenities__label">Amenities</div>
+          <div class="amenities__chips">
+            <button *ngFor="let a of amenityOptions"
+                    type="button"
+                    class="amenity-chip"
+                    [class.amenity-chip--on]="form.controls[a.key].value"
+                    (click)="toggleAmenity(a.key)">
+              <i class="pi" [ngClass]="form.controls[a.key].value ? 'pi-check' : 'pi-plus'"></i>
+              {{ a.label }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div *ngIf="activeStep().id === 'price'" class="grid-2">
+        <label class="field">
+          <span>{{ form.controls.listingType.value === 'RENT' ? 'Monthly rent' : 'Selling price' }}</span>
+          <input type="number" class="ra-input" formControlName="amount" />
+        </label>
+        <label class="field"><span>Currency</span>
+          <select class="ra-input" formControlName="currency"><option>EUR</option></select>
+        </label>
+        <div class="insight span-2">
+          <i class="pi pi-info-circle"></i>
+          <div><strong>Market insight:</strong> Similar properties in this area are priced competitively.</div>
+        </div>
+      </div>
+
+      <!-- Media -->
+      <div *ngIf="activeStep().id === 'media'">
+        <div class="dropzone">
+          <i class="pi pi-cloud-upload"></i>
+          <div class="dropzone__title">Drop photos here or click to upload</div>
+          <div class="dropzone__hint">JPG or PNG, up to 10 MB each · 5–20 photos</div>
+          <button type="button" class="ra-btn ra-btn--ghost">Choose files</button>
+        </div>
+        <p class="todo-note">Photo upload requires a dedicated BE endpoint — UI stub only.</p>
+        <div class="media-grid">
+          <app-photo-placeholder *ngFor="let _ of [0,1,2,3,4,5]; let i = index"
+                                 [seed]="i" [label]="i === 0 ? 'cover' : 'photo ' + (i + 1)" [rounded]="10">
+          </app-photo-placeholder>
+        </div>
+      </div>
+
+      <!-- Review -->
+      <div *ngIf="activeStep().id === 'review'">
+        <p-message severity="success" text="Ready to publish. Your listing passes all required checks."></p-message>
+        <div class="review">
+          <app-photo-placeholder class="review__cover" [seed]="1" [label]="'cover'" [rounded]="14"></app-photo-placeholder>
+          <div>
+            <h3>{{ form.controls.title.value }}</h3>
+            <p>{{ form.controls.street.value }}, {{ form.controls.city.value }}</p>
+            <div class="review__chips">
+              <span class="ra-pill">{{ form.controls.area.value }} m²</span>
+              <span class="ra-pill">{{ form.controls.roomCount.value }} rooms</span>
+              <span class="ra-pill">Floor {{ form.controls.floor.value }}</span>
+              <span class="ra-pill ra-pill--success">Energy {{ form.controls.energyClass.value }}</span>
+            </div>
+            <div class="review__price">{{ form.controls.amount.value }} {{ form.controls.currency.value }}
+              <span *ngIf="form.controls.listingType.value === 'RENT'">/ mo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <p-message *ngIf="createError()" severity="error" [text]="createError() || ''"></p-message>
+
+    <div class="wizard__nav">
+      <button type="button" class="ra-btn ra-btn--ghost" (click)="prev()" [disabled]="currentStep() === 0">
+        <i class="pi pi-arrow-left"></i>Back
+      </button>
+      <button type="button" class="ra-btn" (click)="next()" [disabled]="creating()">
+        {{ isLastStep() ? 'Publish' : 'Continue' }}<i class="pi pi-arrow-right"></i>
+      </button>
+    </div>
+  </div>
 </section>
-
-<article class="owner-panel">
-  <app-listing-form
-    [form]="createForm"
-    [submitting]="creating()"
-    (submitted)="createListing()">
-  </app-listing-form>
-
-  <p *ngIf="createError()" class="message error">{{ createError() }}</p>
-
-  <div class="result-card" *ngIf="createdListing() as listing">
-    <strong>Ponuka bola vytvorená</strong>
-    <span>ID: {{ listing.id }}</span>
-    <span>{{ listing.title }}</span>
-    <span>{{ listing.price.amount }} {{ listing.price.currency }}</span>
-  </div>
-</article>
