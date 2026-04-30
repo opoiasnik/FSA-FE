@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
-import { ListingResponse, ListingType, PropertyType } from '../../../listings/models/listing.model';
+import { ListingSummary, ListingType, PropertyType } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
 import { HeroSection } from '../../components/hero-section/hero-section';
 import { ListingsCarousel } from '../../components/listings-carousel/listings-carousel';
@@ -33,13 +33,13 @@ export class HomePage implements OnInit {
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
-  readonly listings = signal<ListingResponse[]>([]);
+  readonly listings = signal<ListingSummary[]>([]);
 
   readonly searchText = signal('');
   readonly selectedPropertyType = signal<'ALL' | 'APARTMENT' | 'HOUSE' | 'ROOM'>('ALL');
   readonly selectedListingType = signal<'ALL' | 'RENT' | 'SALE'>('ALL');
 
-  readonly firstCity = computed(() => this.listings()[0]?.address.city ?? 'Popular');
+  readonly firstCity = computed(() => this.listings()[0]?.city ?? 'Popular');
   readonly featuredListings = computed(() => this.listings().slice(0, 12));
   readonly extraListings = computed(() => this.listings().slice(12, 24));
 

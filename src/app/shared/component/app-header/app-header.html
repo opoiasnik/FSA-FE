@@ -9,7 +9,7 @@
 
     <nav class="header-center">
       <a routerLink="/home" routerLinkActive="active" class="nav-item">Home</a>
-      <a routerLink="/listings" routerLinkActive="active" class="nav-item">Explore</a>
+      <a routerLink="/listings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">Explore</a>
       <a
         *ngIf="isAuthenticated()"
         routerLink="/favourites"
@@ -28,6 +28,7 @@
         *ngIf="isAuthenticated() && isOwner()"
         routerLink="/owner"
         routerLinkActive="active"
+        [class.active]="isOwnerStudioActive()"
         class="nav-item">
         Owner Studio
       </a>

@@ -7,8 +7,7 @@ import { Avatar } from '../../../../shared/component/avatar/avatar';
 import { EmptyState } from '../../../../shared/component/empty-state/empty-state';
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 import { Conversation, MockDataService } from '../../../../shared/services/mock-data.service';
-import { formatPrice, shortLocation } from '../../../listings/models/listing.helpers';
-import { ListingResponse } from '../../../listings/models/listing.model';
+import { ListingSummary } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
 
 @Component({
@@ -25,7 +24,7 @@ export class MessagesPage implements OnInit {
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
-  readonly listings = signal<ListingResponse[]>([]);
+  readonly listings = signal<ListingSummary[]>([]);
   readonly threads = signal<Conversation[]>([]);
   readonly selectedId = signal<string | null>(null);
   readonly draft = signal('');
@@ -71,8 +70,14 @@ export class MessagesPage implements OnInit {
     void this.router.navigate(['/listings', id]);
   }
 
-  formatPrice = formatPrice;
-  shortLocation = shortLocation;
+  formatPrice(listing: ListingSummary): string {
+    const suffix = listing.listingType === 'RENT' ? ' / mo' : '';
+    return new Intl.NumberFormat('sk-SK').format(listing.price.amount) + ' €' + suffix;
+  }
+
+  shortLocation(listing: ListingSummary): string {
+    return listing.city;
+  }
 
   private toMessage(error: unknown): string {
     if (typeof error === 'string') return error;

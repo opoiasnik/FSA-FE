@@ -94,7 +94,7 @@ export class MockDataService {
     return this.savedSearches;
   }
 
-  getConversations(listings: ListingResponse[]): Conversation[] {
+  getConversations(listings: { id: number }[]): Conversation[] {
     const byIndex = (i: number) => listings[i % Math.max(1, listings.length)];
     return [
       {
@@ -137,7 +137,7 @@ export class MockDataService {
     ];
   }
 
-  getViewings(listings: ListingResponse[]): ViewingEntry[] {
+  getViewings(listings: { id: number }[]): ViewingEntry[] {
     const byIndex = (i: number) => listings[i % Math.max(1, listings.length)];
     return [
       { id: 'v1', listingId: byIndex(0)?.id ?? 1, when: 'Fri · Apr 24 · 17:00', who: 'Adam Horváth', status: 'confirmed' },

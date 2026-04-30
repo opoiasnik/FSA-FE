@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { ListingResponse } from '../../../listings/models/listing.model';
+import { ListingSummary } from '../../../listings/models/listing.model';
 import { ListingCard } from '../listing-card/listing-card';
 
 @Component({
@@ -12,6 +12,6 @@ import { ListingCard } from '../listing-card/listing-card';
 })
 export class ListingsCarousel {
   @Input({ required: true }) title!: string;
-  @Input({ required: true }) items: ListingResponse[] = [];
+  @Input({ required: true }) items: ListingSummary[] = [];
   @Input() imageSeedOffset = 0;
 }

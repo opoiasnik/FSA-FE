@@ -4,8 +4,7 @@ import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MockDataService, OwnerStats, ViewingEntry } from '../../../../shared/services/mock-data.service';
-import { formatPrice, shortLocation } from '../../../listings/models/listing.helpers';
-import { ListingResponse } from '../../../listings/models/listing.model';
+import { ListingSummary } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
 
 interface StatCard { label: string; value: string; delta: string; tone: 'up' | 'down' | 'flat'; }
@@ -24,7 +23,7 @@ export class OwnerDashboardPage implements OnInit {
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
-  readonly listings = signal<ListingResponse[]>([]);
+  readonly listings = signal<ListingSummary[]>([]);
   readonly stats = signal<OwnerStats>(this.mocks.getOwnerStats());
   readonly viewings = signal<ViewingEntry[]>([]);
 
@@ -71,12 +70,18 @@ export class OwnerDashboardPage implements OnInit {
     void this.router.navigate(['/listings', id]);
   }
 
-  viewingListing(v: ViewingEntry): ListingResponse | undefined {
+  viewingListing(v: ViewingEntry): ListingSummary | undefined {
     return this.listings().find(l => l.id === v.listingId);
   }
 
-  formatPrice = formatPrice;
-  shortLocation = shortLocation;
+  formatPrice(listing: ListingSummary): string {
+    const suffix = listing.listingType === 'RENT' ? ' / mo' : '';
+    return new Intl.NumberFormat('sk-SK').format(listing.price.amount) + ' €' + suffix;
+  }
+
+  shortLocation(listing: ListingSummary): string {
+    return listing.city;
+  }
 
   private toMessage(error: unknown): string {
     if (typeof error === 'string') return error;

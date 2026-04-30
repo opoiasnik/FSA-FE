@@ -73,9 +73,9 @@ export class ListingSearchPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.listingService.getFeatured().subscribe({
-      next: (items) => {
-        this.listings.set(Array.isArray(items) ? items : []);
+    this.listingService.search({ page: 0, size: 50 }).subscribe({
+      next: (response) => {
+        this.listings.set(response.content);
         this.loading.set(false);
       },
       error: (error) => {

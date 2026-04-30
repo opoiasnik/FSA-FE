@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateListingRequest, ListingResponse, ListingSearchParams, ListingSearchResponse, ListingType, PropertyType } from '../models/listing.model';
+import { CreateListingRequest, ListingResponse, ListingSearchParams, ListingSearchResponse, ListingSummary, ListingType, PropertyType } from '../models/listing.model';
 
 export interface FeaturedListingsParams {
   city?: string;
@@ -14,12 +14,12 @@ export interface FeaturedListingsParams {
 export class ListingService {
   private readonly http = inject(HttpClient);
 
-  getFeatured(params?: FeaturedListingsParams): Observable<ListingResponse[]> {
+  getFeatured(params?: FeaturedListingsParams): Observable<ListingSummary[]> {
     let httpParams = new HttpParams();
     if (params?.city) httpParams = httpParams.set('city', params.city);
     if (params?.listingType) httpParams = httpParams.set('listingType', params.listingType);
     if (params?.propertyType) httpParams = httpParams.set('propertyType', params.propertyType);
-    return this.http.get<ListingResponse[]>(`${environment.apiBaseUrl}/featured`, { params: httpParams });
+    return this.http.get<ListingSummary[]>(`${environment.apiBaseUrl}/featured`, { params: httpParams });
   }
 
   search(params: ListingSearchParams): Observable<ListingSearchResponse> {

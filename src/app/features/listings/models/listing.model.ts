@@ -55,6 +55,14 @@ export interface ListingResponse extends CreateListingRequest {
   stats?: ListingStats;
 }
 
+export interface ListingSummary {
+  id: number;
+  title: string;
+  listingType: ListingType;
+  city: string;
+  price: Price;
+}
+
 export interface PaginationResponse {
   page: number;
   size: number;

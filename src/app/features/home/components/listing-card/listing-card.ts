@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { ListingResponse } from '../../../listings/models/listing.model';
+import { ListingSummary } from '../../../listings/models/listing.model';
 
 @Component({
   selector: 'app-listing-card',
@@ -12,7 +12,7 @@ import { ListingResponse } from '../../../listings/models/listing.model';
   styleUrl: './listing-card.scss'
 })
 export class ListingCard {
-  @Input({ required: true }) listing!: ListingResponse;
+  @Input({ required: true }) listing!: ListingSummary;
   @Input() imageSeedOffset = 0;
   @Input() badge = 'Top offer';
 
@@ -25,7 +25,6 @@ export class ListingCard {
   }
 
   get location(): string {
-    const { city, country } = this.listing.address;
-    return [city, country].filter(Boolean).join(', ');
+    return this.listing.city;
   }
 }

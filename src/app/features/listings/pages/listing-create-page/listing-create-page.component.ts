@@ -43,25 +43,25 @@ export class ListingCreatePageComponent {
   readonly isLastStep = computed(() => this.currentStep() === this.steps.length - 1);
 
   readonly form = this.fb.nonNullable.group({
-    title: ['Sun-flooded two-bedroom in the old town', [Validators.required, Validators.maxLength(80)]],
-    description: ['Bright and quiet unit with large windows, freshly painted walls and original parquet floors.', [Validators.required]],
-    listingType: ['RENT' as const, [Validators.required]],
-    propertyType: ['APARTMENT' as const, [Validators.required]],
-    street: ['Šancová 12', [Validators.required]],
-    city: ['Bratislava', [Validators.required]],
-    district: ['Staré Mesto'],
-    postalCode: ['81104', [Validators.required]],
+    title: ['', [Validators.required, Validators.maxLength(80)]],
+    description: ['', [Validators.required]],
+    listingType: ['RENT' as 'RENT' | 'SALE', [Validators.required]],
+    propertyType: ['APARTMENT' as 'APARTMENT' | 'HOUSE' | 'ROOM', [Validators.required]],
+    street: ['', [Validators.required]],
+    city: ['', [Validators.required]],
+    district: [''],
+    postalCode: ['', [Validators.required]],
     country: ['Slovakia', [Validators.required]],
-    area: [72, [Validators.required, Validators.min(1)]],
-    roomCount: [3, [Validators.required, Validators.min(0)]],
-    floor: [4],
-    energyClass: ['B' as const],
-    furnished: [true],
-    parkingAvailable: [true],
-    balcony: [true],
-    elevator: [true],
+    area: [null as number | null, [Validators.required, Validators.min(1)]],
+    roomCount: [null as number | null, [Validators.required, Validators.min(0)]],
+    floor: [null as number | null],
+    energyClass: ['' as '' | 'A' | 'B' | 'C' | 'D'],
+    furnished: [false],
+    parkingAvailable: [false],
+    balcony: [false],
+    elevator: [false],
     petsAllowed: [false],
-    amount: [890, [Validators.required, Validators.min(1)]],
+    amount: [null as number | null, [Validators.required, Validators.min(1)]],
     currency: ['EUR', [Validators.required]]
   });
 
@@ -108,15 +108,15 @@ export class ListingCreatePageComponent {
       price: { amount: Number(v.amount), currency: v.currency },
       features: {
         propertyType: v.propertyType,
-        area: v.area ? Number(v.area) : null,
-        roomCount: v.roomCount ? Number(v.roomCount) : null,
-        floor: v.floor ? Number(v.floor) : null,
+        area: v.area != null ? Number(v.area) : null,
+        roomCount: v.roomCount != null ? Number(v.roomCount) : null,
+        floor: v.floor != null ? Number(v.floor) : null,
         furnished: v.furnished,
         parkingAvailable: v.parkingAvailable,
         balcony: v.balcony,
         elevator: v.elevator,
         petsAllowed: v.petsAllowed,
-        energyClass: v.energyClass
+        energyClass: v.energyClass || undefined
       }
     };
 
