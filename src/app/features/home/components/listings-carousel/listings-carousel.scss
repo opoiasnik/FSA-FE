@@ -13,6 +13,8 @@
   color: var(--text);
 }
 
-:host ::ng-deep .p-carousel .p-carousel-content {
-  overflow: visible;
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
 }

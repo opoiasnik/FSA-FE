@@ -3,18 +3,11 @@
     <h2>{{ title }}</h2>
   </div>
 
-  <p-carousel
-    [value]="items"
-    [numVisible]="items.length < 7 ? items.length : 7"
-    [numScroll]="1"
-    [circular]="false"
-    [showIndicators]="false"
-    [responsiveOptions]="responsiveOptions">
-    <ng-template let-item pTemplate="item">
-      <app-listing-card
-        [listing]="item"
-        [imageSeedOffset]="imageSeedOffset">
-      </app-listing-card>
-    </ng-template>
-  </p-carousel>
+  <div class="cards-grid">
+    <app-listing-card
+      *ngFor="let item of items"
+      [listing]="item"
+      [imageSeedOffset]="imageSeedOffset">
+    </app-listing-card>
+  </div>
 </section>
