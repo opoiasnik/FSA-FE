@@ -1,15 +1,27 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateListingRequest, ListingResponse } from '../models/listing.model';
+import { CreateListingRequest, ListingResponse, ListingSearchParams, ListingSearchResponse } from '../models/listing.model';
 
 @Injectable({ providedIn: 'root' })
 export class ListingService {
   private readonly http = inject(HttpClient);
 
-  getAll(): Observable<ListingResponse[]> {
+  getFeatured(): Observable<ListingResponse[]> {
     return this.http.get<ListingResponse[]>(`${environment.apiBaseUrl}/featured`);
+  }
+
+  search(params: ListingSearchParams): Observable<ListingSearchResponse> {
+    let httpParams = new HttpParams();
+    if (params.city) httpParams = httpParams.set('city', params.city);
+    if (params.listingType) httpParams = httpParams.set('listingType', params.listingType);
+    if (params.propertyType) httpParams = httpParams.set('propertyType', params.propertyType);
+    if (params.priceMin != null) httpParams = httpParams.set('priceMin', params.priceMin);
+    if (params.priceMax != null) httpParams = httpParams.set('priceMax', params.priceMax);
+    httpParams = httpParams.set('page', params.page ?? 0);
+    httpParams = httpParams.set('size', params.size ?? 10);
+    return this.http.get<ListingSearchResponse>(environment.apiBaseUrl, { params: httpParams });
   }
 
   getById(id: number): Observable<ListingResponse> {

@@ -73,7 +73,7 @@ export class ListingSearchPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.listingService.getAll().subscribe({
+    this.listingService.getFeatured().subscribe({
       next: (items) => {
         this.listings.set(Array.isArray(items) ? items : []);
         this.loading.set(false);

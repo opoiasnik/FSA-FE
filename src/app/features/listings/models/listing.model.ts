@@ -54,3 +54,25 @@ export interface ListingResponse extends CreateListingRequest {
   ownerId: number;
   stats?: ListingStats;
 }
+
+export interface PaginationResponse {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface ListingSearchResponse {
+  content: ListingResponse[];
+  pagination: PaginationResponse;
+}
+
+export interface ListingSearchParams {
+  city?: string;
+  listingType?: ListingType;
+  propertyType?: PropertyType;
+  priceMin?: number;
+  priceMax?: number;
+  page?: number;
+  size?: number;
+}

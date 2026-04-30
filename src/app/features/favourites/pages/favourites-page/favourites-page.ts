@@ -52,7 +52,7 @@ export class FavouritesPage implements OnInit {
 
   ngOnInit(): void {
     this.loading.set(true);
-    this.listingService.getAll().subscribe({
+    this.listingService.getFeatured().subscribe({
       next: items => { this.listings.set(items ?? []); this.loading.set(false); },
       error: err => { this.error.set(this.toMessage(err)); this.loading.set(false); }
     });

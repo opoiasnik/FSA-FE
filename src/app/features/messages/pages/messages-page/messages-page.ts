@@ -40,7 +40,7 @@ export class MessagesPage implements OnInit {
 
   ngOnInit(): void {
     this.loading.set(true);
-    this.listingService.getAll().subscribe({
+    this.listingService.getFeatured().subscribe({
       next: items => {
         this.listings.set(items ?? []);
         const threads = this.mocks.getConversations(items ?? []);

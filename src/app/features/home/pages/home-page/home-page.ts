@@ -2,8 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
-import { map } from 'rxjs';
-import { ListingResponse } from '../../../listings/models/listing.model';
+import { ListingResponse, ListingType, PropertyType } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
 import { HeroSection } from '../../components/hero-section/hero-section';
 import { ListingsCarousel } from '../../components/listings-carousel/listings-carousel';
@@ -40,49 +39,50 @@ export class HomePage implements OnInit {
   readonly selectedPropertyType = signal<'ALL' | 'APARTMENT' | 'HOUSE' | 'ROOM'>('ALL');
   readonly selectedListingType = signal<'ALL' | 'RENT' | 'SALE'>('ALL');
 
-  readonly filteredListings = computed(() =>
-    this.listings().filter((item) => {
-      const query = this.searchText().trim().toLowerCase();
-      const propertyFilter = this.selectedPropertyType();
-      const listingFilter = this.selectedListingType();
-
-      const matchesQuery =
-        !query
-        || item.title.toLowerCase().includes(query)
-        || item.address.city.toLowerCase().includes(query)
-        || item.address.country.toLowerCase().includes(query);
-      const matchesProperty = propertyFilter === 'ALL' || item.features.propertyType === propertyFilter;
-      const matchesListingType = listingFilter === 'ALL' || item.listingType === listingFilter;
-
-      return matchesQuery && matchesProperty && matchesListingType;
-    })
-  );
-  readonly firstCity = computed(() => this.filteredListings()[0]?.address.city ?? 'Popular');
-
-  readonly featuredListings = computed(() => this.filteredListings().slice(0, 12));
-  readonly extraListings = computed(() => this.filteredListings().slice(12, 24));
+  readonly firstCity = computed(() => this.listings()[0]?.address.city ?? 'Popular');
+  readonly featuredListings = computed(() => this.listings().slice(0, 12));
+  readonly extraListings = computed(() => this.listings().slice(12, 24));
 
   ngOnInit(): void {
-    this.loadListings();
+    this.loadFeatured();
   }
 
-  loadListings(): void {
+  loadFeatured(): void {
     this.loading.set(true);
     this.error.set(null);
 
-    this.listingService.getAll().pipe(
-      map((response) => this.toArray(response))
-    ).subscribe({
+    this.listingService.getFeatured().subscribe({
       next: (items) => {
         this.listings.set(items);
-        if (!items.length) {
-          this.error.set('No listings were returned by the backend featured endpoint.');
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.listings.set([]);
+        this.error.set(this.toMessage(err));
+        this.loading.set(false);
+      }
+    });
+  }
+
+  onSearch(): void {
+    this.loading.set(true);
+    this.error.set(null);
+
+    const city = this.searchText().trim() || undefined;
+    const listingType = this.selectedListingType() === 'ALL' ? undefined : this.selectedListingType() as ListingType;
+    const propertyType = this.selectedPropertyType() === 'ALL' ? undefined : this.selectedPropertyType() as PropertyType;
+
+    this.listingService.search({ city, listingType, propertyType, page: 0, size: 24 }).subscribe({
+      next: (response) => {
+        this.listings.set(response.content);
+        if (!response.content.length) {
+          this.error.set('No listings found for the selected filters.');
         }
         this.loading.set(false);
       },
-      error: (error) => {
+      error: (err) => {
         this.listings.set([]);
-        this.error.set(this.toMessage(error));
+        this.error.set(this.toMessage(err));
         this.loading.set(false);
       }
     });
@@ -100,39 +100,12 @@ export class HomePage implements OnInit {
     this.selectedListingType.set(value);
   }
 
-  private toArray(value: unknown): ListingResponse[] {
-    if (Array.isArray(value)) {
-      return value as ListingResponse[];
-    }
-
-    if (value && typeof value === 'object') {
-      const wrapped = value as { content?: ListingResponse[]; items?: ListingResponse[]; data?: ListingResponse[] };
-      if (Array.isArray(wrapped.content)) {
-        return wrapped.content;
-      }
-      if (Array.isArray(wrapped.items)) {
-        return wrapped.items;
-      }
-      if (Array.isArray(wrapped.data)) {
-        return wrapped.data;
-      }
-    }
-
-    return [];
-  }
-
   private toMessage(error: unknown): string {
-    if (typeof error === 'string') {
-      return error;
-    }
-
+    if (typeof error === 'string') return error;
     if (error && typeof error === 'object') {
-      const maybeHttp = error as { error?: { message?: string }; message?: string; status?: number };
-      return maybeHttp.error?.message
-        ?? maybeHttp.message
-        ?? (maybeHttp.status ? `Request failed with status ${maybeHttp.status}.` : 'Unexpected error.');
+      const e = error as { error?: { message?: string }; message?: string; status?: number };
+      return e.error?.message ?? e.message ?? (e.status ? `Request failed with status ${e.status}.` : 'Unexpected error.');
     }
-
     return 'Unexpected error.';
   }
 }
