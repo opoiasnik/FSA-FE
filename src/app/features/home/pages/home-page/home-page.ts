@@ -72,10 +72,10 @@ export class HomePage implements OnInit {
     const listingType = this.selectedListingType() === 'ALL' ? undefined : this.selectedListingType() as ListingType;
     const propertyType = this.selectedPropertyType() === 'ALL' ? undefined : this.selectedPropertyType() as PropertyType;
 
-    this.listingService.search({ city, listingType, propertyType, page: 0, size: 24 }).subscribe({
-      next: (response) => {
-        this.listings.set(response.content);
-        if (!response.content.length) {
+    this.listingService.getFeatured({ city, listingType, propertyType }).subscribe({
+      next: (items) => {
+        this.listings.set(items);
+        if (!items.length) {
           this.error.set('No listings found for the selected filters.');
         }
         this.loading.set(false);

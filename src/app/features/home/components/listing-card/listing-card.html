@@ -1,4 +1,4 @@
-<article class="listing-tile">
+<article class="listing-tile" [routerLink]="['/listings', listing.id]" style="cursor: pointer">
   <div class="tile-media">
     <img [src]="imageUrl" [alt]="listing.title" loading="lazy" />
     <span *ngIf="badge" class="favorite-chip">{{ badge }}</span>
