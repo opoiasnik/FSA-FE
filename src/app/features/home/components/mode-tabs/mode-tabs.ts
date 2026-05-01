@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, computed, inject } from '@angular/core';
+import { UserService } from '../../../../core/services/user.service';
 
 export type HomeMode = 'listings' | 'favorites' | 'viewings' | 'messages';
 
@@ -11,15 +12,22 @@ export type HomeMode = 'listings' | 'favorites' | 'viewings' | 'messages';
   styleUrl: './mode-tabs.scss'
 })
 export class ModeTabs {
+  private readonly userService = inject(UserService);
+
   @Input() active: HomeMode = 'listings';
   @Output() readonly activeChange = new EventEmitter<HomeMode>();
 
-  readonly tabs: { id: HomeMode; label: string; icon: string }[] = [
-    { id: 'listings', label: 'Listings', icon: 'pi pi-home' },
-    { id: 'favorites', label: 'Favorites', icon: 'pi pi-heart' },
-    { id: 'viewings', label: 'Viewings', icon: 'pi pi-calendar' },
-    { id: 'messages', label: 'Messages', icon: 'pi pi-comments' }
+  private readonly allTabs: { id: HomeMode; label: string; icon: string; requiresAuth: boolean }[] = [
+    { id: 'listings', label: 'Listings', icon: 'pi pi-home', requiresAuth: false },
+    { id: 'favorites', label: 'Favorites', icon: 'pi pi-heart', requiresAuth: true },
+    { id: 'viewings', label: 'Viewings', icon: 'pi pi-calendar', requiresAuth: true },
+    { id: 'messages', label: 'Messages', icon: 'pi pi-comments', requiresAuth: true }
   ];
+
+  readonly tabs = computed(() => {
+    const isLoggedIn = this.userService.isUserLoggedIn();
+    return this.allTabs.filter(t => !t.requiresAuth || isLoggedIn);
+  });
 
   select(tab: HomeMode): void {
     this.active = tab;

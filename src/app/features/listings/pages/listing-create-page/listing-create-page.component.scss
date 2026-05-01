@@ -54,7 +54,7 @@
 .field {
   display: block;
 
-  span {
+  > span {
     display: block;
     font-size: 13px;
     font-weight: 600;
@@ -65,6 +65,22 @@
     margin-top: 4px;
     color: var(--text-muted);
     font-size: 12px;
+  }
+
+  .req {
+    color: #dc2626;
+    font-weight: 700;
+    display: inline;
+    margin: 0 0 0 2px;
+  }
+}
+
+.ra-input--invalid {
+  border-color: #dc2626 !important;
+
+  &:focus {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1) !important;
   }
 }
 

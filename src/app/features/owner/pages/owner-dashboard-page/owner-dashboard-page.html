@@ -78,7 +78,7 @@
           <td>{{ shortLocation(l) }}</td>
           <td>{{ formatPrice(l) }}</td>
           <td>{{ l.listingType === 'RENT' ? 'Rent' : 'Sale' }}</td>
-          <td><span class="ra-pill ra-pill--success">ACTIVE</span></td>
+          <td><span class="ra-pill" [class.ra-pill--success]="l.status === 'ACTIVE'">{{ l.status }}</span></td>
           <td class="dash__table-actions"><i class="pi pi-chevron-right"></i></td>
         </tr>
       </tbody>

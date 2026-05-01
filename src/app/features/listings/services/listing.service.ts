@@ -34,6 +34,10 @@ export class ListingService {
     return this.http.get<ListingSearchResponse>(environment.apiBaseUrl, { params: httpParams });
   }
 
+  getMy(): Observable<ListingResponse[]> {
+    return this.http.get<ListingResponse[]>(`${environment.apiBaseUrl}/my`);
+  }
+
   getById(id: number): Observable<ListingResponse> {
     return this.http.get<ListingResponse>(`${environment.apiBaseUrl}/${id}`);
   }

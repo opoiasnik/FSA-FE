@@ -1,7 +1,7 @@
 <section class="bnb-top-nav">
   <div class="mode-tabs">
     <button
-      *ngFor="let tab of tabs"
+      *ngFor="let tab of tabs()"
       type="button"
       class="mode-tab"
       [class.active]="active === tab.id"

@@ -47,11 +47,19 @@ export interface CreateListingRequest {
   features: PropertyFeatures;
 }
 
+export interface ListingOwner {
+  id?: number;
+  name: string;
+  email: string;
+  role: 'OWNER' | 'USER';
+}
+
 export interface ListingResponse extends CreateListingRequest {
   id: number;
   status: ListingStatus;
   createdAt: string;
   ownerId: number;
+  owner?: ListingOwner;
   stats?: ListingStats;
 }
 

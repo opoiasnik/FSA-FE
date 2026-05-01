@@ -41,9 +41,18 @@ export class ListingDetailPage implements OnInit {
   readonly error = signal<string | null>(null);
   readonly saved = signal(false);
 
-  readonly owner = computed<OwnerProfile | undefined>(() => {
+  readonly owner = computed(() => {
     const item = this.listing();
-    return item ? this.mocks.getOwner(item.ownerId) ?? this.mocks.getOwners()[0] : undefined;
+    if (!item?.owner) return undefined;
+    return {
+      name: item.owner.name,
+      email: item.owner.email,
+      role: item.owner.role === 'OWNER' ? 'Private owner' : 'User',
+      avatarHue: 200,
+      verified: true,
+      rating: null as number | null,
+      responseRate: null as number | null
+    };
   });
 
   readonly fullAddress = computed(() => {

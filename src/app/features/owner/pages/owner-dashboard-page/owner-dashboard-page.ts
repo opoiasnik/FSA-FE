@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MockDataService, OwnerStats, ViewingEntry } from '../../../../shared/services/mock-data.service';
-import { ListingSummary } from '../../../listings/models/listing.model';
+import { ListingResponse } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
 
 interface StatCard { label: string; value: string; delta: string; tone: 'up' | 'down' | 'flat'; }
@@ -23,7 +23,7 @@ export class OwnerDashboardPage implements OnInit {
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
-  readonly listings = signal<ListingSummary[]>([]);
+  readonly listings = signal<ListingResponse[]>([]);
   readonly stats = signal<OwnerStats>(this.mocks.getOwnerStats());
   readonly viewings = signal<ViewingEntry[]>([]);
 
@@ -52,7 +52,7 @@ export class OwnerDashboardPage implements OnInit {
 
   ngOnInit(): void {
     this.loading.set(true);
-    this.listingService.getFeatured().subscribe({
+    this.listingService.getMy().subscribe({
       next: items => {
         this.listings.set(items ?? []);
         this.viewings.set(this.mocks.getViewings(items ?? []));
@@ -70,17 +70,17 @@ export class OwnerDashboardPage implements OnInit {
     void this.router.navigate(['/listings', id]);
   }
 
-  viewingListing(v: ViewingEntry): ListingSummary | undefined {
+  viewingListing(v: ViewingEntry): ListingResponse | undefined {
     return this.listings().find(l => l.id === v.listingId);
   }
 
-  formatPrice(listing: ListingSummary): string {
+  formatPrice(listing: ListingResponse): string {
     const suffix = listing.listingType === 'RENT' ? ' / mo' : '';
     return new Intl.NumberFormat('sk-SK').format(listing.price.amount) + ' €' + suffix;
   }
 
-  shortLocation(listing: ListingSummary): string {
-    return listing.city;
+  shortLocation(listing: ListingResponse): string {
+    return listing.address.city;
   }
 
   private toMessage(error: unknown): string {

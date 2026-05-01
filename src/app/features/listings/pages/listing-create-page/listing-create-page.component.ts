@@ -42,6 +42,36 @@ export class ListingCreatePageComponent {
   readonly activeStep = computed(() => this.steps[this.currentStep()]);
   readonly isLastStep = computed(() => this.currentStep() === this.steps.length - 1);
 
+  private readonly stepRequiredFields: Record<WizardStep['id'], string[]> = {
+    basics: ['title', 'description'],
+    location: ['street', 'city', 'postalCode', 'country'],
+    details: ['area', 'roomCount'],
+    price: ['amount', 'currency'],
+    media: [],
+    review: []
+  };
+
+  isStepValid(stepId: WizardStep['id']): boolean {
+    const fields = this.stepRequiredFields[stepId];
+    return fields.every(name => {
+      const ctrl = this.form.get(name);
+      return ctrl ? ctrl.valid : true;
+    });
+  }
+
+  isFieldRequired(name: string): boolean {
+    return Object.values(this.stepRequiredFields).flat().includes(name);
+  }
+
+  isFieldInvalid(name: string): boolean {
+    const ctrl = this.form.get(name);
+    return !!ctrl && ctrl.invalid && (ctrl.touched || ctrl.dirty);
+  }
+
+  canProceed(): boolean {
+    return this.isStepValid(this.activeStep().id);
+  }
+
   readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(80)]],
     description: ['', [Validators.required]],
@@ -75,15 +105,32 @@ export class ListingCreatePageComponent {
 
   goTo(index: number): void {
     if (index < 0 || index >= this.steps.length) return;
+    if (index > this.currentStep()) {
+      for (let i = this.currentStep(); i < index; i++) {
+        if (!this.isStepValid(this.steps[i].id)) {
+          this.markStepFieldsTouched(this.steps[i].id);
+          this.currentStep.set(i);
+          return;
+        }
+      }
+    }
     this.currentStep.set(index);
   }
 
   next(): void {
+    if (!this.canProceed()) {
+      this.markStepFieldsTouched(this.activeStep().id);
+      return;
+    }
     if (this.isLastStep()) {
       this.publish();
       return;
     }
     this.currentStep.update(v => v + 1);
+  }
+
+  private markStepFieldsTouched(stepId: WizardStep['id']): void {
+    this.stepRequiredFields[stepId].forEach(name => this.form.get(name)?.markAsTouched());
   }
 
   prev(): void {

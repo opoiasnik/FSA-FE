@@ -3,13 +3,6 @@
     <div>
       <div class="ra-eyebrow">Owner studio</div>
       <h1>Publish a new listing</h1>
-      <p>Your draft auto-saves. You can leave and come back.</p>
-    </div>
-    <div class="wizard__head-actions">
-      <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm">Save draft</button>
-      <button type="button" class="ra-btn ra-btn--sm" (click)="publish()" [disabled]="creating()">
-        <i class="pi pi-check"></i>Publish
-      </button>
     </div>
   </div>
 
@@ -28,12 +21,12 @@
     <h2>{{ activeStep().title }}</h2>
     <p class="wizard__sub">{{ activeStep().sub }}</p>
 
-    <form [formGroup]="form" class="wizard__form">
+    <form [formGroup]="form" class="wizard__form" novalidate>
       <!-- Basics -->
       <div *ngIf="activeStep().id === 'basics'" class="grid-2">
         <label class="field span-2">
-          <span>Listing title</span>
-          <input class="ra-input" formControlName="title" />
+          <span>Listing title <span class="req">*</span></span>
+          <input class="ra-input" [class.ra-input--invalid]="isFieldInvalid('title')" formControlName="title" />
           <small>Up to 80 characters. Be descriptive.</small>
         </label>
         <label class="field">
@@ -52,8 +45,8 @@
           </select>
         </label>
         <label class="field span-2">
-          <span>Description</span>
-          <textarea class="ra-input" rows="6" formControlName="description"></textarea>
+          <span>Description <span class="req">*</span></span>
+          <textarea class="ra-input" [class.ra-input--invalid]="isFieldInvalid('description')" rows="6" formControlName="description"></textarea>
           <small>Mention the neighbourhood, building, what's nearby, any quirks.</small>
         </label>
       </div>
@@ -61,23 +54,24 @@
       <!-- Location -->
       <div *ngIf="activeStep().id === 'location'" class="grid-2">
         <label class="field span-2">
-          <span>Street & number</span>
-          <input class="ra-input" formControlName="street" />
+          <span>Street & number <span class="req">*</span></span>
+          <input class="ra-input" [class.ra-input--invalid]="isFieldInvalid('street')" formControlName="street" />
         </label>
-        <label class="field"><span>City</span><input class="ra-input" formControlName="city" /></label>
+        <label class="field"><span>City <span class="req">*</span></span><input class="ra-input" [class.ra-input--invalid]="isFieldInvalid('city')" formControlName="city" /></label>
         <label class="field"><span>District</span><input class="ra-input" formControlName="district" /></label>
-        <label class="field"><span>Postal code</span><input class="ra-input" formControlName="postalCode" /></label>
-        <label class="field"><span>Country</span><input class="ra-input" formControlName="country" /></label>
+        <label class="field"><span>Postal code <span class="req">*</span></span><input class="ra-input" [class.ra-input--invalid]="isFieldInvalid('postalCode')" formControlName="postalCode" /></label>
+        <label class="field"><span>Country <span class="req">*</span></span><input class="ra-input" [class.ra-input--invalid]="isFieldInvalid('country')" formControlName="country" /></label>
       </div>
 
       <!-- Details -->
       <div *ngIf="activeStep().id === 'details'" class="grid-4">
-        <label class="field"><span>Area (m²)</span><input type="number" class="ra-input" formControlName="area" /></label>
-        <label class="field"><span>Rooms</span><input type="number" class="ra-input" formControlName="roomCount" /></label>
+        <label class="field"><span>Area (m²) <span class="req">*</span></span><input type="number" class="ra-input" [class.ra-input--invalid]="isFieldInvalid('area')" formControlName="area" /></label>
+        <label class="field"><span>Rooms <span class="req">*</span></span><input type="number" class="ra-input" [class.ra-input--invalid]="isFieldInvalid('roomCount')" formControlName="roomCount" /></label>
         <label class="field"><span>Floor</span><input type="number" class="ra-input" formControlName="floor" /></label>
         <label class="field">
           <span>Energy class</span>
           <select class="ra-input" formControlName="energyClass">
+            <option value="">—</option>
             <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
           </select>
         </label>
@@ -100,10 +94,10 @@
       <!-- Price -->
       <div *ngIf="activeStep().id === 'price'" class="grid-2">
         <label class="field">
-          <span>{{ form.controls.listingType.value === 'RENT' ? 'Monthly rent' : 'Selling price' }}</span>
-          <input type="number" class="ra-input" formControlName="amount" />
+          <span>{{ form.controls.listingType.value === 'RENT' ? 'Monthly rent' : 'Selling price' }} <span class="req">*</span></span>
+          <input type="number" class="ra-input" [class.ra-input--invalid]="isFieldInvalid('amount')" formControlName="amount" />
         </label>
-        <label class="field"><span>Currency</span>
+        <label class="field"><span>Currency <span class="req">*</span></span>
           <select class="ra-input" formControlName="currency"><option>EUR</option></select>
         </label>
         <div class="insight span-2">
@@ -156,7 +150,7 @@
       <button type="button" class="ra-btn ra-btn--ghost" (click)="prev()" [disabled]="currentStep() === 0">
         <i class="pi pi-arrow-left"></i>Back
       </button>
-      <button type="button" class="ra-btn" (click)="next()" [disabled]="creating()">
+      <button type="button" class="ra-btn" (click)="next()" [disabled]="creating() || !canProceed()">
         {{ isLastStep() ? 'Publish' : 'Continue' }}<i class="pi pi-arrow-right"></i>
       </button>
     </div>

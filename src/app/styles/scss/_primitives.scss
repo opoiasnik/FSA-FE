@@ -90,12 +90,26 @@
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 
-  &:focus {
-    border-color: var(--text);
-    box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.05);
+  &::placeholder { color: var(--text-faint); }
+
+  /* Suppress native :invalid red border (browser default) */
+  &:invalid {
+    border-color: var(--border);
+    box-shadow: none;
   }
 
-  &::placeholder { color: var(--text-faint); }
+  /* Suppress Angular ng-invalid red — show red only if also touched/dirty */
+  &.ng-invalid:not(.ng-touched):not(.ng-dirty) {
+    border-color: var(--border);
+    box-shadow: none;
+  }
+
+  &:focus,
+  &:focus-visible {
+    border-color: var(--text);
+    box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.05);
+    outline: none;
+  }
 }
 
 .ra-card {
