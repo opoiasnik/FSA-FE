@@ -8,6 +8,7 @@ import { MapStub, MapPin } from '../../../../shared/component/map-stub/map-stub'
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 import { MockDataService } from '../../../../shared/services/mock-data.service';
 import { formatPrice, shortLocation } from '../../models/listing.helpers';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ListingResponse, ListingType, PropertyType } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
@@ -26,6 +27,7 @@ export class ListingSearchPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly listingService = inject(ListingService);
   private readonly mocks = inject(MockDataService);
+  private readonly errorHandler = inject(ErrorHandlerService);
 
   readonly filtersForm = this.fb.nonNullable.group({
     q: [''],
@@ -113,11 +115,6 @@ export class ListingSearchPageComponent implements OnInit {
   }
 
   private toMessage(error: unknown): string {
-    if (typeof error === 'string') return error;
-    if (error && typeof error === 'object') {
-      const maybe = error as { error?: { message?: string }; message?: string; status?: number };
-      return maybe.error?.message ?? maybe.message ?? (maybe.status ? `Request failed with status ${maybe.status}.` : 'Unexpected error.');
-    }
-    return 'Unexpected error.';
+    return this.errorHandler.toMessage(error);
   }
 }

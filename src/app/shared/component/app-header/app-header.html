@@ -25,7 +25,7 @@
         Inbox
       </a>
       <a
-        *ngIf="isAuthenticated() && isOwner()"
+        *ngIf="canViewOwnerStudio()"
         routerLink="/owner"
         routerLinkActive="active"
         [class.active]="isOwnerStudioActive()"

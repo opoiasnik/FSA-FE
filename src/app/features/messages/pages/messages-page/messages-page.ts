@@ -7,6 +7,7 @@ import { Avatar } from '../../../../shared/component/avatar/avatar';
 import { EmptyState } from '../../../../shared/component/empty-state/empty-state';
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 import { Conversation, MockDataService } from '../../../../shared/services/mock-data.service';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ListingSummary } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
 
@@ -21,6 +22,7 @@ export class MessagesPage implements OnInit {
   private readonly router = inject(Router);
   private readonly listingService = inject(ListingService);
   private readonly mocks = inject(MockDataService);
+  private readonly errorHandler = inject(ErrorHandlerService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -80,11 +82,6 @@ export class MessagesPage implements OnInit {
   }
 
   private toMessage(error: unknown): string {
-    if (typeof error === 'string') return error;
-    if (error && typeof error === 'object') {
-      const m = error as { error?: { message?: string }; message?: string; status?: number };
-      return m.error?.message ?? m.message ?? (m.status ? `Request failed with status ${m.status}.` : 'Unexpected error.');
-    }
-    return 'Unexpected error.';
+    return this.errorHandler.toMessage(error);
   }
 }

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ListingSummary, ListingType, PropertyType } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
 import { HeroSection } from '../../components/hero-section/hero-section';
@@ -30,6 +31,7 @@ import { SearchFilters } from '../../components/search-filters/search-filters';
 })
 export class HomePage implements OnInit {
   private readonly listingService = inject(ListingService);
+  private readonly errorHandler = inject(ErrorHandlerService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -101,11 +103,6 @@ export class HomePage implements OnInit {
   }
 
   private toMessage(error: unknown): string {
-    if (typeof error === 'string') return error;
-    if (error && typeof error === 'object') {
-      const e = error as { error?: { message?: string }; message?: string; status?: number };
-      return e.error?.message ?? e.message ?? (e.status ? `Request failed with status ${e.status}.` : 'Unexpected error.');
-    }
-    return 'Unexpected error.';
+    return this.errorHandler.toMessage(error);
   }
 }

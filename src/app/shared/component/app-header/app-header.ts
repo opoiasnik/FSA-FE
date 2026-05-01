@@ -4,6 +4,7 @@ import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/ro
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
+import { AccessService } from '../../../core/access/access';
 import { UserService } from '../../../core/services/user.service';
 import { Avatar } from '../avatar/avatar';
 
@@ -23,10 +24,11 @@ import { Avatar } from '../avatar/avatar';
 export class AppHeader {
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
+  private readonly access = inject(AccessService);
 
   readonly user = this.userService.getUserSignal();
   readonly isAuthenticated = computed(() => this.userService.isUserLoggedIn());
-  readonly isOwner = computed(() => this.userService.hasRole('OWNER'));
+  readonly canViewOwnerStudio = this.access.can('viewOwnerStudio');
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(

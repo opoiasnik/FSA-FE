@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MockDataService, OwnerStats, ViewingEntry } from '../../../../shared/services/mock-data.service';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ListingResponse } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
 
@@ -20,6 +21,7 @@ export class OwnerDashboardPage implements OnInit {
   private readonly router = inject(Router);
   private readonly listingService = inject(ListingService);
   private readonly mocks = inject(MockDataService);
+  private readonly errorHandler = inject(ErrorHandlerService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -84,11 +86,6 @@ export class OwnerDashboardPage implements OnInit {
   }
 
   private toMessage(error: unknown): string {
-    if (typeof error === 'string') return error;
-    if (error && typeof error === 'object') {
-      const m = error as { error?: { message?: string }; message?: string; status?: number };
-      return m.error?.message ?? m.message ?? (m.status ? `Request failed with status ${m.status}.` : 'Unexpected error.');
-    }
-    return 'Unexpected error.';
+    return this.errorHandler.toMessage(error);
   }
 }

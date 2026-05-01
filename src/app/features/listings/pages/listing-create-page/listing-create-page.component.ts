@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { CreateListingRequest, ListingResponse } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
@@ -24,6 +25,7 @@ export class ListingCreatePageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly listingService = inject(ListingService);
   private readonly router = inject(Router);
+  private readonly errorHandler = inject(ErrorHandlerService);
 
   readonly steps: WizardStep[] = [
     { id: 'basics', title: 'Basics', sub: 'Title, description, deal type' },
@@ -174,7 +176,16 @@ export class ListingCreatePageComponent {
         void this.router.navigate(['/owner']);
       },
       error: (error) => {
-        this.createError.set(this.toMessage(error));
+        const result = this.errorHandler.toResult(error);
+        this.createError.set(result.message);
+        if (result.field) {
+          const fieldName = result.field.split('.').pop()!;
+          const ctrl = this.form.get(fieldName);
+          if (ctrl) {
+            ctrl.setErrors({ server: result.message });
+            ctrl.markAsTouched();
+          }
+        }
         this.creating.set(false);
       }
     });
@@ -186,11 +197,6 @@ export class ListingCreatePageComponent {
   }
 
   private toMessage(error: unknown): string {
-    if (typeof error === 'string') return error;
-    if (error && typeof error === 'object') {
-      const maybe = error as { error?: { message?: string }; message?: string; status?: number };
-      return maybe.error?.message ?? maybe.message ?? (maybe.status ? `Request failed with status ${maybe.status}.` : 'Unexpected error.');
-    }
-    return 'Unexpected error.';
+    return this.errorHandler.toMessage(error);
   }
 }
