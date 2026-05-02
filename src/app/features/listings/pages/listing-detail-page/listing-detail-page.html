@@ -100,9 +100,11 @@
             <button type="button" class="ra-btn ra-btn--lg" (click)="openMessages()">
               <i class="pi pi-send"></i>Message {{ own.name.split(' ')[0] }}
             </button>
-            <button type="button" class="ra-btn ra-btn--ghost ra-btn--lg">
+            <button type="button" class="ra-btn ra-btn--ghost ra-btn--lg"
+                    [disabled]="!canBookViewing()" (click)="openViewingForm()">
               <i class="pi pi-calendar"></i>Book a viewing
             </button>
+            <p *ngIf="viewingSuccess()" class="viewing-form__success">Viewing request sent.</p>
             <button type="button" class="ra-btn ra-btn--text">
               <i class="pi pi-phone"></i>Show phone number
             </button>
@@ -117,3 +119,40 @@
     </div>
   </ng-container>
 </section>
+
+<app-modal
+  title="Book a viewing"
+  [visible]="viewingForm()"
+  width="420px"
+  (closed)="cancelViewingForm()">
+
+  <div class="viewing-dialog">
+    <label class="viewing-dialog__field">
+      <span>Date and time</span>
+      <app-date-picker
+        [value]="viewingDate()"
+        [minDate]="today"
+        (valueChange)="setViewingDate($event)">
+      </app-date-picker>
+    </label>
+
+    <label class="viewing-dialog__field">
+      <span>Note <small>(optional)</small></span>
+      <textarea class="ra-input" rows="3" placeholder="What time works best for you?"
+                [value]="viewingNote()"
+                (input)="setViewingNote($any($event.target).value)"></textarea>
+    </label>
+
+    <p *ngIf="viewingError()" class="viewing-dialog__error">{{ viewingError() }}</p>
+
+    <div class="viewing-dialog__actions">
+      <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="cancelViewingForm()">
+        Cancel
+      </button>
+      <button type="button" class="ra-btn ra-btn--sm"
+              [disabled]="!viewingDate() || creatingViewing()" (click)="submitViewing()">
+        <i class="pi pi-check"></i>Submit request
+      </button>
+    </div>
+  </div>
+</app-modal>

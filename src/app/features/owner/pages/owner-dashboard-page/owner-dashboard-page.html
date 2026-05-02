@@ -36,17 +36,29 @@
 
     <div class="ra-card dash__viewings">
       <div class="dash__viewings-head">
-        <h2>Upcoming viewings</h2>
-        <span>{{ viewings().length }} this week</span>
+        <h2>Viewing requests</h2>
+        <span>{{ viewingRequests().length }} total</span>
       </div>
       <ul>
-        <li *ngFor="let v of viewings()">
+        <li *ngFor="let v of viewingRequests()">
           <div>
-            <strong>{{ v.who }}</strong>
-            <p>{{ viewingListing(v)?.title || 'Listing' }} · {{ v.when }}</p>
+            <strong>{{ v.requester?.name || 'User' }}</strong>
+            <p>{{ v.listing.title }} · {{ v.requestedDate | date:'medium' }}</p>
+            <p *ngIf="v.note" class="dash__note">{{ v.note }}</p>
           </div>
-          <span class="ra-pill" [class.ra-pill--success]="v.status === 'confirmed'">{{ v.status }}</span>
+          <div class="dash__viewing-actions">
+            <span class="ra-pill"
+                  [class.ra-pill--success]="v.status === 'APPROVED'"
+                  [class.ra-pill--danger]="v.status === 'REJECTED' || v.status === 'CANCELLED'">
+              {{ v.status }}
+            </span>
+            <ng-container *ngIf="v.status === 'PENDING'">
+              <button type="button" class="ra-btn ra-btn--sm" (click)="approveViewing(v.id)">Approve</button>
+              <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="rejectViewing(v.id)">Reject</button>
+            </ng-container>
+          </div>
         </li>
+        <li *ngIf="!viewingRequests().length" class="dash__empty">No viewing requests yet.</li>
       </ul>
     </div>
   </div>

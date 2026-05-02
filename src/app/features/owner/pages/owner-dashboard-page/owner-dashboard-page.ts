@@ -1,25 +1,27 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
-import { MockDataService, OwnerStats, ViewingEntry } from '../../../../shared/services/mock-data.service';
+import { MockDataService, OwnerStats } from '../../../../shared/services/mock-data.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ListingResponse } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
+import { ViewingRequestResponse, ViewingService } from '../../../viewings/services/viewing.service';
 
 interface StatCard { label: string; value: string; delta: string; tone: 'up' | 'down' | 'flat'; }
 
 @Component({
   selector: 'app-owner-dashboard-page',
   standalone: true,
-  imports: [CommonModule, MessageModule, SkeletonModule],
+  imports: [CommonModule, DatePipe, MessageModule, SkeletonModule],
   templateUrl: './owner-dashboard-page.html',
   styleUrl: './owner-dashboard-page.scss'
 })
 export class OwnerDashboardPage implements OnInit {
   private readonly router = inject(Router);
   private readonly listingService = inject(ListingService);
+  private readonly viewingService = inject(ViewingService);
   private readonly mocks = inject(MockDataService);
   private readonly errorHandler = inject(ErrorHandlerService);
 
@@ -27,7 +29,7 @@ export class OwnerDashboardPage implements OnInit {
   readonly error = signal<string | null>(null);
   readonly listings = signal<ListingResponse[]>([]);
   readonly stats = signal<OwnerStats>(this.mocks.getOwnerStats());
-  readonly viewings = signal<ViewingEntry[]>([]);
+  readonly viewingRequests = signal<ViewingRequestResponse[]>([]);
 
   readonly statCards = computed<StatCard[]>(() => {
     const s = this.stats();
@@ -57,10 +59,31 @@ export class OwnerDashboardPage implements OnInit {
     this.listingService.getMy().subscribe({
       next: items => {
         this.listings.set(items ?? []);
-        this.viewings.set(this.mocks.getViewings(items ?? []));
         this.loading.set(false);
       },
       error: err => { this.error.set(this.toMessage(err)); this.loading.set(false); }
+    });
+    this.loadViewings();
+  }
+
+  loadViewings(): void {
+    this.viewingService.getOwner().subscribe({
+      next: items => this.viewingRequests.set(items ?? []),
+      error: () => this.viewingRequests.set([])
+    });
+  }
+
+  approveViewing(id: number): void {
+    this.viewingService.approve(id).subscribe({
+      next: updated => this.viewingRequests.update(list => list.map(v => v.id === id ? updated : v)),
+      error: err => this.error.set(this.toMessage(err))
+    });
+  }
+
+  rejectViewing(id: number): void {
+    this.viewingService.reject(id).subscribe({
+      next: updated => this.viewingRequests.update(list => list.map(v => v.id === id ? updated : v)),
+      error: err => this.error.set(this.toMessage(err))
     });
   }
 
@@ -70,10 +93,6 @@ export class OwnerDashboardPage implements OnInit {
 
   openListing(id: number): void {
     void this.router.navigate(['/listings', id]);
-  }
-
-  viewingListing(v: ViewingEntry): ListingResponse | undefined {
-    return this.listings().find(l => l.id === v.listingId);
   }
 
   formatPrice(listing: ListingResponse): string {

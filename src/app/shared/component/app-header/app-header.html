@@ -19,6 +19,13 @@
       </a>
       <a
         *ngIf="isAuthenticated()"
+        routerLink="/viewings"
+        routerLinkActive="active"
+        class="nav-item">
+        Viewings
+      </a>
+      <a
+        *ngIf="isAuthenticated()"
         routerLink="/messages"
         routerLinkActive="active"
         class="nav-item">

@@ -8,6 +8,7 @@ import { MessagesPage } from './features/messages/pages/messages-page/messages-p
 import { ProfilePage } from './features/profile/pages/profile-page/profile-page';
 import { OwnerDashboardPage } from './features/owner/pages/owner-dashboard-page/owner-dashboard-page';
 import { PageNotFoundComponent } from './features/page-not-found/page-not-found.component';
+import { ViewingsPage } from './features/viewings/pages/viewings-page/viewings-page';
 import { isLoggedInWithToastGuard, isOwnerGuard } from './core/guards/auth.guards';
 
 export const routes: Routes = [
@@ -15,7 +16,8 @@ export const routes: Routes = [
   { path: 'listings', component: ListingSearchPageComponent, canActivate: [isLoggedInWithToastGuard] },
   { path: 'listings/create', component: ListingCreatePageComponent, canActivate: [isOwnerGuard] },
   { path: 'listings/:id', component: ListingDetailPage, canActivate: [isLoggedInWithToastGuard] },
-  { path: 'favourites', component: FavouritesPage },
+  { path: 'favourites', component: FavouritesPage, canActivate: [isLoggedInWithToastGuard] },
+  { path: 'viewings', component: ViewingsPage, canActivate: [isLoggedInWithToastGuard] },
   { path: 'messages', component: MessagesPage },
   { path: 'profile', component: ProfilePage },
   { path: 'owner', component: OwnerDashboardPage, canActivate: [isOwnerGuard] },

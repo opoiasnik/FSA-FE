@@ -4,12 +4,15 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { Avatar } from '../../../../shared/component/avatar/avatar';
+import { DatePicker } from '../../../../shared/component/date-picker/date-picker';
+import { Modal } from '../../../../shared/component/modal/modal';
 import { MapView, MapPin } from '../../../../shared/component/map-view/map-view';
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 import { formatAmount, fullAddress } from '../../models/listing.helpers';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { UserService } from '../../../../core/services/user.service';
 import { FavoriteStore } from '../../../favourites/services/favorite.store';
+import { ViewingService } from '../../../viewings/services/viewing.service';
 import { ListingResponse } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
@@ -28,7 +31,7 @@ interface Amenity {
 @Component({
   selector: 'app-listing-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, MessageModule, SkeletonModule, Avatar, MapView, PhotoPlaceholder],
+  imports: [CommonModule, RouterLink, MessageModule, SkeletonModule, Avatar, DatePicker, Modal, MapView, PhotoPlaceholder],
   templateUrl: './listing-detail-page.html',
   styleUrl: './listing-detail-page.scss'
 })
@@ -39,6 +42,7 @@ export class ListingDetailPage implements OnInit {
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly favoriteStore = inject(FavoriteStore);
   private readonly userService = inject(UserService);
+  private readonly viewingService = inject(ViewingService);
 
   readonly listing = signal<ListingResponse | null>(null);
   readonly loading = signal(false);
@@ -48,6 +52,21 @@ export class ListingDetailPage implements OnInit {
     return item ? this.favoriteStore.isFavorite(item.id) : false;
   });
   readonly canFavorite = computed(() => this.userService.isUserLoggedIn());
+
+  readonly viewingForm = signal(false);
+  readonly viewingDate = signal<Date | null>(null);
+  readonly viewingNote = signal('');
+  readonly creatingViewing = signal(false);
+  readonly viewingError = signal<string | null>(null);
+  readonly viewingSuccess = signal(false);
+  readonly today = new Date();
+
+  readonly canBookViewing = computed(() => {
+    const item = this.listing();
+    if (!item || !this.userService.isUserLoggedIn()) return false;
+    const userEmail = this.userService.getUserSnapshot()?.email;
+    return !!userEmail && item.owner?.email !== userEmail;
+  });
 
   readonly owner = computed(() => {
     const item = this.listing();
@@ -148,6 +167,53 @@ export class ListingDetailPage implements OnInit {
 
   openMessages(): void {
     void this.router.navigate(['/messages']);
+  }
+
+  openViewingForm(): void {
+    this.viewingError.set(null);
+    this.viewingSuccess.set(false);
+    this.viewingForm.set(true);
+  }
+
+  cancelViewingForm(): void {
+    this.viewingForm.set(false);
+    this.viewingDate.set(null);
+    this.viewingNote.set('');
+    this.viewingError.set(null);
+  }
+
+  setViewingDate(value: Date | null): void {
+    this.viewingDate.set(value);
+  }
+
+  setViewingNote(value: string): void {
+    this.viewingNote.set(value);
+  }
+
+  submitViewing(): void {
+    const item = this.listing();
+    const date = this.viewingDate();
+    if (!item || !date) return;
+
+    this.creatingViewing.set(true);
+    this.viewingError.set(null);
+    this.viewingService.create({
+      listingId: item.id,
+      requestedDate: date.toISOString(),
+      note: this.viewingNote() || undefined
+    }).subscribe({
+      next: () => {
+        this.viewingSuccess.set(true);
+        this.creatingViewing.set(false);
+        this.viewingForm.set(false);
+        this.viewingDate.set(null);
+        this.viewingNote.set('');
+      },
+      error: (err) => {
+        this.viewingError.set(this.toMessage(err));
+        this.creatingViewing.set(false);
+      }
+    });
   }
 
   private toMessage(error: unknown): string {

@@ -1,0 +1,55 @@
+<div class="dp">
+  <button #trigger type="button" class="dp__trigger" (click)="toggle()">
+    <i class="pi pi-calendar"></i>
+    <span class="dp__value" [class.dp__value--placeholder]="!displayValue()">
+      {{ displayValue() || placeholder }}
+    </span>
+    <i *ngIf="displayValue()" class="pi pi-times dp__clear" (click)="clear($event)"></i>
+  </button>
+
+  <div *ngIf="open()" #panel class="dp__panel"
+       [style.top.px]="panelTop()"
+       [style.left.px]="panelLeft()">
+    <div class="dp__header">
+      <button type="button" class="dp__nav" (click)="prevMonth()" aria-label="Previous month">
+        <i class="pi pi-chevron-left"></i>
+      </button>
+      <span class="dp__title">{{ months[viewMonth()] }} {{ viewYear() }}</span>
+      <button type="button" class="dp__nav" (click)="nextMonth()" aria-label="Next month">
+        <i class="pi pi-chevron-right"></i>
+      </button>
+    </div>
+
+    <div class="dp__weekdays">
+      <span *ngFor="let w of weekdays">{{ w }}</span>
+    </div>
+
+    <div class="dp__grid">
+      <button *ngFor="let cell of grid()"
+              type="button"
+              class="dp__day"
+              [class.dp__day--muted]="!cell.current"
+              [class.dp__day--selected]="cell.selected"
+              [class.dp__day--today]="cell.today"
+              [disabled]="cell.disabled"
+              (click)="selectDay(cell)">
+        {{ cell.day }}
+      </button>
+    </div>
+
+    <div *ngIf="showTime" class="dp__time">
+      <label>
+        <span>Hours</span>
+        <input type="number" min="0" max="23"
+               [value]="hour()"
+               (input)="setHour($any($event.target).value)" />
+      </label>
+      <label>
+        <span>Minutes</span>
+        <input type="number" min="0" max="59"
+               [value]="minute()"
+               (input)="setMinute($any($event.target).value)" />
+      </label>
+    </div>
+  </div>
+</div>

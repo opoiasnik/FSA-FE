@@ -1,5 +1,48 @@
 :host { display: block; }
 
+.viewing-form__success {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #16a34a;
+}
+
+.viewing-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+
+.viewing-dialog__field {
+  display: block;
+
+  span {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+
+    small {
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+  }
+}
+
+.viewing-dialog__error {
+  margin: 0;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+.viewing-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
 .detail {
   max-width: 1280px;
   margin: 0 auto;

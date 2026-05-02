@@ -1,0 +1,13 @@
+<div *ngIf="visible" #backdrop class="modal-backdrop" (click)="onBackdropClick($event, backdrop)">
+  <div class="modal" [style.width]="width">
+    <header class="modal__header">
+      <h2>{{ title }}</h2>
+      <button type="button" class="modal__close" (click)="close()" aria-label="Close">
+        <i class="pi pi-times"></i>
+      </button>
+    </header>
+    <div class="modal__body">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>
