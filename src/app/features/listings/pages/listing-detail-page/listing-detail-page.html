@@ -73,7 +73,7 @@
         <section class="block">
           <h2>Where you'll be</h2>
           <div class="map-wrap">
-            <app-map-stub *ngIf="mapPin().length" [pins]="mapPin()" [selectedId]="item.id" [showPrices]="false"></app-map-stub>
+            <app-map-view *ngIf="mapPin().length" [pins]="mapPin()" [selectedId]="item.id" [showPrices]="false"></app-map-view>
             <div *ngIf="!mapPin().length" class="map-empty">Coordinates not provided for this listing.</div>
           </div>
           <p class="address-hint">{{ fullAddress() }}</p>

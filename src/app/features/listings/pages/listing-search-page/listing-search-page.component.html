@@ -96,7 +96,7 @@
     </div>
 
     <aside class="split__map">
-      <app-map-stub [pins]="mapPins()" [selectedId]="selectedId()" (pinSelect)="selectedId.set($event); openDetail($event)"></app-map-stub>
+      <app-map-view [pins]="mapPins()" [selectedId]="selectedId()" (pinSelect)="selectedId.set($event); openDetail($event)"></app-map-view>
     </aside>
   </div>
 </section>

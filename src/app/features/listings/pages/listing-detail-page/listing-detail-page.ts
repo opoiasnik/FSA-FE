@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { Avatar } from '../../../../shared/component/avatar/avatar';
-import { MapStub, MapPin } from '../../../../shared/component/map-stub/map-stub';
+import { MapView, MapPin } from '../../../../shared/component/map-view/map-view';
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 import { MockDataService, OwnerProfile } from '../../../../shared/services/mock-data.service';
 import { formatAmount, fullAddress } from '../../models/listing.helpers';
@@ -27,7 +27,7 @@ interface Amenity {
 @Component({
   selector: 'app-listing-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, MessageModule, SkeletonModule, Avatar, MapStub, PhotoPlaceholder],
+  imports: [CommonModule, RouterLink, MessageModule, SkeletonModule, Avatar, MapView, PhotoPlaceholder],
   templateUrl: './listing-detail-page.html',
   styleUrl: './listing-detail-page.scss'
 })

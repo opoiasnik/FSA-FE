@@ -4,7 +4,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
-import { MapStub, MapPin } from '../../../../shared/component/map-stub/map-stub';
+import { MapView, MapPin } from '../../../../shared/component/map-view/map-view';
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 import { MockDataService } from '../../../../shared/services/mock-data.service';
 import { formatPrice, shortLocation } from '../../models/listing.helpers';
@@ -18,7 +18,7 @@ type DealFilter = 'ALL' | ListingType;
 @Component({
   selector: 'app-listing-search-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, MessageModule, SkeletonModule, MapStub, PhotoPlaceholder],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, MessageModule, SkeletonModule, MapView, PhotoPlaceholder],
   templateUrl: './listing-search-page.component.html',
   styleUrl: './listing-search-page.component.scss'
 })
@@ -62,7 +62,17 @@ export class ListingSearchPageComponent implements OnInit {
   readonly mapPins = computed<MapPin[]>(() =>
     this.results()
       .filter(l => l.address.lat != null && l.address.lng != null)
-      .map(l => ({ id: l.id, lat: l.address.lat!, lng: l.address.lng!, price: l.price.amount }))
+      .map(l => ({
+        id: l.id,
+        lat: l.address.lat!,
+        lng: l.address.lng!,
+        price: l.price.amount,
+        currency: l.price.currency,
+        title: l.title,
+        city: l.address.city,
+        listingType: l.listingType,
+        imageUrl: `https://picsum.photos/seed/rental-${l.id}/320/180`
+      }))
   );
 
   readonly filterChips = ['Price', 'Rooms', 'Area', 'Furnished', 'Parking', 'Balcony', 'Pets', 'Energy class'];

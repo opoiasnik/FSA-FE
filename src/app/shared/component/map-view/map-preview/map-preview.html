@@ -1,0 +1,15 @@
+<div class="map-preview">
+  <img *ngIf="pin.imageUrl"
+       class="map-preview__img"
+       [src]="pin.imageUrl"
+       [alt]="pin.title || ''"
+       loading="lazy" />
+
+  <div class="map-preview__body">
+    <div *ngIf="pin.title" class="map-preview__title">{{ pin.title }}</div>
+    <div *ngIf="pin.city" class="map-preview__city">{{ pin.city }}</div>
+    <div *ngIf="pin.price != null" class="map-preview__price">
+      {{ priceLabel }}<span *ngIf="isRent"> / mo</span>
+    </div>
+  </div>
+</div>
