@@ -3,12 +3,15 @@
     <img [src]="imageUrl" [alt]="listing.title" loading="lazy" />
     <span *ngIf="badge" class="favorite-chip">{{ badge }}</span>
     <button
+      *ngIf="canFavorite()"
       pButton
       type="button"
-      icon="pi pi-heart"
+      [icon]="isFavorite() ? 'pi pi-heart-fill' : 'pi pi-heart'"
       [rounded]="true"
       [text]="true"
-      class="favorite-btn">
+      class="favorite-btn"
+      [class.favorite-btn--active]="isFavorite()"
+      (click)="toggleFavorite($event)">
     </button>
   </div>
   <h3>{{ listing.title }}</h3>

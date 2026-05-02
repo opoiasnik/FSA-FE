@@ -18,22 +18,6 @@
     </div>
   </header>
 
-  <section *ngIf="savedSearches().length" class="favs__searches">
-    <div class="favs__searches-head">
-      <h2>Saved searches</h2>
-      <p>We'll ping you when new matches appear.</p>
-    </div>
-    <div class="favs__searches-list">
-      <button *ngFor="let s of savedSearches()" type="button" class="saved-search">
-        <i class="pi pi-bell"></i>
-        <div>
-          <div class="saved-search__label">{{ s.label }}</div>
-          <div class="saved-search__count">{{ s.count }} active matches</div>
-        </div>
-      </button>
-    </div>
-  </section>
-
   <p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
 
   <div *ngIf="loading()" class="grid">

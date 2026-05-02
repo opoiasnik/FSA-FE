@@ -3,6 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { FavoriteStore } from '../../../favourites/services/favorite.store';
 import { ListingSummary, ListingType, PropertyType } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
 import { HeroSection } from '../../components/hero-section/hero-section';
@@ -32,6 +33,7 @@ import { SearchFilters } from '../../components/search-filters/search-filters';
 export class HomePage implements OnInit {
   private readonly listingService = inject(ListingService);
   private readonly errorHandler = inject(ErrorHandlerService);
+  private readonly favoriteStore = inject(FavoriteStore);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -46,6 +48,7 @@ export class HomePage implements OnInit {
   readonly extraListings = computed(() => this.listings().slice(12, 24));
 
   ngOnInit(): void {
+    this.favoriteStore.loadIfNeeded();
     this.loadFeatured();
   }
 

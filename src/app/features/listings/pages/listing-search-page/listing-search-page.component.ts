@@ -9,6 +9,7 @@ import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder
 import { MockDataService } from '../../../../shared/services/mock-data.service';
 import { formatPrice, shortLocation } from '../../models/listing.helpers';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { FavoriteStore } from '../../../favourites/services/favorite.store';
 import { ListingResponse, ListingType, PropertyType } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
@@ -28,6 +29,7 @@ export class ListingSearchPageComponent implements OnInit {
   private readonly listingService = inject(ListingService);
   private readonly mocks = inject(MockDataService);
   private readonly errorHandler = inject(ErrorHandlerService);
+  private readonly favoriteStore = inject(FavoriteStore);
 
   readonly filtersForm = this.fb.nonNullable.group({
     q: [''],
@@ -78,6 +80,7 @@ export class ListingSearchPageComponent implements OnInit {
   readonly filterChips = ['Price', 'Rooms', 'Area', 'Furnished', 'Parking', 'Balcony', 'Pets', 'Energy class'];
 
   ngOnInit(): void {
+    this.favoriteStore.loadIfNeeded();
     this.load();
   }
 
@@ -104,11 +107,11 @@ export class ListingSearchPageComponent implements OnInit {
 
   toggleSave(event: Event, id: number): void {
     event.stopPropagation();
-    this.mocks.toggleFavourite(id);
+    this.favoriteStore.toggle(id);
   }
 
   isSaved(id: number): boolean {
-    return this.mocks.isFavourite(id);
+    return this.favoriteStore.isFavorite(id);
   }
 
   formatPrice = formatPrice;

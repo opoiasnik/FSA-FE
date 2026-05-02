@@ -6,9 +6,10 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { Avatar } from '../../../../shared/component/avatar/avatar';
 import { MapView, MapPin } from '../../../../shared/component/map-view/map-view';
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
-import { MockDataService, OwnerProfile } from '../../../../shared/services/mock-data.service';
 import { formatAmount, fullAddress } from '../../models/listing.helpers';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { UserService } from '../../../../core/services/user.service';
+import { FavoriteStore } from '../../../favourites/services/favorite.store';
 import { ListingResponse } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
@@ -35,13 +36,18 @@ export class ListingDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly listingService = inject(ListingService);
-  private readonly mocks = inject(MockDataService);
   private readonly errorHandler = inject(ErrorHandlerService);
+  private readonly favoriteStore = inject(FavoriteStore);
+  private readonly userService = inject(UserService);
 
   readonly listing = signal<ListingResponse | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
-  readonly saved = signal(false);
+  readonly saved = computed(() => {
+    const item = this.listing();
+    return item ? this.favoriteStore.isFavorite(item.id) : false;
+  });
+  readonly canFavorite = computed(() => this.userService.isUserLoggedIn());
 
   readonly owner = computed(() => {
     const item = this.listing();
@@ -109,7 +115,7 @@ export class ListingDetailPage implements OnInit {
       return;
     }
 
-    this.saved.set(this.mocks.isFavourite(id));
+    this.favoriteStore.loadIfNeeded();
     this.loadListing(id);
   }
 
@@ -132,7 +138,7 @@ export class ListingDetailPage implements OnInit {
   toggleSave(): void {
     const item = this.listing();
     if (!item) return;
-    this.saved.set(this.mocks.toggleFavourite(item.id));
+    this.favoriteStore.toggle(item.id);
   }
 
   hasAmenity(key: Amenity['key']): boolean {

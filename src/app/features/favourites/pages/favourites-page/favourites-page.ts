@@ -5,10 +5,10 @@ import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { EmptyState } from '../../../../shared/component/empty-state/empty-state';
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
-import { MockDataService, SavedSearch } from '../../../../shared/services/mock-data.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ListingSummary } from '../../../listings/models/listing.model';
-import { ListingService } from '../../../listings/services/listing.service';
+import { FavoriteService } from '../../services/favorite.service';
+import { FavoriteStore } from '../../services/favorite.store';
 
 type Tab = 'ALL' | 'RENT' | 'SALE';
 
@@ -21,20 +21,15 @@ type Tab = 'ALL' | 'RENT' | 'SALE';
 })
 export class FavouritesPage implements OnInit {
   private readonly router = inject(Router);
-  private readonly listingService = inject(ListingService);
-  private readonly mocks = inject(MockDataService);
+  private readonly favoriteService = inject(FavoriteService);
+  private readonly favoriteStore = inject(FavoriteStore);
   private readonly errorHandler = inject(ErrorHandlerService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
-  readonly listings = signal<ListingSummary[]>([]);
   readonly tab = signal<Tab>('ALL');
-  readonly savedSearches = signal<SavedSearch[]>(this.mocks.getSavedSearches());
 
-  readonly saved = computed(() => {
-    const ids = this.mocks.getFavouriteIds();
-    return this.listings().filter(l => ids.has(l.id));
-  });
+  readonly saved = computed<ListingSummary[]>(() => this.favoriteStore.items().map(f => f.listing));
 
   readonly filtered = computed(() => {
     const t = this.tab();
@@ -53,8 +48,8 @@ export class FavouritesPage implements OnInit {
 
   ngOnInit(): void {
     this.loading.set(true);
-    this.listingService.getFeatured().subscribe({
-      next: items => { this.listings.set(items ?? []); this.loading.set(false); },
+    this.favoriteService.getMy().subscribe({
+      next: () => { this.favoriteStore.reload(); this.loading.set(false); },
       error: err => { this.error.set(this.toMessage(err)); this.loading.set(false); }
     });
   }
@@ -65,8 +60,7 @@ export class FavouritesPage implements OnInit {
 
   remove(event: Event, id: number): void {
     event.stopPropagation();
-    this.mocks.toggleFavourite(id);
-    this.listings.set([...this.listings()]);
+    this.favoriteStore.toggle(id);
   }
 
   browse(): void {
