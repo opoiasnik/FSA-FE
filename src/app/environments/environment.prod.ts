@@ -3,8 +3,8 @@ export const environment = {
   apiBaseUrl: '/api/listings',
   auth: {
     issuer: 'https://keycloak.fullstackacademy.sk/auth/realms/FSA',
-    redirectUri: 'https://poiasniko.fullstackacademy.sk/',
-    postLogoutRedirectUri: 'https://poiasniko.fullstackacademy.sk/',
+    redirectUri: 'https://poiasniko.20.107.204.3.nip.io/',
+    postLogoutRedirectUri: 'https://poiasniko.20.107.204.3.nip.io/',
     clientId: 'fsa-client',
     responseType: 'code',
     scope: 'openid profile email',
