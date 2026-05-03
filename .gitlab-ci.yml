@@ -1,5 +1,6 @@
 stages:
   - build
+  - deploy
 
 variables:
   IMAGE_NAME: "rental-frontend"
@@ -23,5 +24,19 @@ build:
     - docker build -t "$ACR_REGISTRY/$IMAGE_NAME:$IMAGE_VERSION" -t "$ACR_REGISTRY/$IMAGE_NAME:latest" .
     - docker push "$ACR_REGISTRY/$IMAGE_NAME:$IMAGE_VERSION"
     - docker push "$ACR_REGISTRY/$IMAGE_NAME:latest"
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  tags:
+    - fsa-poiasnik
+  image: alpine/k8s:1.32.3
+  before_script:
+    - mkdir -p ~/.kube
+    - echo "$KUBECONFIG_BASE64" | base64 -d > ~/.kube/config
+  script:
+    - kubectl set image deployment/fsa-fe fsa-fe="$ACR_REGISTRY/$IMAGE_NAME:latest" -n app
+    - kubectl rollout status deployment/fsa-fe -n app --timeout=240s
   only:
     - main
