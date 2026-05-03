@@ -2,7 +2,7 @@ export const environment = {
   production: true,
   apiBaseUrl: '/api/listings',
   auth: {
-    issuer: 'https://keycloak.fullstackacademy.sk/auth/realms/FSA',
+    issuer: 'https://poiasniko.20.107.204.3.nip.io/auth/realms/FSA',
     redirectUri: 'https://poiasniko.20.107.204.3.nip.io/',
     postLogoutRedirectUri: 'https://poiasniko.20.107.204.3.nip.io/',
     clientId: 'fsa-client',
