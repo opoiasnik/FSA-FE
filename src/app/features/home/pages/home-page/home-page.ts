@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
@@ -33,7 +33,6 @@ import { PropertyTypes } from '../../components/property-types/property-types';
   styleUrl: './home-page.scss',
 })
 export class HomePage implements OnInit {
-  private readonly router         = inject(Router);
   private readonly listingService = inject(ListingService);
   private readonly errorHandler   = inject(ErrorHandlerService);
   private readonly favoriteStore  = inject(FavoriteStore);
@@ -51,15 +50,14 @@ export class HomePage implements OnInit {
   }
 
   onSearch(values: SearchPillValues): void {
-    const city = values.q.trim();
-    void this.router.navigate(['/listings'], city ? { queryParams: { city } } : {});
+    this.loadFeatured(values.q.trim() || undefined);
   }
 
-  private loadFeatured(): void {
+  private loadFeatured(city?: string): void {
     this.loading.set(true);
     this.error.set(null);
 
-    this.listingService.getFeatured().subscribe({
+    this.listingService.getFeatured({ city }).subscribe({
       next: items => {
         this.listings.set(items);
         this.loading.set(false);
