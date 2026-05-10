@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiBaseUrl: '/api/listings',
+  apiUrl: '/api',
   auth: {
     issuer: 'https://poiasniko.20.107.204.3.nip.io/auth/realms/rental',
     redirectUri: 'https://poiasniko.20.107.204.3.nip.io/',

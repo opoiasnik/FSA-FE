@@ -1,0 +1,23 @@
+<article class="card" (click)="cardClick.emit()">
+  <div class="card__media">
+    <app-photo-placeholder [seed]="listing.id" [rounded]="0"></app-photo-placeholder>
+    <button type="button" class="card__save" (click)="onSaveClick($event)">
+      <i class="pi"
+         [ngClass]="saved ? 'pi-heart-fill' : 'pi-heart'"
+         [style.color]="saved ? 'var(--accent)' : '#fff'"></i>
+    </button>
+    <div class="card__meta-chip">
+      {{ listing.features.propertyType.toLowerCase() }}
+      <ng-container *ngIf="listing.features.area">· {{ listing.features.area }} m²</ng-container>
+      <ng-container *ngIf="listing.features.roomCount">· {{ listing.features.roomCount }} rm</ng-container>
+    </div>
+  </div>
+  <div class="card__body">
+    <div class="card__title-row">
+      <h3>{{ listing.title }}</h3>
+      <span class="card__deal">{{ listing.listingType === 'RENT' ? 'rent' : 'sale' }}</span>
+    </div>
+    <p class="card__loc">{{ shortLocation(listing) }}</p>
+    <p class="card__price">{{ formatPrice(listing) }}</p>
+  </div>
+</article>

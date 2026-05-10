@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiBaseUrl: '/api/listings',
+  apiUrl: '/api',
   auth: {
     issuer: 'http://localhost:8081/realms/rental',
     redirectUri: 'http://localhost:4200/',

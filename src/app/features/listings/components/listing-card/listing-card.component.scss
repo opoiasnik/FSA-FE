@@ -1,0 +1,60 @@
+:host { display: block; cursor: pointer; }
+
+.card__media {
+  position: relative;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 10px;
+  background: var(--surface-soft);
+
+  app-photo-placeholder { width: 100%; height: 100%; }
+}
+
+.card__save {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.card__meta-chip {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text);
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.card__body { padding: 0 2px; }
+
+.card__title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.card__deal  { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+.card__loc   { margin: 2px 0 0; color: var(--text-muted); font-size: 13px; }
+.card__price { margin: 4px 0 0; font-size: 14px; font-weight: 700; }

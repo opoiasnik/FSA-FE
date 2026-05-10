@@ -4,15 +4,9 @@
   image="hero.jpg"
   title="Find a place to live"
   subtitle="Browse apartments, houses and land for long-term rent or sale across Slovakia.">
-  <app-search-filters
-    [searchText]="searchText()"
-    [propertyType]="selectedPropertyType()"
-    [listingType]="selectedListingType()"
-    (searchTextChange)="setSearchText($event)"
-    (propertyTypeChange)="setPropertyType($event)"
-    (listingTypeChange)="setListingType($event)"
-    (search)="onSearch()">
-  </app-search-filters>
+  <div class="hero-search">
+    <app-search-pill label="Where to go?" placeholder="Enter a city" (search)="onSearch($event)"></app-search-pill>
+  </div>
 </app-hero-section>
 
 <p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
@@ -28,13 +22,6 @@
   *ngIf="!loading()"
   [title]="firstCity() + ': featured properties'"
   [items]="featuredListings()">
-</app-listings-carousel>
-
-<app-listings-carousel
-  *ngIf="!loading()"
-  title="Recommended listings"
-  [items]="extraListings()"
-  [imageSeedOffset]="250">
 </app-listings-carousel>
 
 <app-property-types></app-property-types>

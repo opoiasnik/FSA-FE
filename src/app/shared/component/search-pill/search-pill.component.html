@@ -1,0 +1,38 @@
+<form [formGroup]="form" class="search-pill" (ngSubmit)="emit()">
+
+  <div class="search-pill__where">
+    <div class="search-pill__label">{{ label }}</div>
+    <input class="search-pill__input" formControlName="q" [placeholder]="placeholder" />
+  </div>
+
+  <ng-container *ngIf="showFilters">
+    <div class="search-pill__divider"></div>
+
+    <div class="search-pill__seg">
+      <div class="search-pill__label">Property</div>
+      <div class="seg">
+        <button *ngFor="let opt of propertyOptions"
+                type="button" class="seg__btn"
+                [class.seg__btn--on]="form.controls.propertyType.value === opt[0]"
+                (click)="form.controls.propertyType.setValue(opt[0])">{{ opt[1] }}</button>
+      </div>
+    </div>
+
+    <div class="search-pill__divider"></div>
+
+    <div class="search-pill__seg">
+      <div class="search-pill__label">Deal</div>
+      <div class="seg">
+        <button *ngFor="let opt of dealOptions"
+                type="button" class="seg__btn"
+                [class.seg__btn--on]="form.controls.listingType.value === opt[0]"
+                (click)="form.controls.listingType.setValue(opt[0])">{{ opt[1] }}</button>
+      </div>
+    </div>
+  </ng-container>
+
+  <button type="submit" class="search-pill__submit">
+    <i class="pi pi-search"></i>
+  </button>
+
+</form>

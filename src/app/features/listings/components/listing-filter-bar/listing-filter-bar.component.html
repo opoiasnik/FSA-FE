@@ -1,0 +1,54 @@
+<div class="filter-row">
+  <div class="filter-chips" *ngIf="showChips()">
+    <app-filter-chip label="Price" type="range" unit="€"
+      [sliderMin]="0" [sliderMax]="10000" [step]="50"
+      [value]="priceValue()"
+      (apply)="onPriceApply($event)" (clear)="onPriceClear()">
+    </app-filter-chip>
+
+    <app-filter-chip label="Rooms" type="rooms" [options]="roomOptions"
+      [value]="roomCount()"
+      (apply)="onRoomsApply($event)" (clear)="onRoomsClear()">
+    </app-filter-chip>
+
+    <app-filter-chip label="Area" type="range" unit="m²"
+      [sliderMin]="0" [sliderMax]="500" [step]="5"
+      [value]="areaValue()"
+      (apply)="onAreaApply($event)" (clear)="onAreaClear()">
+    </app-filter-chip>
+
+    <app-filter-chip label="Furnished" type="toggle"
+      [value]="furnished()"
+      (apply)="onFurnishedApply($event)" (clear)="onFurnishedClear()">
+    </app-filter-chip>
+
+    <app-filter-chip label="Parking" type="toggle"
+      [value]="parkingAvailable()"
+      (apply)="onParkingApply($event)" (clear)="onParkingClear()">
+    </app-filter-chip>
+
+    <app-filter-chip label="Balcony" type="toggle"
+      [value]="balcony()"
+      (apply)="onBalconyApply($event)" (clear)="onBalconyClear()">
+    </app-filter-chip>
+
+    <app-filter-chip label="Pets" type="toggle"
+      [value]="petsAllowed()"
+      (apply)="onPetsApply($event)" (clear)="onPetsClear()">
+    </app-filter-chip>
+
+    <app-filter-chip label="Energy" type="enum" [options]="energyOptions"
+      [value]="energyClass()"
+      (apply)="onEnergyApply($event)" (clear)="onEnergyClear()">
+    </app-filter-chip>
+  </div>
+
+  <div class="filter-row__actions">
+    <button type="button" class="action-btn action-btn--filters" (click)="toggleChips()">
+      <i class="pi pi-sliders-h"></i>All filters
+    </button>
+    <button *ngIf="pendingChange()" type="button" class="action-btn action-btn--apply" (click)="applyFilters()">
+      <i class="pi pi-check"></i>Apply filters
+    </button>
+  </div>
+</div>

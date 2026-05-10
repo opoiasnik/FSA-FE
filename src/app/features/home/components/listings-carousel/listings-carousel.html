@@ -1,13 +1,20 @@
-<section *ngIf="items.length">
+<section *ngIf="_items.length">
   <div class="section-head">
     <h2>{{ title }}</h2>
   </div>
 
-  <div class="cards-grid">
+  <div class="cards-row">
     <app-listing-card
-      *ngFor="let item of items"
+      *ngFor="let item of _items"
       [listing]="item"
       [imageSeedOffset]="imageSeedOffset">
     </app-listing-card>
+
+    <a class="explore-cta" routerLink="/login">
+      <div class="explore-cta__circle">
+        <i class="pi pi-arrow-right"></i>
+      </div>
+      <span class="explore-cta__label">Login to explore more</span>
+    </a>
   </div>
 </section>

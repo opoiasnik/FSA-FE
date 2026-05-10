@@ -83,12 +83,24 @@ export interface ListingSearchResponse {
   pagination: PaginationResponse;
 }
 
+export type SortBy = 'price_asc' | 'price_desc' | 'newest' | 'area_asc' | 'area_desc';
+export type EnergyClass = 'A' | 'B' | 'C' | 'D';
+
 export interface ListingSearchParams {
   city?: string;
   listingType?: ListingType;
   propertyType?: PropertyType;
   priceMin?: number;
   priceMax?: number;
+  roomCount?: number;
+  areaMin?: number;
+  areaMax?: number;
+  furnished?: boolean;
+  parkingAvailable?: boolean;
+  balcony?: boolean;
+  petsAllowed?: boolean;
+  energyClass?: EnergyClass;
+  sortBy?: SortBy;
   page?: number;
   size?: number;
 }

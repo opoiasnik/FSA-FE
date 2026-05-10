@@ -1,0 +1,67 @@
+<button #trigger type="button" class="chip" [class.chip--active]="active()" (click)="toggle()">
+  {{ label }}<ng-container *ngIf="summary()">: {{ summary() }}</ng-container>
+  <i class="pi" [ngClass]="open() ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+</button>
+
+<div #panel *ngIf="open()" class="chip-panel"
+     [style.top.px]="panelTop()"
+     [style.left.px]="panelLeft()">
+
+  <div class="chip-panel__title">{{ label }}</div>
+
+  <ng-container *ngIf="type === 'range'">
+    <div class="range-slider">
+      <div class="range-slider__track">
+        <div class="range-slider__fill"
+             [style.left.%]="fillLeft()"
+             [style.width.%]="fillWidth()">
+        </div>
+      </div>
+      <input type="range" class="range-thumb range-thumb--lo"
+             [min]="sliderMin" [max]="sliderMax" [step]="step"
+             [ngModel]="sliderLo()"
+             (ngModelChange)="onSliderLo($event)"
+             (change)="emitRange()" />
+      <input type="range" class="range-thumb range-thumb--hi"
+             [min]="sliderMin" [max]="sliderMax" [step]="step"
+             [ngModel]="sliderHi()"
+             (ngModelChange)="onSliderHi($event)"
+             (change)="emitRange()" />
+    </div>
+    <div class="range-values">
+      <span>{{ sliderLo().toLocaleString() }}{{ unit ? ' ' + unit : '' }}</span>
+      <span class="range-values__sep">–</span>
+      <span>{{ sliderHi().toLocaleString() }}{{ unit ? ' ' + unit : '' }}</span>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="type === 'rooms'">
+    <div class="seg">
+      <button *ngFor="let opt of options" type="button" class="seg__btn"
+              [class.seg__btn--on]="picked() === opt"
+              (click)="selectOption(opt)">{{ opt }}+</button>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="type === 'toggle'">
+    <div class="seg">
+      <button type="button" class="seg__btn"
+              [class.seg__btn--on]="picked() === true"
+              (click)="selectOption(true)">Yes</button>
+      <button type="button" class="seg__btn"
+              [class.seg__btn--on]="picked() === false"
+              (click)="selectOption(false)">No</button>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="type === 'enum'">
+    <div class="seg">
+      <button *ngFor="let opt of options" type="button" class="seg__btn"
+              [class.seg__btn--on]="picked() === opt"
+              (click)="selectOption(opt)">{{ opt }}</button>
+    </div>
+  </ng-container>
+
+  <button *ngIf="active()" type="button" class="chip-panel__clear" (click)="onClear()">Clear</button>
+
+</div>
