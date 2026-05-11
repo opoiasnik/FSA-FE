@@ -58,15 +58,14 @@
         </button>
       </ng-container>
       <ng-template #guestActions>
-        <button
+        <a
           pButton
-          type="button"
+          routerLink="/login"
           icon="pi pi-sign-in"
           label="Login"
           [text]="true"
-          class="auth-btn"
-          (click)="login()">
-        </button>
+          class="auth-btn">
+        </a>
       </ng-template>
     </div>
   </div>

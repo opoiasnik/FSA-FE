@@ -1,0 +1,32 @@
+<app-auth-layout
+  eyebrow="Join Rental"
+  title="Create your account"
+  prompt="Already have an account?"
+  linkText="Sign in"
+  linkTo="/login">
+
+  <ng-container *ngIf="success(); else formTpl">
+    <section class="auth-success" aria-live="polite">
+      <i class="pi pi-check-circle"></i>
+      <h2>Account created!</h2>
+      <p>Redirecting you to sign in...</p>
+    </section>
+  </ng-container>
+
+  <ng-template #formTpl>
+    <app-auth-form
+      mode="register"
+      [form]="form"
+      [loading]="loading()"
+      [error]="error()"
+      (submitted)="onSubmit()">
+    </app-auth-form>
+  </ng-template>
+
+  <figure auth-art>
+    <blockquote>
+      "Found my perfect flat in Bratislava in under a week. The platform is incredibly easy to use."
+    </blockquote>
+    <figcaption>Martin V., tenant</figcaption>
+  </figure>
+</app-auth-layout>

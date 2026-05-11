@@ -4,6 +4,7 @@ import { MessageService } from 'primeng/api';
 import { UserService } from '../services/user.service';
 
 export const isLoggedInGuard: CanActivateFn = async (_, state) => {
+  const router = inject(Router);
   const userService = inject(UserService);
 
   const user = await userService.tryLogin();
@@ -11,8 +12,7 @@ export const isLoggedInGuard: CanActivateFn = async (_, state) => {
     return true;
   }
 
-  userService.login(state.url);
-  return false;
+  return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 };
 
 export const isLoggedInWithToastGuard: CanActivateFn = async () => {
@@ -32,7 +32,7 @@ export const isLoggedInWithToastGuard: CanActivateFn = async () => {
     life: 4000
   });
 
-  return router.createUrlTree(['/home']);
+  return router.createUrlTree(['/login']);
 };
 
 export const isOwnerGuard: CanActivateFn = async (_, state) => {
@@ -41,8 +41,7 @@ export const isOwnerGuard: CanActivateFn = async (_, state) => {
 
   const user = await userService.tryLogin();
   if (!user) {
-    userService.login(state.url);
-    return false;
+    return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
   }
 
   if (userService.hasRole('OWNER')) {

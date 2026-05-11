@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, computed, signal } from '@angular/core';
+import { Component, Input, computed, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ListingSummary } from '../../../listings/models/listing.model';
+import { UserService } from '../../../../core/services/user.service';
 import { ListingCard } from '../listing-card/listing-card';
 
 @Component({
@@ -12,6 +13,8 @@ import { ListingCard } from '../listing-card/listing-card';
   styleUrl: './listings-carousel.scss',
 })
 export class ListingsCarousel {
+  private readonly userService = inject(UserService);
+
   @Input({ required: true }) title!: string;
   @Input() imageSeedOffset = 0;
 
@@ -20,4 +23,7 @@ export class ListingsCarousel {
   }
 
   _items: ListingSummary[] = [];
+
+  readonly viewMoreLink = computed(() => this.userService.isUserLoggedIn() ? '/listings' : '/login');
+  readonly viewMoreQueryParams = computed(() => this.userService.isUserLoggedIn() ? null : { returnUrl: '/listings' });
 }

@@ -10,7 +10,7 @@
       [imageSeedOffset]="imageSeedOffset">
     </app-listing-card>
 
-    <a class="explore-cta" routerLink="/listings">
+    <a class="explore-cta" [routerLink]="viewMoreLink()" [queryParams]="viewMoreQueryParams()">
       <div class="explore-cta__circle">
         <i class="pi pi-arrow-right"></i>
       </div>

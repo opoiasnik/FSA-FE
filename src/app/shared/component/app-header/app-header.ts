@@ -41,10 +41,6 @@ export class AppHeader {
 
   readonly isOwnerStudioActive = computed(() => this.currentUrl().startsWith('/listings/create'));
 
-  login(): void {
-    this.userService.login(window.location.pathname + window.location.search);
-  }
-
   logout(): void {
     this.userService.logout();
   }

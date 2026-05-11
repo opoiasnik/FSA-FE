@@ -1,0 +1,25 @@
+<div class="role-row" role="radiogroup" aria-label="Account type">
+  <button
+    type="button"
+    class="role-chip"
+    role="radio"
+    [attr.aria-checked]="value === 'USER'"
+    [class.role-chip--on]="value === 'USER'"
+    (click)="select('USER')">
+    <i class="pi pi-user"></i>
+    <span>Tenant</span>
+    <small>Browse and save listings, request viewings</small>
+  </button>
+
+  <button
+    type="button"
+    class="role-chip"
+    role="radio"
+    [attr.aria-checked]="value === 'OWNER'"
+    [class.role-chip--on]="value === 'OWNER'"
+    (click)="select('OWNER')">
+    <i class="pi pi-home"></i>
+    <span>Owner</span>
+    <small>Publish listings and manage viewings</small>
+  </button>
+</div>

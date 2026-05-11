@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { RegisterPage } from './features/auth/pages/register-page/register-page';
+import { LoginPage } from './features/auth/pages/login-page/login-page';
 import { HomePage } from './features/home/pages/home-page/home-page';
 import { ListingSearchPageComponent } from './features/listings/pages/listing-search-page/listing-search-page.component';
 import { ListingDetailPage } from './features/listings/pages/listing-detail-page/listing-detail-page';
@@ -21,6 +23,8 @@ export const routes: Routes = [
   { path: 'messages', component: MessagesPage },
   { path: 'profile', component: ProfilePage },
   { path: 'owner', component: OwnerDashboardPage, canActivate: [isOwnerGuard] },
+  { path: 'login', component: LoginPage },
+  { path: 'register', component: RegisterPage },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', component: PageNotFoundComponent }
 ];

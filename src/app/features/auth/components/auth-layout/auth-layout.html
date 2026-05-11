@@ -1,0 +1,15 @@
+<section class="auth-shell">
+  <article class="auth-card" aria-labelledby="auth-title">
+    <header class="auth-card__header">
+      <p class="auth-eyebrow">{{ eyebrow }}</p>
+      <h1 id="auth-title">{{ title }}</h1>
+      <p class="auth-sub">{{ prompt }} <a class="auth-link" [routerLink]="linkTo">{{ linkText }}</a></p>
+    </header>
+
+    <ng-content></ng-content>
+  </article>
+
+  <aside class="auth-art" aria-label="Account benefits">
+    <ng-content select="[auth-art]"></ng-content>
+  </aside>
+</section>

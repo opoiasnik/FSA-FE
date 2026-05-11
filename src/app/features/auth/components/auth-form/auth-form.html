@@ -1,0 +1,52 @@
+<form [formGroup]="form" (ngSubmit)="submitted.emit()" novalidate>
+  <fieldset [class.grid-2]="isRegister">
+    <legend class="sr-only">{{ isRegister ? 'Account information' : 'Login credentials' }}</legend>
+
+    <ng-container *ngIf="isRegister">
+      <label class="field">
+        <span>First name <span class="req">*</span></span>
+        <input class="ra-input" [class.ra-input--invalid]="isInvalid('firstName')"
+               formControlName="firstName" placeholder="John" />
+      </label>
+
+      <label class="field">
+        <span>Last name <span class="req">*</span></span>
+        <input class="ra-input" [class.ra-input--invalid]="isInvalid('lastName')"
+               formControlName="lastName" placeholder="Doe" />
+      </label>
+    </ng-container>
+
+    <label class="field">
+      <span>{{ isRegister ? 'Username' : 'Username or email' }} <span class="req">*</span></span>
+      <input class="ra-input" [class.ra-input--invalid]="isInvalid('username')"
+             formControlName="username" [placeholder]="isRegister ? 'johndoe' : 'owner or user'"
+             autocomplete="username" />
+    </label>
+
+    <label class="field" *ngIf="isRegister">
+      <span>Email <span class="req">*</span></span>
+      <input class="ra-input" [class.ra-input--invalid]="isInvalid('email')"
+             formControlName="email" type="email" placeholder="john@example.com" />
+    </label>
+
+    <label class="field" [class.span-2]="isRegister">
+      <span>Password <span class="req">*</span></span>
+      <input class="ra-input" [class.ra-input--invalid]="isInvalid('password')"
+             formControlName="password" type="password"
+             [placeholder]="isRegister ? 'At least 6 characters' : 'password'"
+             [autocomplete]="isRegister ? 'new-password' : 'current-password'" />
+    </label>
+  </fieldset>
+
+  <section *ngIf="isRegister" class="field" aria-labelledby="role-label">
+    <span id="role-label" class="field__label">I am registering as</span>
+    <app-role-selector [value]="roleValue" (valueChange)="setRole($event)"></app-role-selector>
+  </section>
+
+  <p-message *ngIf="error" severity="error" [text]="error"></p-message>
+
+  <button type="submit" class="ra-btn auth-submit" [disabled]="loading">
+    <i class="pi pi-spin pi-spinner" *ngIf="loading"></i>
+    {{ submitLabel }}
+  </button>
+</form>

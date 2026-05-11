@@ -1,0 +1,21 @@
+<app-auth-layout
+  eyebrow="Welcome back"
+  title="Sign in to RentArea"
+  prompt="New here?"
+  linkText="Create an account"
+  linkTo="/register">
+
+  <app-auth-form
+    mode="login"
+    [form]="form"
+    [loading]="loading()"
+    [error]="error()"
+    (submitted)="onSubmit()">
+  </app-auth-form>
+
+  <section auth-art class="auth-art__content">
+    <span class="ra-pill ra-pill--accent">Rental access</span>
+    <h2>Manage saved homes, viewings, and owner listings from one account.</h2>
+    <p>Use the local demo users from the Keycloak realm: <strong>owner</strong> or <strong>user</strong>, password <strong>password</strong>.</p>
+  </section>
+</app-auth-layout>

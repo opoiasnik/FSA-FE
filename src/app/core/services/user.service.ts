@@ -1,13 +1,19 @@
 import { Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { authCodeFlowConfig } from '../config/auth-code-flow.config';
 import { UserModel } from '../models/user.model';
+import { KeycloakTokenService } from '../auth/keycloak-token.service';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private readonly userState = signal<UserModel | undefined>(undefined);
 
-  constructor(private readonly oauthService: OAuthService) {
+  constructor(
+    private readonly oauthService: OAuthService,
+    private readonly keycloakTokenService: KeycloakTokenService,
+    private readonly router: Router,
+  ) {
     this.oauthService.configure(authCodeFlowConfig);
   }
 
@@ -28,36 +34,46 @@ export class UserService {
     this.cleanupOidcParams();
 
     const accessToken = this.oauthService.getAccessToken();
-    const accessTokenClaims = this.readAccessTokenClaims(accessToken);
-    //console.log('Access Token Claims:', accessTokenClaims);
-
-    if (!accessToken || !accessTokenClaims) {
+    if (!accessToken) {
       this.userState.set(undefined);
       return undefined;
     }
 
-    const realmAccess = accessTokenClaims['realm_access'] as { roles?: string[] } | undefined;
-    const user: UserModel = {
-      id: String(accessTokenClaims['sub'] ?? ''),
-      email: String(accessTokenClaims['email'] ?? ''),
-      username: String(accessTokenClaims['preferred_username'] ?? ''),
-      name: String(accessTokenClaims['name'] ?? accessTokenClaims['preferred_username'] ?? ''),
-      roles: realmAccess?.roles ?? []
-    };
+    return this.setUserFromAccessToken(accessToken);
+  }
 
-    this.userState.set(user);
+  async loginWithPassword(username: string, password: string): Promise<UserModel> {
+    const token = await this.keycloakTokenService.passwordGrant(username, password);
+    await this.keycloakTokenService.storeTokenResponse(token);
+
+    const user = this.setUserFromAccessToken(token.access_token);
+    if (!user) {
+      throw new Error('Unable to read user claims from access token.');
+    }
+
     return user;
   }
 
   login(redirectUrl?: string): void {
-    this.oauthService.initCodeFlow(redirectUrl);
+    void this.router.navigate(['/login'], {
+      queryParams: redirectUrl ? { returnUrl: redirectUrl } : undefined
+    });
   }
 
-  logout(): void {
+  async logout(): Promise<void> {
+    const idToken = this.oauthService.getIdToken();
+
+    if (idToken) {
+      this.oauthService.logOut();
+      this.userState.set(undefined);
+      return;
+    }
+
+    await this.keycloakTokenService.revoke(this.oauthService.getRefreshToken(), 'refresh_token');
+    await this.keycloakTokenService.revoke(this.oauthService.getAccessToken(), 'access_token');
+    this.oauthService.logOut(true);
     this.userState.set(undefined);
-    void this.oauthService.revokeTokenAndLogout({
-      post_logout_redirect_uri: window.location.origin + '/'
-    });
+    void this.router.navigate(['/home']);
   }
 
   isUserLoggedIn(): boolean {
@@ -96,6 +112,26 @@ export class UserService {
     } catch {
       return null;
     }
+  }
+
+  private setUserFromAccessToken(accessToken: string): UserModel | undefined {
+    const accessTokenClaims = this.readAccessTokenClaims(accessToken);
+    if (!accessTokenClaims) {
+      this.userState.set(undefined);
+      return undefined;
+    }
+
+    const realmAccess = accessTokenClaims['realm_access'] as { roles?: string[] } | undefined;
+    const user: UserModel = {
+      id: String(accessTokenClaims['sub'] ?? ''),
+      email: String(accessTokenClaims['email'] ?? ''),
+      username: String(accessTokenClaims['preferred_username'] ?? ''),
+      name: String(accessTokenClaims['name'] ?? accessTokenClaims['preferred_username'] ?? ''),
+      roles: realmAccess?.roles ?? []
+    };
+
+    this.userState.set(user);
+    return user;
   }
 
   private cleanupOidcParams(): void {
