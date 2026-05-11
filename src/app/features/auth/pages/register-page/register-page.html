@@ -3,14 +3,15 @@
   title="Create your account"
   prompt="Already have an account?"
   linkText="Sign in"
-  linkTo="/login">
+  linkTo="/login"
+  artImage="smart-home-1200x800.avif">
 
   <ng-container *ngIf="success(); else formTpl">
-    <section class="auth-success" aria-live="polite">
+    <div class="auth-success">
       <i class="pi pi-check-circle"></i>
       <h2>Account created!</h2>
-      <p>Redirecting you to sign in...</p>
-    </section>
+      <p>Redirecting you to the home page…</p>
+    </div>
   </ng-container>
 
   <ng-template #formTpl>
@@ -23,10 +24,9 @@
     </app-auth-form>
   </ng-template>
 
-  <figure auth-art>
-    <blockquote>
-      "Found my perfect flat in Bratislava in under a week. The platform is incredibly easy to use."
-    </blockquote>
-    <figcaption>Martin V., tenant</figcaption>
-  </figure>
+  <section auth-art class="auth-art__content">
+    <span class="ra-pill ra-pill--accent">Get started</span>
+    <h2>Your perfect home is just a few clicks away.</h2>
+    <p>Create an account to browse listings, save favourites, and request viewings instantly.</p>
+  </section>
 </app-auth-layout>

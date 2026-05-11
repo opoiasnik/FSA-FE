@@ -21,6 +21,8 @@ export class AuthForm {
 
   @Output() submitted = new EventEmitter<void>();
 
+  showPassword = false;
+
   get isRegister(): boolean {
     return this.mode === 'register';
   }

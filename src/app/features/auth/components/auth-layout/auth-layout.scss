@@ -54,13 +54,14 @@ h1 {
 .auth-art {
   border-radius: var(--r-xl);
   background:
-    linear-gradient(135deg, rgba(255, 56, 92, 0.14), rgba(15, 118, 110, 0.12)),
-    url('/hero.jpg') center/cover;
+    linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, rgba(0,0,0,0.08) 100%),
+    var(--auth-art-image) center / var(--auth-art-size) no-repeat;
   min-height: 420px;
   padding: 40px;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
+  color: #fff;
 }
 
 @media (max-width: 900px) {

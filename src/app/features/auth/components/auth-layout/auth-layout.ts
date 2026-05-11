@@ -15,4 +15,13 @@ export class AuthLayout {
   @Input({ required: true }) prompt!: string;
   @Input({ required: true }) linkText!: string;
   @Input({ required: true }) linkTo!: string;
+  @Input() artImage = 'hero.jpg';
+  @Input() artImageSize = 'cover';
+
+  get artStyle(): Record<string, string> {
+    return {
+      '--auth-art-image': `url('/${this.artImage}')`,
+      '--auth-art-size': this.artImageSize,
+    };
+  }
 }

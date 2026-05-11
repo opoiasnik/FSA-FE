@@ -2,13 +2,7 @@
 <app-header></app-header>
 
 <main class="app-content">
-  <p-message
-    *ngIf="isAuthenticated() && !isOwner()"
-    severity="warn"
-    text="Owner Studio is available only for the OWNER role.">
-  </p-message>
-
-  <p-message *ngIf="authError()" severity="error" [text]="authError() || ''"></p-message>
+<p-message *ngIf="authError()" severity="error" [text]="authError() || ''"></p-message>
 
   <router-outlet></router-outlet>
 </main>

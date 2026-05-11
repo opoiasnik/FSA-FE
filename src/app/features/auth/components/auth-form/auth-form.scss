@@ -44,6 +44,33 @@ fieldset {
   margin-left: 2px;
 }
 
+.input-eye {
+  position: relative;
+
+  .ra-input {
+    width: 100%;
+    padding-right: 40px;
+  }
+}
+
+.eye-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+
+  &:hover { color: var(--text); }
+
+  i { font-size: 16px; }
+}
+
 .ra-input--invalid {
   border-color: #dc2626 !important;
 

@@ -13,19 +13,20 @@
   p  { margin: 0; color: var(--text-muted); }
 }
 
-figure[auth-art] {
-  margin: 0;
+.auth-art__content {
+  max-width: 520px;
+  color: #fff;
 
-  blockquote {
-    font-size: 1.1rem;
-    line-height: 1.45;
-    max-width: 32ch;
-    margin: 0;
+  h2 {
+    margin: 18px 0 10px;
+    font-size: 2rem;
+    line-height: 1.12;
+    letter-spacing: 0;
   }
 
-  figcaption {
-    font-size: 0.85rem;
-    margin-top: 12px;
-    color: var(--text-muted);
+  p {
+    margin: 0;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
   }
 }

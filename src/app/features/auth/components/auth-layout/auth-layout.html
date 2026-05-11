@@ -9,7 +9,7 @@
     <ng-content></ng-content>
   </article>
 
-  <aside class="auth-art" aria-label="Account benefits">
+  <aside class="auth-art" aria-label="Account benefits" [ngStyle]="artStyle">
     <ng-content select="[auth-art]"></ng-content>
   </aside>
 </section>

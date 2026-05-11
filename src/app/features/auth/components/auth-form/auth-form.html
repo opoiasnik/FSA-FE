@@ -31,10 +31,15 @@
 
     <label class="field" [class.span-2]="isRegister">
       <span>Password <span class="req">*</span></span>
-      <input class="ra-input" [class.ra-input--invalid]="isInvalid('password')"
-             formControlName="password" type="password"
-             [placeholder]="isRegister ? 'At least 6 characters' : 'password'"
-             [autocomplete]="isRegister ? 'new-password' : 'current-password'" />
+      <div class="input-eye">
+        <input class="ra-input" [class.ra-input--invalid]="isInvalid('password')"
+               formControlName="password" [type]="showPassword ? 'text' : 'password'"
+               [placeholder]="isRegister ? 'At least 6 characters' : 'password'"
+               [autocomplete]="isRegister ? 'new-password' : 'current-password'" />
+        <button type="button" class="eye-btn" (click)="showPassword = !showPassword" tabindex="-1">
+          <i class="pi" [class.pi-eye-slash]="!showPassword" [class.pi-eye]="showPassword"></i>
+        </button>
+      </div>
     </label>
   </fieldset>
 

@@ -2,7 +2,7 @@
 
 .auth-art__content {
   max-width: 520px;
-  color: var(--text);
+  color: #fff;
 
   h2 {
     margin: 18px 0 10px;
@@ -13,7 +13,7 @@
 
   p {
     margin: 0;
-    color: var(--text);
+    color: rgba(255,255,255,0.8);
     line-height: 1.6;
   }
 }
