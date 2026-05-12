@@ -3,9 +3,10 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
+import { forkJoin, of, switchMap } from 'rxjs';
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { CreateListingRequest, ListingResponse } from '../../models/listing.model';
+import { CreateListingRequest } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
 interface WizardStep {
@@ -18,10 +19,10 @@ interface WizardStep {
   selector: 'app-listing-create-page',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MessageModule, PhotoPlaceholder],
-  templateUrl: './listing-create-page.component.html',
-  styleUrl: './listing-create-page.component.scss'
+  templateUrl: './listing-create-page.html',
+  styleUrl: './listing-create-page.scss'
 })
-export class ListingCreatePageComponent {
+export class ListingCreatePage {
   private readonly fb = inject(FormBuilder);
   private readonly listingService = inject(ListingService);
   private readonly router = inject(Router);
@@ -38,8 +39,9 @@ export class ListingCreatePageComponent {
 
   readonly currentStep = signal(0);
   readonly creating = signal(false);
-  readonly createdListing = signal<ListingResponse | null>(null);
   readonly createError = signal<string | null>(null);
+  readonly selectedPhotos = signal<File[]>([]);
+  readonly photoPreviews = signal<string[]>([]);
 
   readonly activeStep = computed(() => this.steps[this.currentStep()]);
   readonly isLastStep = computed(() => this.currentStep() === this.steps.length - 1);
@@ -169,9 +171,15 @@ export class ListingCreatePageComponent {
       }
     };
 
-    this.listingService.create(payload).subscribe({
-      next: (listing) => {
-        this.createdListing.set(listing);
+    this.listingService.create(payload).pipe(
+      switchMap(listing => {
+        const uploads = this.selectedPhotos().map((file, index) =>
+          this.listingService.uploadPhoto(listing.id, file, index === 0 ? 'Cover photo' : `Photo ${index + 1}`)
+        );
+        return uploads.length ? forkJoin(uploads).pipe(switchMap(() => of(listing))) : of(listing);
+      })
+    ).subscribe({
+      next: () => {
         this.creating.set(false);
         void this.router.navigate(['/owner']);
       },
@@ -196,7 +204,24 @@ export class ListingCreatePageComponent {
     control.setValue(!control.value);
   }
 
-  private toMessage(error: unknown): string {
-    return this.errorHandler.toMessage(error);
+  onPhotosSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const newFiles = Array.from(input.files ?? [])
+      .filter(file => file.type.startsWith('image/'));
+
+    const remaining = 20 - this.selectedPhotos().length;
+    const toAdd = newFiles.slice(0, remaining);
+
+    this.selectedPhotos.update(files => [...files, ...toAdd]);
+    this.photoPreviews.update(urls => [...urls, ...toAdd.map(f => URL.createObjectURL(f))]);
+    input.value = '';
   }
+
+  removePhoto(index: number): void {
+    const previews = this.photoPreviews();
+    URL.revokeObjectURL(previews[index]);
+    this.selectedPhotos.update(files => files.filter((_, i) => i !== index));
+    this.photoPreviews.update(urls => urls.filter((_, i) => i !== index));
+  }
+
 }

@@ -8,10 +8,10 @@ import { InputTextModule } from 'primeng/inputtext';
   selector: 'app-listing-search-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ButtonModule, InputTextModule],
-  templateUrl: './listing-search-form.component.html',
-  styleUrl: './listing-search-form.component.scss'
+  templateUrl: './listing-search-form.html',
+  styleUrl: './listing-search-form.scss'
 })
-export class ListingSearchFormComponent {
+export class ListingSearchForm {
   @Input({ required: true }) form!: FormGroup;
   @Input() loading = false;
   @Input() submitLabel = 'Vyhladat';

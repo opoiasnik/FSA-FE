@@ -1,6 +1,12 @@
 <article class="card" (click)="cardClick.emit()">
   <div class="card__media">
-    <app-photo-placeholder [seed]="listing.id" [rounded]="0"></app-photo-placeholder>
+    <img *ngIf="listing.photos?.[0]?.contentUrl; else cardPhotoPlaceholder"
+         [src]="listing.photos?.[0]?.contentUrl"
+         [alt]="listing.photos?.[0]?.altText || listing.title"
+         loading="lazy" />
+    <ng-template #cardPhotoPlaceholder>
+      <app-photo-placeholder [seed]="listing.id" [rounded]="0"></app-photo-placeholder>
+    </ng-template>
     <button type="button" class="card__save" (click)="onSaveClick($event)">
       <i class="pi"
          [ngClass]="saved ? 'pi-heart-fill' : 'pi-heart'"

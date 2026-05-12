@@ -6,10 +6,10 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
   selector: 'app-listing-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './listing-form.component.html',
-  styleUrl: './listing-form.component.scss'
+  templateUrl: './listing-form.html',
+  styleUrl: './listing-form.scss'
 })
-export class ListingFormComponent {
+export class ListingForm {
   @Input({ required: true }) form!: FormGroup;
   @Input() submitting = false;
   @Output() submitted = new EventEmitter<void>();

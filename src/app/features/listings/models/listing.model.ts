@@ -38,6 +38,15 @@ export interface ListingStats {
   messages: number;
 }
 
+export interface PhotoResponse {
+  id: number;
+  altText?: string;
+  contentType?: string;
+  originalFilename?: string;
+  position?: number;
+  contentUrl: string;
+}
+
 export interface CreateListingRequest {
   title: string;
   description: string;
@@ -60,6 +69,7 @@ export interface ListingResponse extends CreateListingRequest {
   createdAt: string;
   ownerId: number;
   owner?: ListingOwner;
+  photos?: PhotoResponse[];
   stats?: ListingStats;
 }
 
@@ -69,6 +79,7 @@ export interface ListingSummary {
   listingType: ListingType;
   city: string;
   price: Price;
+  coverPhoto?: PhotoResponse;
 }
 
 export interface PaginationResponse {

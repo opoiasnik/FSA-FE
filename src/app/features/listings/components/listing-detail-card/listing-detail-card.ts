@@ -6,9 +6,9 @@ import { ListingResponse } from '../../models/listing.model';
   selector: 'app-listing-detail-card',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './listing-detail-card.component.html',
-  styleUrl: './listing-detail-card.component.scss'
+  templateUrl: './listing-detail-card.html',
+  styleUrl: './listing-detail-card.scss'
 })
-export class ListingDetailCardComponent {
+export class ListingDetailCard {
   @Input({ required: true }) listing!: ListingResponse;
 }

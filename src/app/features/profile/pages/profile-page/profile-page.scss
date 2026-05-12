@@ -7,6 +7,7 @@
   gap: 20px;
   align-items: center;
   margin-bottom: 28px;
+  position: relative;
 
   h1 { margin: 6px 0 4px; font-size: 26px; font-weight: 700; }
   p { margin: 0; color: var(--text-muted); font-size: 13px; }
@@ -148,6 +149,98 @@
     p { margin: 2px 0 0; font-size: 12px; color: var(--text-muted); }
   }
 }
+
+// ─── Avatar upload ────────────────────────────────────────────────────────────
+
+.avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatar-spinner {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  pointer-events: none;
+}
+
+.avatar-upload {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 100;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+  padding: 16px;
+  width: 240px;
+
+  &__drop {
+    border: 2px dashed var(--border);
+    border-radius: var(--r-md);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    transition: border-color 0.15s, background 0.15s;
+    cursor: default;
+
+    &--over {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+  }
+
+  &__icon {
+    font-size: 28px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  &__label {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  &__hint {
+    margin: 0 0 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  &__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    border-radius: var(--r-sm);
+
+    &:hover { color: var(--text); background: var(--surface-soft); }
+  }
+}
+
+.avatar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
 
 @media (max-width: 760px) {
   .profile__layout { grid-template-columns: 1fr; }

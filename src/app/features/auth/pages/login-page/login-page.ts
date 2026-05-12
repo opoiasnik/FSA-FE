@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { UserService } from '../../../../core/services/user.service';
@@ -14,6 +14,11 @@ import { AuthForm } from '../../components/auth-form/auth-form';
   styleUrl: './login-page.scss',
 })
 export class LoginPage {
+  private readonly fb = inject(FormBuilder);
+  private readonly userService = inject(UserService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
@@ -21,13 +26,6 @@ export class LoginPage {
     username: ['', Validators.required],
     password: ['', Validators.required],
   });
-
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly userService: UserService,
-    private readonly router: Router,
-    private readonly route: ActivatedRoute,
-  ) {}
 
   async onSubmit(): Promise<void> {
     this.form.markAllAsTouched();

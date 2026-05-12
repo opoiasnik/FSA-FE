@@ -20,8 +20,8 @@ export interface ChipFilters {
   selector: 'app-listing-filter-bar',
   standalone: true,
   imports: [CommonModule, FilterChip],
-  templateUrl: './listing-filter-bar.component.html',
-  styleUrl: './listing-filter-bar.component.scss',
+  templateUrl: './listing-filter-bar.html',
+  styleUrl: './listing-filter-bar.scss',
 })
 export class ListingFilterBar {
   @Output() search = new EventEmitter<ChipFilters>();

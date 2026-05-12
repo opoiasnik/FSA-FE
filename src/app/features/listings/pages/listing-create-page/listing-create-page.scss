@@ -121,16 +121,19 @@
 }
 
 .dropzone {
+  display: block;
   border: 2px dashed var(--border);
   border-radius: var(--r-md);
   padding: 40px;
   text-align: center;
   background: var(--surface-soft);
+  cursor: pointer;
 
   i { font-size: 32px; color: var(--text-muted); }
   &__title { font-size: 15px; font-weight: 600; margin-top: 12px; }
   &__hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
   .ra-btn { margin-top: 14px; }
+  input { display: none; }
 }
 
 .todo-note {
@@ -149,13 +152,67 @@
   app-photo-placeholder { height: 120px; display: block; }
 }
 
+.photo-preview {
+  position: relative;
+  height: 120px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-soft);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  span {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 4px 8px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, 0.92);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  &__remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    cursor: pointer;
+  }
+}
+
 .review {
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 20px;
   margin-top: 14px;
 
-  &__cover { display: block; height: 200px; }
+  &__cover {
+    display: block;
+    height: 200px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface-soft);
+
+    img,
+    app-photo-placeholder {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    img { object-fit: cover; }
+  }
   h3 { margin: 0 0 4px; font-size: 18px; font-weight: 700; }
   p { margin: 0; color: var(--text-muted); font-size: 13px; }
   &__chips { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }

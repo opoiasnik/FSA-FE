@@ -14,6 +14,15 @@
   </div>
 
   <ng-container *ngIf="listing() as item">
+    <div class="gallery" *ngIf="item.photos?.length; else placeholderGallery">
+      <div class="gallery__photo gallery__main" *ngFor="let photo of item.photos | slice:0:1">
+        <img [src]="photo.contentUrl" [alt]="photo.altText || item.title" />
+      </div>
+      <div class="gallery__photo" *ngFor="let photo of item.photos | slice:1:5">
+        <img [src]="photo.contentUrl" [alt]="photo.altText || item.title" />
+      </div>
+    </div>
+    <ng-template #placeholderGallery>
     <div class="gallery">
       <app-photo-placeholder class="gallery__main" [seed]="item.id" [rounded]="0" [label]="'Main photo'"></app-photo-placeholder>
       <app-photo-placeholder [seed]="item.id + 1" [rounded]="0" [label]="'photo 2'"></app-photo-placeholder>
@@ -25,6 +34,7 @@
         </button>
       </app-photo-placeholder>
     </div>
+    </ng-template>
 
     <div class="layout">
       <main class="content">

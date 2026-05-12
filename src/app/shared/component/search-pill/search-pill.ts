@@ -16,8 +16,8 @@ export interface SearchPillValues {
   selector: 'app-search-pill',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './search-pill.component.html',
-  styleUrl: './search-pill.component.scss',
+  templateUrl: './search-pill.html',
+  styleUrl: './search-pill.scss',
 })
 export class SearchPill {
   @Input() showFilters = false;

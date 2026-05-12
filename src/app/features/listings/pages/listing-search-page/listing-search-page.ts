@@ -7,9 +7,9 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { MapView, MapPin } from '../../../../shared/component/map-view/map-view';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { FavoriteStore } from '../../../favourites/services/favorite.store';
-import { SearchPill, SearchPillValues } from '../../../../shared/component/search-pill/search-pill.component';
-import { ListingCard } from '../../components/listing-card/listing-card.component';
-import { ListingFilterBar, ChipFilters } from '../../components/listing-filter-bar/listing-filter-bar.component';
+import { SearchPill, SearchPillValues } from '../../../../shared/component/search-pill/search-pill';
+import { ListingCard } from '../../components/listing-card/listing-card';
+import { ListingFilterBar, ChipFilters } from '../../components/listing-filter-bar/listing-filter-bar';
 import { ListingResponse, ListingSearchParams, ListingType, PropertyType, SortBy } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
@@ -27,10 +27,10 @@ const emptyPill = (): SearchPillValues => ({
   selector: 'app-listing-search-page',
   standalone: true,
   imports: [CommonModule, FormsModule, MessageModule, SkeletonModule, MapView, ListingCard, ListingFilterBar, SearchPill],
-  templateUrl: './listing-search-page.component.html',
-  styleUrl: './listing-search-page.component.scss',
+  templateUrl: './listing-search-page.html',
+  styleUrl: './listing-search-page.scss',
 })
-export class ListingSearchPageComponent implements OnInit {
+export class ListingSearchPage implements OnInit {
   private readonly router         = inject(Router);
   private readonly listingService = inject(ListingService);
   private readonly errorHandler   = inject(ErrorHandlerService);

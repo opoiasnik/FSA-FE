@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
-import { CreateListingRequest, ListingResponse, ListingSearchParams, ListingSearchResponse, ListingSummary, ListingType, PropertyType } from '../models/listing.model';
+import { CreateListingRequest, ListingResponse, ListingSearchParams, ListingSearchResponse, ListingSummary, ListingType, PhotoResponse, PropertyType } from '../models/listing.model';
 
 export interface FeaturedListingsParams {
   city?: string;
@@ -36,5 +36,14 @@ export class ListingService {
 
   create(payload: CreateListingRequest): Observable<ListingResponse> {
     return this.api.post<ListingResponse>(this.base, payload);
+  }
+
+  uploadPhoto(listingId: number, file: File, altText?: string): Observable<PhotoResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (altText) {
+      formData.append('altText', altText);
+    }
+    return this.api.post<PhotoResponse>(`${this.base}/${listingId}/photos`, formData);
   }
 }

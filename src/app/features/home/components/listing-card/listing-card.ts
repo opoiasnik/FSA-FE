@@ -25,6 +25,9 @@ export class ListingCard {
   readonly canFavorite = computed(() => this.userService.isUserLoggedIn());
 
   get imageUrl(): string {
+    if (this.listing.coverPhoto?.contentUrl) {
+      return this.listing.coverPhoto.contentUrl;
+    }
     return `https://picsum.photos/seed/rental-${this.listing.id + this.imageSeedOffset}/540/540`;
   }
 

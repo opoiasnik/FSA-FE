@@ -112,21 +112,42 @@
           <i class="pi pi-cloud-upload"></i>
           <div class="dropzone__title">Drop photos here or click to upload</div>
           <div class="dropzone__hint">JPG or PNG, up to 10 MB each · 5–20 photos</div>
-          <button type="button" class="ra-btn ra-btn--ghost">Choose files</button>
+          <label class="ra-btn ra-btn--ghost">
+            Choose files
+            <input type="file" accept="image/*" multiple (change)="onPhotosSelected($event)" />
+          </label>
         </div>
-        <p class="todo-note">Photo upload requires a dedicated BE endpoint — UI stub only.</p>
+        <p class="todo-note" *ngIf="!photoPreviews().length">No photos selected yet.</p>
+        <div class="media-grid" *ngIf="photoPreviews().length; else emptyPhotos">
+          <div class="photo-preview" *ngFor="let preview of photoPreviews(); let i = index">
+            <img [src]="preview" [alt]="i === 0 ? 'Cover photo preview' : 'Photo preview ' + (i + 1)" />
+            <span>{{ i === 0 ? 'cover' : 'photo ' + (i + 1) }}</span>
+            <button type="button" class="photo-preview__remove" (click)="removePhoto(i)" aria-label="Remove photo">
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+        </div>
+        <ng-template #emptyPhotos>
         <div class="media-grid">
           <app-photo-placeholder *ngFor="let _ of [0,1,2,3,4,5]; let i = index"
                                  [seed]="i" [label]="i === 0 ? 'cover' : 'photo ' + (i + 1)" [rounded]="10">
           </app-photo-placeholder>
         </div>
+        </ng-template>
       </div>
 
       <!-- Review -->
       <div *ngIf="activeStep().id === 'review'">
         <p-message severity="success" text="Ready to publish. Your listing passes all required checks."></p-message>
         <div class="review">
-          <app-photo-placeholder class="review__cover" [seed]="1" [label]="'cover'" [rounded]="14"></app-photo-placeholder>
+          <div class="review__cover">
+            <img *ngIf="photoPreviews()[0]; else reviewPhotoPlaceholder"
+                 [src]="photoPreviews()[0]"
+                 alt="Cover photo preview" />
+            <ng-template #reviewPhotoPlaceholder>
+              <app-photo-placeholder [seed]="1" [label]="'cover'" [rounded]="14"></app-photo-placeholder>
+            </ng-template>
+          </div>
           <div>
             <h3>{{ form.controls.title.value }}</h3>
             <p>{{ form.controls.street.value }}, {{ form.controls.city.value }}</p>

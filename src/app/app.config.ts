@@ -11,6 +11,7 @@ import { routes } from './app.routes';
 import { UserService } from './core/services/user.service';
 import { GlobalErrorHandler } from './core/errors/global-error.handler';
 import { GlobalHttpErrorInterceptor } from './core/interceptors/global-http-error.interceptor';
+import { HttpCacheInterceptor } from './core/interceptors/http-cache.interceptor';
 
 function initializeAuth(userService: UserService): () => Promise<unknown> {
   return () => userService.tryLogin().catch(() => undefined);
@@ -37,6 +38,7 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     { provide: HTTP_INTERCEPTORS, useClass: DefaultOAuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: HttpCacheInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: GlobalHttpErrorInterceptor, multi: true },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {

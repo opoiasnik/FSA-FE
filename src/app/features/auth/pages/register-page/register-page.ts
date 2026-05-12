@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpBackend, HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -15,8 +15,11 @@ import { AuthForm } from '../../components/auth-form/auth-form';
   styleUrl: './register-page.scss',
 })
 export class RegisterPage {
-  private readonly http: HttpClient;
-  private readonly realm       = 'rental';
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  // HttpBackend bypasses all interceptors — needed for Keycloak admin calls
+  private readonly http = new HttpClient(inject(HttpBackend));
+  private readonly realm = 'rental';
 
   readonly loading = signal(false);
   readonly error   = signal<string | null>(null);
@@ -30,14 +33,6 @@ export class RegisterPage {
     password:  ['', [Validators.required, Validators.minLength(6)]],
     role:      ['USER' as 'USER' | 'OWNER'],
   });
-
-  constructor(
-    private readonly fb:     FormBuilder,
-    private readonly router: Router,
-    handler:                 HttpBackend,
-  ) {
-    this.http = new HttpClient(handler);
-  }
 
   async onSubmit(): Promise<void> {
     this.form.markAllAsTouched();

@@ -1,0 +1,35 @@
+<div class="avatar"
+     [style.width.px]="size"
+     [style.height.px]="size"
+     [class.avatar--editable]="editable"
+     (click)="onAvatarClick()">
+
+  <ng-container *ngIf="resolvedImageUrl() as url; else circle">
+    <img class="avatar__img"
+         [src]="url"
+         [alt]="name"
+         [style.width.px]="size"
+         [style.height.px]="size"
+         (error)="onImageError()" />
+  </ng-container>
+
+  <ng-template #circle>
+    <div class="avatar__circle"
+         [style.width.px]="size"
+         [style.height.px]="size"
+         [style.background]="color()"
+         [style.fontSize.px]="size * 0.38">
+      {{ initials() }}
+    </div>
+  </ng-template>
+
+  <span *ngIf="verified" class="avatar__check"
+        [style.width.px]="badgeSize()"
+        [style.height.px]="badgeSize()">
+    <i class="pi pi-check" [style.fontSize.px]="size * 0.2"></i>
+  </span>
+
+  <div *ngIf="editable" class="avatar__overlay">
+    <i class="pi pi-pencil" [style.fontSize.px]="size * 0.32"></i>
+  </div>
+</div>

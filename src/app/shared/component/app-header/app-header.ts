@@ -27,6 +27,7 @@ export class AppHeader {
   private readonly access = inject(AccessService);
 
   readonly user = this.userService.getUserSignal();
+  readonly avatarUrl = this.userService.avatarUrl;
   readonly isAuthenticated = computed(() => this.userService.isUserLoggedIn());
   readonly canViewOwnerStudio = this.access.can('viewOwnerStudio');
 

@@ -41,4 +41,4 @@ import { RouterLink } from '@angular/router';
     .not-found__actions { display: inline-flex; gap: 10px; }
   `]
 })
-export class PageNotFoundComponent {}
+export class PageNotFound {}

@@ -7,7 +7,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { FavoriteStore } from '../../../favourites/services/favorite.store';
 import { ListingSummary } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
-import { SearchPill, SearchPillValues } from '../../../../shared/component/search-pill/search-pill.component';
+import { SearchPill, SearchPillValues } from '../../../../shared/component/search-pill/search-pill';
 import { HeroSection } from '../../components/hero-section/hero-section';
 import { ListingsCarousel } from '../../components/listings-carousel/listings-carousel';
 import { ModeTabs } from '../../components/mode-tabs/mode-tabs';

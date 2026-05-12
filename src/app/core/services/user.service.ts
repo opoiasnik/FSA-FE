@@ -1,18 +1,28 @@
 import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { OAuthService } from 'angular-oauth2-oidc';
+import { firstValueFrom } from 'rxjs';
 import { authCodeFlowConfig } from '../config/auth-code-flow.config';
 import { UserModel } from '../models/user.model';
+import { UserProfileDto } from '../models/user-profile.model';
 import { KeycloakTokenService } from '../auth/keycloak-token.service';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private readonly userState = signal<UserModel | undefined>(undefined);
+  private readonly _avatarUrl = signal<string | null>(null);
+  private readonly _phone = signal<string | null>(null);
+  private readonly _bio = signal<string | null>(null);
+  readonly avatarUrl = this._avatarUrl.asReadonly();
+  readonly phone = this._phone.asReadonly();
+  readonly bio = this._bio.asReadonly();
 
   constructor(
     private readonly oauthService: OAuthService,
     private readonly keycloakTokenService: KeycloakTokenService,
     private readonly router: Router,
+    private readonly http: HttpClient,
   ) {
     this.oauthService.configure(authCodeFlowConfig);
   }
@@ -39,7 +49,11 @@ export class UserService {
       return undefined;
     }
 
-    return this.setUserFromAccessToken(accessToken);
+    const user = this.setUserFromAccessToken(accessToken);
+    if (user) {
+      await this.loadUserProfile();
+    }
+    return user;
   }
 
   async loginWithPassword(username: string, password: string): Promise<UserModel> {
@@ -51,6 +65,7 @@ export class UserService {
       throw new Error('Unable to read user claims from access token.');
     }
 
+    await this.loadUserProfile();
     return user;
   }
 
@@ -60,19 +75,29 @@ export class UserService {
     });
   }
 
+  updateAvatarUrl(url: string | null): void {
+    this._avatarUrl.set(url);
+  }
+
+  updateProfile(name: string, surname: string, email: string, phone: string | null, bio: string | null): void {
+    this.userState.update(u => u ? { ...u, name, surname, email } : u);
+    this._phone.set(phone);
+    this._bio.set(bio);
+  }
+
   async logout(): Promise<void> {
     const idToken = this.oauthService.getIdToken();
 
     if (idToken) {
       this.oauthService.logOut();
-      this.userState.set(undefined);
+      this.clearUserState();
       return;
     }
 
     await this.keycloakTokenService.revoke(this.oauthService.getRefreshToken(), 'refresh_token');
     await this.keycloakTokenService.revoke(this.oauthService.getAccessToken(), 'access_token');
     this.oauthService.logOut(true);
-    this.userState.set(undefined);
+    this.clearUserState();
     void this.router.navigate(['/home']);
   }
 
@@ -87,9 +112,23 @@ export class UserService {
     return this.userState()?.roles.includes(role) ?? false;
   }
 
-  getAccessTokenExpiration(): number {
-    this.userState();
-    return this.oauthService.getAccessTokenExpiration();
+  private clearUserState(): void {
+    this.userState.set(undefined);
+    this._avatarUrl.set(null);
+    this._phone.set(null);
+    this._bio.set(null);
+  }
+
+  private async loadUserProfile(): Promise<void> {
+    try {
+      const dto = await firstValueFrom(this.http.get<UserProfileDto>('/api/user'));
+      this.userState.update(u => u ? { ...u, name: dto.name, surname: dto.surname, email: dto.email } : u);
+      this._avatarUrl.set(dto.avatarUrl);
+      this._phone.set(dto.phone);
+      this._bio.set(dto.bio);
+    } catch {
+      // non-critical
+    }
   }
 
   private readAccessTokenClaims(token: string): Record<string, unknown> | null {
@@ -126,7 +165,8 @@ export class UserService {
       id: String(accessTokenClaims['sub'] ?? ''),
       email: String(accessTokenClaims['email'] ?? ''),
       username: String(accessTokenClaims['preferred_username'] ?? ''),
-      name: String(accessTokenClaims['name'] ?? accessTokenClaims['preferred_username'] ?? ''),
+      name: String(accessTokenClaims['given_name'] ?? accessTokenClaims['preferred_username'] ?? ''),
+      surname: String(accessTokenClaims['family_name'] ?? ''),
       roles: realmAccess?.roles ?? []
     };
 

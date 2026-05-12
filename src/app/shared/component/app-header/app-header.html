@@ -44,8 +44,8 @@
     <div class="header-right">
       <ng-container *ngIf="isAuthenticated(); else guestActions">
         <a routerLink="/profile" class="user-chip" *ngIf="user() as currentUser">
-          <app-avatar [name]="currentUser.name || currentUser.username" [hue]="200" [verified]="true" [size]="32"></app-avatar>
-          <span class="user-chip__name">{{ currentUser.name || currentUser.username }}</span>
+          <app-avatar [name]="currentUser.name + ' ' + currentUser.surname" [hue]="200" [verified]="true" [size]="32" [imageUrl]="avatarUrl()"></app-avatar>
+          <span class="user-chip__name">{{ currentUser.name }} {{ currentUser.surname }}</span>
         </a>
         <button
           pButton

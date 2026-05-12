@@ -8,8 +8,8 @@ import { ListingResponse } from '../../models/listing.model';
   selector: 'app-listing-card',
   standalone: true,
   imports: [CommonModule, PhotoPlaceholder],
-  templateUrl: './listing-card.component.html',
-  styleUrl: './listing-card.component.scss',
+  templateUrl: './listing-card.html',
+  styleUrl: './listing-card.scss',
 })
 export class ListingCard {
   @Input({ required: true }) listing!: ListingResponse;
