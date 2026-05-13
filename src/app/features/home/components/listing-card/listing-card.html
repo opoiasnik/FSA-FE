@@ -1,6 +1,7 @@
 <article class="listing-tile" [routerLink]="['/listings', listing.id]" style="cursor: pointer">
   <div class="tile-media">
-    <img [src]="imageUrl" [alt]="listing.title" loading="lazy" />
+    <img *ngIf="imageUrl; else photoPlaceholder" [src]="imageUrl" [alt]="listing.title" loading="lazy" />
+    <ng-template #photoPlaceholder><app-photo-placeholder /></ng-template>
     <span *ngIf="badge" class="favorite-chip">{{ badge }}</span>
     <button
       *ngIf="canFavorite()"

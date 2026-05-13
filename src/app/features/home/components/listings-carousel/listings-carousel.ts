@@ -16,7 +16,6 @@ export class ListingsCarousel {
   private readonly userService = inject(UserService);
 
   @Input({ required: true }) title!: string;
-  @Input() imageSeedOffset = 0;
 
   @Input({ required: true }) set items(v: ListingSummary[]) {
     this._items = v.slice(0, 5);

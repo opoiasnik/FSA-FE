@@ -55,7 +55,7 @@ export class ListingSearchPage implements OnInit {
         price: l.price.amount, currency: l.price.currency,
         title: l.title, city: l.address.city,
         listingType: l.listingType,
-        imageUrl: `https://picsum.photos/seed/rental-${l.id}/320/180`,
+        imageUrl: l.photos?.[0]?.contentUrl,
       }))
   );
 

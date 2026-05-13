@@ -6,8 +6,7 @@
   <div class="cards-row">
     <app-listing-card
       *ngFor="let item of _items"
-      [listing]="item"
-      [imageSeedOffset]="imageSeedOffset">
+      [listing]="item">
     </app-listing-card>
 
     <a class="explore-cta" [routerLink]="viewMoreLink()" [queryParams]="viewMoreQueryParams()">
