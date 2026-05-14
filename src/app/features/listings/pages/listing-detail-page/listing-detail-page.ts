@@ -12,6 +12,7 @@ import { formatAmount, fullAddress } from '../../models/listing.helpers';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { UserService } from '../../../../core/services/user.service';
 import { FavoriteStore } from '../../../favourites/services/favorite.store';
+import { MessageService } from '../../../messages/services/message.service';
 import { ViewingService } from '../../../viewings/services/viewing.service';
 import { ListingResponse } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
@@ -42,6 +43,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly favoriteStore = inject(FavoriteStore);
   private readonly userService = inject(UserService);
+  private readonly messageService = inject(MessageService);
   private readonly viewingService = inject(ViewingService);
 
   readonly listing = signal<ListingResponse | null>(null);
@@ -60,6 +62,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   readonly creatingViewing = signal(false);
   readonly viewingError = signal<string | null>(null);
   readonly viewingSuccess = signal(false);
+  readonly openingConversation = signal(false);
   readonly today = new Date();
   private photoObjectUrls: string[] = [];
 
@@ -69,6 +72,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
     const userEmail = this.userService.getUserSnapshot()?.email;
     return !!userEmail && item.owner?.email !== userEmail;
   });
+  readonly canMessageOwner = computed(() => this.canBookViewing());
 
   readonly owner = computed(() => {
     const item = this.listing();
@@ -194,7 +198,20 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   }
 
   openMessages(): void {
-    void this.router.navigate(['/messages']);
+    const item = this.listing();
+    if (!item || !this.canMessageOwner() || this.openingConversation()) return;
+
+    this.openingConversation.set(true);
+    this.messageService.openConversation({ listingId: item.id }).subscribe({
+      next: conversation => {
+        this.openingConversation.set(false);
+        void this.router.navigate(['/messages', conversation.id]);
+      },
+      error: err => {
+        this.error.set(this.toMessage(err));
+        this.openingConversation.set(false);
+      }
+    });
   }
 
   openViewingForm(): void {

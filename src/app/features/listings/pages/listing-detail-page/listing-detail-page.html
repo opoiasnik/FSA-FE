@@ -107,7 +107,7 @@
           </div>
 
           <div class="sidebar__actions">
-            <button type="button" class="ra-btn ra-btn--lg" (click)="openMessages()">
+            <button type="button" class="ra-btn ra-btn--lg" (click)="openMessages()" [disabled]="!canMessageOwner() || openingConversation()">
               <i class="pi pi-send"></i>Message {{ own.name.split(' ')[0] }}
             </button>
             <button type="button" class="ra-btn ra-btn--ghost ra-btn--lg"
