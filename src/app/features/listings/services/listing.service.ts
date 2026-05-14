@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
+import { ImageContentService } from '../../../core/services/image-content.service';
 import { CreateListingRequest, ListingResponse, ListingSearchParams, ListingSearchResponse, ListingSummary, ListingType, PhotoResponse, PropertyType } from '../models/listing.model';
 
 export interface FeaturedListingsParams {
@@ -12,6 +13,7 @@ export interface FeaturedListingsParams {
 @Injectable({ providedIn: 'root' })
 export class ListingService {
   private readonly api  = inject(ApiService);
+  private readonly imageContentService = inject(ImageContentService);
   private readonly base = '/listings';
 
   getFeatured(params?: FeaturedListingsParams): Observable<ListingSummary[]> {
@@ -45,5 +47,17 @@ export class ListingService {
       formData.append('altText', altText);
     }
     return this.api.post<PhotoResponse>(`${this.base}/${listingId}/photos`, formData);
+  }
+
+  loadPhotoObjectUrl(contentUrl: string): Observable<string> {
+    return this.imageContentService.loadObjectUrl(contentUrl);
+  }
+
+  revokePhotoObjectUrl(objectUrl: string | null | undefined): void {
+    this.imageContentService.revokeObjectUrl(objectUrl);
+  }
+
+  recordView(listingId: number): Observable<void> {
+    return this.api.post<void>(`${this.base}/${listingId}/view`, {});
   }
 }

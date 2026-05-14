@@ -55,7 +55,6 @@ export class ListingSearchPage implements OnInit {
         price: l.price.amount, currency: l.price.currency,
         title: l.title, city: l.address.city,
         listingType: l.listingType,
-        imageUrl: l.photos?.[0]?.contentUrl,
       }))
   );
 

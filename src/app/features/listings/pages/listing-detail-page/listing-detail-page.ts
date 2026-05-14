@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -35,7 +35,7 @@ interface Amenity {
   templateUrl: './listing-detail-page.html',
   styleUrl: './listing-detail-page.scss'
 })
-export class ListingDetailPage implements OnInit {
+export class ListingDetailPage implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly listingService = inject(ListingService);
@@ -45,6 +45,7 @@ export class ListingDetailPage implements OnInit {
   private readonly viewingService = inject(ViewingService);
 
   readonly listing = signal<ListingResponse | null>(null);
+  readonly photoImageUrls = signal<Record<number, string>>({});
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly saved = computed(() => {
@@ -60,6 +61,7 @@ export class ListingDetailPage implements OnInit {
   readonly viewingError = signal<string | null>(null);
   readonly viewingSuccess = signal(false);
   readonly today = new Date();
+  private photoObjectUrls: string[] = [];
 
   readonly canBookViewing = computed(() => {
     const item = this.listing();
@@ -138,6 +140,10 @@ export class ListingDetailPage implements OnInit {
     this.loadListing(id);
   }
 
+  ngOnDestroy(): void {
+    this.revokePhotoObjectUrls();
+  }
+
   loadListing(id: number): void {
     this.loading.set(true);
     this.error.set(null);
@@ -145,7 +151,9 @@ export class ListingDetailPage implements OnInit {
     this.listingService.getById(id).subscribe({
       next: (listing) => {
         this.listing.set(listing);
+        this.loadPhotoContents(listing);
         this.loading.set(false);
+        this.listingService.recordView(id).subscribe({ error: () => {} });
       },
       error: (error) => {
         this.error.set(this.toMessage(error));
@@ -158,6 +166,26 @@ export class ListingDetailPage implements OnInit {
     const item = this.listing();
     if (!item) return;
     this.favoriteStore.toggle(item.id);
+  }
+
+  private loadPhotoContents(listing: ListingResponse): void {
+    this.revokePhotoObjectUrls();
+    this.photoImageUrls.set({});
+
+    for (const photo of listing.photos ?? []) {
+      this.listingService.loadPhotoObjectUrl(photo.contentUrl).subscribe({
+        next: objectUrl => {
+          this.photoObjectUrls.push(objectUrl);
+          this.photoImageUrls.update(urls => ({ ...urls, [photo.id]: objectUrl }));
+        },
+        error: () => {}
+      });
+    }
+  }
+
+  private revokePhotoObjectUrls(): void {
+    this.photoObjectUrls.forEach(url => this.listingService.revokePhotoObjectUrl(url));
+    this.photoObjectUrls = [];
   }
 
   hasAmenity(key: Amenity['key']): boolean {

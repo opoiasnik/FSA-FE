@@ -1,7 +1,7 @@
 <article class="card" (click)="cardClick.emit()">
   <div class="card__media">
-    <img *ngIf="listing.photos?.[0]?.contentUrl; else cardPhotoPlaceholder"
-         [src]="listing.photos?.[0]?.contentUrl"
+    <img *ngIf="coverImageUrl(); else cardPhotoPlaceholder"
+         [src]="coverImageUrl()"
          [alt]="listing.photos?.[0]?.altText || listing.title"
          loading="lazy" />
     <ng-template #cardPhotoPlaceholder>

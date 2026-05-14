@@ -3,7 +3,7 @@ import { ListingResponse } from '../../features/listings/models/listing.model';
 
 /**
  * Temporary data source for screens whose BE endpoints don't exist yet
- * (favourites, messages, viewings, owner dashboard stats, owner profiles).
+ * (messages, owner profiles).
  * Replace per-method calls with real HTTP services as BE catches up.
  */
 
@@ -42,14 +42,6 @@ export interface ViewingEntry {
   status: 'confirmed' | 'pending' | 'cancelled';
 }
 
-export interface OwnerStats {
-  activeListings: number;
-  totalViews: number;
-  savedByUsers: number;
-  openConversations: number;
-  viewsTrend: number[];
-}
-
 export interface SavedSearch {
   id: string;
   label: string;
@@ -65,14 +57,6 @@ export class MockDataService {
     { id: 4, name: 'Lenka Dobrá', role: 'Agency · Urbania', verified: true, premium: true, rating: 5.0, responseRate: 100, avatarHue: 140 }
   ];
 
-  private readonly ownerStats: OwnerStats = {
-    activeListings: 3,
-    totalViews: 1843,
-    savedByUsers: 74,
-    openConversations: 5,
-    viewsTrend: [42, 55, 61, 58, 70, 82, 91, 86, 95, 110, 128, 142, 138, 156]
-  };
-
   private readonly savedSearches: SavedSearch[] = [
     { id: 'ss1', label: '2-izbový, Bratislava, do 1 100 €', count: 14 },
     { id: 'ss2', label: 'Dom, Košice, do 280 000 €', count: 6 }
@@ -84,10 +68,6 @@ export class MockDataService {
 
   getOwner(id: number): OwnerProfile | undefined {
     return this.owners.find(o => o.id === id);
-  }
-
-  getOwnerStats(): OwnerStats {
-    return this.ownerStats;
   }
 
   getSavedSearches(): SavedSearch[] {

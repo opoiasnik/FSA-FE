@@ -30,7 +30,14 @@ export class ApiService {
     return this.http.delete<T>(this.url(path));
   }
 
+  getBlob(path: string): Observable<Blob> {
+    return this.http.get(this.url(path), { responseType: 'blob' });
+  }
+
   private url(path: string): string {
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith(this.base)) {
+      return path;
+    }
     return `${this.base}${path}`;
   }
 

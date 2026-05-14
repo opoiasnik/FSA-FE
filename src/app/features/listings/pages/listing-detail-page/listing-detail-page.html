@@ -16,10 +16,10 @@
   <ng-container *ngIf="listing() as item">
     <div class="gallery" *ngIf="item.photos?.length; else placeholderGallery">
       <div class="gallery__photo gallery__main" *ngFor="let photo of item.photos | slice:0:1">
-        <img [src]="photo.contentUrl" [alt]="photo.altText || item.title" />
+        <img *ngIf="photoImageUrls()[photo.id]" [src]="photoImageUrls()[photo.id]" [alt]="photo.altText || item.title" />
       </div>
       <div class="gallery__photo" *ngFor="let photo of item.photos | slice:1:5">
-        <img [src]="photo.contentUrl" [alt]="photo.altText || item.title" />
+        <img *ngIf="photoImageUrls()[photo.id]" [src]="photoImageUrls()[photo.id]" [alt]="photo.altText || item.title" />
       </div>
     </div>
     <ng-template #placeholderGallery>

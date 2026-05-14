@@ -1,5 +1,4 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { firstValueFrom } from 'rxjs';
@@ -7,6 +6,8 @@ import { authCodeFlowConfig } from '../config/auth-code-flow.config';
 import { UserModel } from '../models/user.model';
 import { UserProfileDto } from '../models/user-profile.model';
 import { KeycloakTokenService } from '../auth/keycloak-token.service';
+import { ApiService } from './api.service';
+import { ImageContentService } from './image-content.service';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -14,6 +15,7 @@ export class UserService {
   private readonly _avatarUrl = signal<string | null>(null);
   private readonly _phone = signal<string | null>(null);
   private readonly _bio = signal<string | null>(null);
+  private avatarObjectUrl: string | null = null;
   readonly avatarUrl = this._avatarUrl.asReadonly();
   readonly phone = this._phone.asReadonly();
   readonly bio = this._bio.asReadonly();
@@ -22,7 +24,8 @@ export class UserService {
     private readonly oauthService: OAuthService,
     private readonly keycloakTokenService: KeycloakTokenService,
     private readonly router: Router,
-    private readonly http: HttpClient,
+    private readonly api: ApiService,
+    private readonly imageContentService: ImageContentService,
   ) {
     this.oauthService.configure(authCodeFlowConfig);
   }
@@ -76,7 +79,7 @@ export class UserService {
   }
 
   updateAvatarUrl(url: string | null): void {
-    this._avatarUrl.set(url);
+    void this.setAvatarFromContentUrl(url);
   }
 
   updateProfile(name: string, surname: string, email: string, phone: string | null, bio: string | null): void {
@@ -114,21 +117,41 @@ export class UserService {
 
   private clearUserState(): void {
     this.userState.set(undefined);
-    this._avatarUrl.set(null);
+    this.clearAvatarObjectUrl();
     this._phone.set(null);
     this._bio.set(null);
   }
 
   private async loadUserProfile(): Promise<void> {
     try {
-      const dto = await firstValueFrom(this.http.get<UserProfileDto>('/api/user'));
+      const dto = await firstValueFrom(this.api.get<UserProfileDto>('/user'));
       this.userState.update(u => u ? { ...u, name: dto.name, surname: dto.surname, email: dto.email } : u);
-      this._avatarUrl.set(dto.avatarUrl);
+      await this.setAvatarFromContentUrl(dto.avatarUrl);
       this._phone.set(dto.phone);
       this._bio.set(dto.bio);
     } catch {
       // non-critical
     }
+  }
+
+  private async setAvatarFromContentUrl(url: string | null | undefined): Promise<void> {
+    this.clearAvatarObjectUrl();
+    if (!url) {
+      return;
+    }
+
+    try {
+      this.avatarObjectUrl = await firstValueFrom(this.imageContentService.loadObjectUrl(url));
+      this._avatarUrl.set(this.avatarObjectUrl);
+    } catch {
+      this._avatarUrl.set(null);
+    }
+  }
+
+  private clearAvatarObjectUrl(): void {
+    this.imageContentService.revokeObjectUrl(this.avatarObjectUrl);
+    this.avatarObjectUrl = null;
+    this._avatarUrl.set(null);
   }
 
   private readAccessTokenClaims(token: string): Record<string, unknown> | null {

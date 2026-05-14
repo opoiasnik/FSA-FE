@@ -3,13 +3,35 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
-import { MockDataService, OwnerStats } from '../../../../shared/services/mock-data.service';
+import { OwnerService, OwnerStats } from '../../services/owner.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ListingResponse } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
 import { ViewingRequestResponse, ViewingService } from '../../../viewings/services/viewing.service';
 
 interface StatCard { label: string; value: string; delta: string; tone: 'up' | 'down' | 'flat'; }
+
+// Pure SVG drawing space — labels are HTML, not SVG text
+const CW = 300;
+const CH = 80;
+
+interface ChartData {
+  linePath: string;
+  fillPath: string;
+  gridY: number[];
+  yMax: number;
+  yMid: number;
+  xLabels: string[];
+  hasData: boolean;
+}
+
+interface HoveredPoint {
+  pct: number;    // 0..1, position along x axis
+  svgX: number;   // SVG coordinate x
+  svgY: number;   // SVG coordinate y (for dot)
+  date: string;
+  views: number;
+}
 
 @Component({
   selector: 'app-owner-dashboard-page',
@@ -22,37 +44,113 @@ export class OwnerDashboardPage implements OnInit {
   private readonly router = inject(Router);
   private readonly listingService = inject(ListingService);
   private readonly viewingService = inject(ViewingService);
-  private readonly mocks = inject(MockDataService);
+  private readonly ownerService = inject(OwnerService);
   private readonly errorHandler = inject(ErrorHandlerService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly listings = signal<ListingResponse[]>([]);
-  readonly stats = signal<OwnerStats>(this.mocks.getOwnerStats());
+  readonly stats = signal<OwnerStats | null>(null);
   readonly viewingRequests = signal<ViewingRequestResponse[]>([]);
 
   readonly statCards = computed<StatCard[]>(() => {
     const s = this.stats();
+    if (!s) return [];
+
+    const trend = s.viewsTrend ?? [];
+    const todayViews   = trend[trend.length - 1] ?? 0;
+    const last7        = trend.slice(-7).reduce((a, b) => a + b, 0);
+    const prev7        = trend.slice(-14, -7).reduce((a, b) => a + b, 0);
+    const viewPct      = prev7 === 0 ? null : Math.round(((last7 - prev7) / prev7) * 100);
+    const viewDelta    = viewPct !== null
+      ? `${viewPct >= 0 ? '+' : ''}${viewPct}% vs last week`
+      : `+${todayViews} today`;
+    const viewTone: 'up' | 'down' | 'flat' =
+      viewPct === null ? (todayViews > 0 ? 'up' : 'flat')
+      : viewPct > 0 ? 'up' : viewPct < 0 ? 'down' : 'flat';
+
     return [
-      { label: 'Active listings', value: String(s.activeListings), delta: '+1 this month', tone: 'up' },
-      { label: 'Total views', value: s.totalViews.toLocaleString('sk-SK'), delta: '+12% week on week', tone: 'up' },
-      { label: 'Saved by users', value: String(s.savedByUsers), delta: '+8 new', tone: 'up' },
-      { label: 'Open conversations', value: String(s.openConversations), delta: '2 need a reply', tone: 'flat' }
+      { label: 'Active listings',    value: String(s.activeListings ?? 0),           delta: 'published',       tone: 'flat' },
+      { label: 'Saved by users',     value: String(s.savedByUsers ?? 0),             delta: 'by renters',      tone: 'up'   },
+      { label: 'Pending viewings',   value: String(s.pendingViewingRequests ?? 0),   delta: 'await review',    tone: 'flat' },
+      { label: 'Total views',        value: String(s.totalViews ?? 0),               delta: viewDelta,         tone: viewTone },
     ];
   });
 
-  readonly trendPath = computed(() => {
-    const pts = this.stats().viewsTrend;
-    const max = Math.max(...pts);
-    const min = Math.min(...pts);
-    const range = max - min || 1;
-    const w = 320, h = 80;
-    return pts.map((v, i) => {
-      const x = (i / (pts.length - 1)) * w;
-      const y = h - ((v - min) / range) * h;
-      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(' ');
+  readonly chart = computed<ChartData>(() => {
+    const trend = this.stats()?.viewsTrend;
+    const empty: ChartData = { linePath: '', fillPath: '', gridY: [], yMax: 0, yMid: 0, xLabels: [], hasData: false };
+    if (!trend || trend.length < 2 || !trend.some(v => v > 0)) return empty;
+
+    const max = Math.max(...trend, 1);
+    const yMax = max <= 10 ? max : Math.ceil(max / 5) * 5;
+    const yMid = Math.round(yMax / 2);
+
+    const toX = (i: number) => (i / (trend.length - 1)) * CW;
+    const toY = (v: number) => CH - (v / yMax) * CH;
+
+    const pts: [number, number][] = trend.map((v, i) => [toX(i), toY(v)]);
+
+    let line = `M ${pts[0][0].toFixed(2)},${pts[0][1].toFixed(2)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const [x0, y0] = pts[i - 1];
+      const [x1, y1] = pts[i];
+      const cx = (x0 + x1) / 2;
+      line += ` C ${cx.toFixed(2)},${y0.toFixed(2)} ${cx.toFixed(2)},${y1.toFixed(2)} ${x1.toFixed(2)},${y1.toFixed(2)}`;
+    }
+    const fill = `${line} L ${CW},${CH} L 0,${CH} Z`;
+
+    const gridY = [0, CH / 2, CH];
+
+    const today = new Date();
+    const fmt = (daysAgo: number) => {
+      const d = new Date(today);
+      d.setDate(d.getDate() - daysAgo);
+      return d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+    };
+    const xLabels = [fmt(trend.length - 1), fmt(Math.floor((trend.length - 1) / 2)), 'Today'];
+
+    return { linePath: line, fillPath: fill, gridY, yMax, yMid, xLabels, hasData: true };
   });
+
+  readonly trendTotal = computed<number>(() =>
+    this.stats()?.viewsTrend?.reduce((a, b) => a + b, 0) ?? 0
+  );
+
+  readonly hoveredPoint = signal<HoveredPoint | null>(null);
+
+  onChartMove(event: MouseEvent): void {
+    const trend = this.stats()?.viewsTrend;
+    if (!trend || !trend.some(v => v > 0)) return;
+
+    const el = event.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+    const idx = Math.round(pct * (trend.length - 1));
+    const snappedPct = idx / (trend.length - 1);
+
+    const max = Math.max(...trend, 1);
+    const yMax = max <= 10 ? max : Math.ceil(max / 5) * 5;
+    const svgX = snappedPct * CW;
+    const svgY = CH - (trend[idx] / yMax) * CH;
+
+    const today = new Date();
+    const d = new Date(today);
+    d.setDate(d.getDate() - (trend.length - 1 - idx));
+    const date = d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+
+    this.hoveredPoint.set({ pct: snappedPct, svgX, svgY, date, views: trend[idx] });
+  }
+
+  onChartLeave(): void {
+    this.hoveredPoint.set(null);
+  }
+
+  tooltipTransform(pct: number): string {
+    if (pct < 0.12) return 'translateX(0)';
+    if (pct > 0.88) return 'translateX(-100%)';
+    return 'translateX(-50%)';
+  }
 
   ngOnInit(): void {
     this.loading.set(true);
@@ -64,6 +162,14 @@ export class OwnerDashboardPage implements OnInit {
       error: err => { this.error.set(this.toMessage(err)); this.loading.set(false); }
     });
     this.loadViewings();
+    this.loadStats();
+  }
+
+  private loadStats(): void {
+    this.ownerService.getStats().subscribe({
+      next: stats => this.stats.set(stats),
+      error: () => this.stats.set(null)
+    });
   }
 
   loadViewings(): void {
