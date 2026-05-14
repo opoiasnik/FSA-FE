@@ -31,6 +31,7 @@ const rolesAccess: Record<AccessAction, Partial<Record<AppRole, boolean>>> = {
   searchListings:     { OWNER: true, USER: true }
 };
 
+
 export function canAccess(action: AccessAction, role: string | null | undefined): boolean {
   if (!role) return false;
   return rolesAccess[action]?.[role as AppRole] === true;
