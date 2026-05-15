@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { UserService } from '../../../../core/services/user.service';
 import { ViewingRequestResponse, ViewingService } from '../../services/viewing.service';
 
 @Component({
@@ -16,11 +17,13 @@ import { ViewingRequestResponse, ViewingService } from '../../services/viewing.s
 export class ViewingsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly viewingService = inject(ViewingService);
+  private readonly userService = inject(UserService);
   private readonly errorHandler = inject(ErrorHandlerService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly items = signal<ViewingRequestResponse[]>([]);
+  readonly ownerMode = this.userService.hasRole('OWNER');
 
   ngOnInit(): void {
     this.load();
@@ -28,7 +31,8 @@ export class ViewingsPage implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.viewingService.getMy().subscribe({
+    const request$ = this.ownerMode ? this.viewingService.getOwner() : this.viewingService.getMy();
+    request$.subscribe({
       next: items => { this.items.set(items ?? []); this.loading.set(false); },
       error: err => { this.error.set(this.errorHandler.toMessage(err)); this.loading.set(false); }
     });
@@ -36,6 +40,20 @@ export class ViewingsPage implements OnInit {
 
   cancel(id: number): void {
     this.viewingService.cancel(id).subscribe({
+      next: updated => this.items.update(list => list.map(v => v.id === id ? updated : v)),
+      error: err => this.error.set(this.errorHandler.toMessage(err))
+    });
+  }
+
+  approve(id: number): void {
+    this.viewingService.approve(id).subscribe({
+      next: updated => this.items.update(list => list.map(v => v.id === id ? updated : v)),
+      error: err => this.error.set(this.errorHandler.toMessage(err))
+    });
+  }
+
+  reject(id: number): void {
+    this.viewingService.reject(id).subscribe({
       next: updated => this.items.update(list => list.map(v => v.id === id ? updated : v)),
       error: err => this.error.set(this.errorHandler.toMessage(err))
     });

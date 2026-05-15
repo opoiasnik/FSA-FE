@@ -19,7 +19,13 @@
               class="thread"
               [class.thread--on]="selectedId() === t.id"
               (click)="select(t.id)">
-        <app-avatar [name]="peerName(t)" [hue]="t.peer.id" [verified]="t.peer.role === 'OWNER'" [size]="44"></app-avatar>
+        <app-avatar
+          [name]="peerName(t)"
+          [hue]="t.peer.id"
+          [verified]="t.peer.role === 'OWNER'"
+          [size]="44"
+          [imageUrl]="peerAvatarUrls()[t.peer.id]">
+        </app-avatar>
         <div class="thread__body">
           <div class="thread__top">
             <strong>{{ peerName(t) }}</strong>
@@ -33,7 +39,13 @@
 
     <section class="inbox__conversation" *ngIf="selected() as conv; else pickOne">
       <header class="inbox__conv-head">
-        <app-avatar [name]="peerName(conv)" [hue]="conv.peer.id" [verified]="conv.peer.role === 'OWNER'" [size]="40"></app-avatar>
+        <app-avatar
+          [name]="peerName(conv)"
+          [hue]="conv.peer.id"
+          [verified]="conv.peer.role === 'OWNER'"
+          [size]="40"
+          [imageUrl]="peerAvatarUrls()[conv.peer.id]">
+        </app-avatar>
         <div>
           <strong>{{ peerName(conv) }}</strong>
           <p>{{ peerRole(conv) }}</p>
@@ -68,7 +80,12 @@
     <aside class="inbox__listing" *ngIf="selectedListing() as l">
       <button type="button" class="listing-preview" (click)="openListing(l.id)">
         <div class="listing-preview__media">
-          <app-photo-placeholder [seed]="l.id" [rounded]="0"></app-photo-placeholder>
+          <img *ngIf="listingPhotoUrls()[l.id]; else listingPlaceholder"
+               [src]="listingPhotoUrls()[l.id]"
+               [alt]="l.title" />
+          <ng-template #listingPlaceholder>
+            <app-photo-placeholder [seed]="l.id" [rounded]="0"></app-photo-placeholder>
+          </ng-template>
         </div>
         <div class="listing-preview__body">
           <h3>{{ l.title }}</h3>

@@ -8,6 +8,7 @@ export type ViewingStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
 export interface ViewingUser {
   id?: number;
   name: string;
+  surname?: string;
   email: string;
   role: 'OWNER' | 'USER';
 }

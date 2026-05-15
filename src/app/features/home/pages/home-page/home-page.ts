@@ -10,7 +10,6 @@ import { ListingService } from '../../../listings/services/listing.service';
 import { SearchPill, SearchPillValues } from '../../../../shared/component/search-pill/search-pill';
 import { HeroSection } from '../../components/hero-section/hero-section';
 import { ListingsCarousel } from '../../components/listings-carousel/listings-carousel';
-import { ModeTabs } from '../../components/mode-tabs/mode-tabs';
 import { PopularRegions } from '../../components/popular-regions/popular-regions';
 import { PropertyTypes } from '../../components/property-types/property-types';
 
@@ -24,7 +23,6 @@ import { PropertyTypes } from '../../components/property-types/property-types';
     MessageModule,
     HeroSection,
     SearchPill,
-    ModeTabs,
     ListingsCarousel,
     PropertyTypes,
     PopularRegions,
