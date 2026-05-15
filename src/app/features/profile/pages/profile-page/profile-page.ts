@@ -60,6 +60,15 @@ export class ProfilePage implements OnInit {
 
   private originalForm = { name: '', surname: '', email: '', phone: '', bio: '' };
 
+  memberSince(): string {
+    const createdAt = this.userService.createdAt();
+    if (!createdAt) {
+      return '';
+    }
+    return new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' })
+      .format(new Date(createdAt));
+  }
+
   get isDirty(): boolean {
     return this.form.name    !== this.originalForm.name
         || this.form.surname !== this.originalForm.surname

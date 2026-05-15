@@ -15,12 +15,14 @@ export class UserService {
   private readonly _avatarUrl = signal<string | null>(null);
   private readonly _phone = signal<string | null>(null);
   private readonly _bio = signal<string | null>(null);
+  private readonly _createdAt = signal<string | null>(null);
   private readonly _emailVerified = signal(false);
   private readonly _emailVerificationPending = signal(false);
   private avatarObjectUrl: string | null = null;
   readonly avatarUrl = this._avatarUrl.asReadonly();
   readonly phone = this._phone.asReadonly();
   readonly bio = this._bio.asReadonly();
+  readonly createdAt = this._createdAt.asReadonly();
   readonly emailVerified = this._emailVerified.asReadonly();
   readonly emailVerificationPending = this._emailVerificationPending.asReadonly();
 
@@ -138,6 +140,7 @@ export class UserService {
     this.clearAvatarObjectUrl();
     this._phone.set(null);
     this._bio.set(null);
+    this._createdAt.set(null);
     this._emailVerified.set(false);
     this._emailVerificationPending.set(false);
   }
@@ -147,6 +150,7 @@ export class UserService {
       const dto = await firstValueFrom(this.api.get<UserProfileDto>('/user'));
       this.userState.update(u => u ? { ...u, name: dto.name, surname: dto.surname, email: dto.email } : u);
       await this.setAvatarFromContentUrl(dto.avatarUrl);
+      this._createdAt.set(dto.createdAt);
       this._phone.set(dto.phone);
       this._bio.set(dto.bio);
       this._emailVerified.set(dto.emailVerified);

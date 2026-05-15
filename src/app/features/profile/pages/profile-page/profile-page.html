@@ -47,7 +47,7 @@
     <div>
       <div class="ra-eyebrow">Your account</div>
       <h1>{{ user()?.name }} {{ user()?.surname }}</h1>
-      <p>{{ user()?.email }} · Member since 2024</p>
+      <p>{{ user()?.email }}<span *ngIf="memberSince()"> · Member since {{ memberSince() }}</span></p>
     </div>
   </header>
 

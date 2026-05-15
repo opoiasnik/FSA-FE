@@ -3,6 +3,7 @@ export interface UserProfileDto {
   name: string;
   surname: string;
   email: string;
+  createdAt: string;
   phone: string | null;
   bio: string | null;
   role: string;
