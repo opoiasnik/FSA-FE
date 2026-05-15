@@ -24,4 +24,12 @@ export class ProfileService {
     formData.append('file', file);
     return this.api.post<UserProfileDto>('/user/avatar', formData);
   }
+
+  requestEmailVerification(): Observable<void> {
+    return this.api.post<void>('/user/email-verification', {});
+  }
+
+  confirmEmailVerification(code: string): Observable<UserProfileDto> {
+    return this.api.post<UserProfileDto>('/user/email-verification/confirm', { code });
+  }
 }

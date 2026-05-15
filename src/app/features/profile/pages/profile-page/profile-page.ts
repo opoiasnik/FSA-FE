@@ -1,18 +1,24 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MessageService } from 'primeng/api';
 import { MessageModule } from 'primeng/message';
 import { UserService } from '../../../../core/services/user.service';
 import { Avatar } from '../../../../shared/component/avatar/avatar';
 import { ProfileService } from '../../services/profile.service';
 
-type Tab = 'profile' | 'verification' | 'payments' | 'notifications' | 'security';
+type Tab = 'profile' | 'verification' | 'notifications';
 
 interface NotificationPref {
   key: string;
   label: string;
   body: string;
   channels: { email: boolean; push: boolean };
+}
+
+interface VerificationStep {
+  label: string;
+  status: 'verified' | 'pending' | 'unverified';
 }
 
 @Component({
@@ -25,17 +31,24 @@ interface NotificationPref {
 export class ProfilePage implements OnInit {
   private readonly userService = inject(UserService);
   private readonly profileService = inject(ProfileService);
+  private readonly messageService = inject(MessageService);
 
   @ViewChild('fileInput') private readonly fileInputRef!: ElementRef<HTMLInputElement>;
 
   readonly tab = signal<Tab>('profile');
   readonly user = this.userService.getUserSignal();
   readonly avatarUrl = this.userService.avatarUrl;
+  readonly emailVerified = this.userService.emailVerified;
+  readonly emailVerificationPending = this.userService.emailVerificationPending;
 
   readonly showUploadPanel = signal(false);
   readonly uploading = signal(false);
   readonly saving = signal(false);
+  readonly sendingEmailCode = signal(false);
+  readonly confirmingEmailCode = signal(false);
+  readonly emailVerificationRequested = signal(false);
   readonly isDragOver = signal(false);
+  readonly verificationCode = signal('');
 
   readonly form = {
     name: '',
@@ -58,21 +71,7 @@ export class ProfilePage implements OnInit {
   readonly tabs: { id: Tab; label: string; icon: string }[] = [
     { id: 'profile', label: 'Profile', icon: 'pi-user' },
     { id: 'verification', label: 'Verification', icon: 'pi-shield' },
-    { id: 'payments', label: 'Payments', icon: 'pi-credit-card' },
-    { id: 'notifications', label: 'Notifications', icon: 'pi-bell' },
-    { id: 'security', label: 'Security', icon: 'pi-lock' }
-  ];
-
-  readonly verificationSteps = [
-    { label: 'Email address', done: true },
-    { label: 'Phone number', done: true },
-    { label: 'Government ID', done: false },
-    { label: 'Address of residence', done: false }
-  ];
-
-  readonly paymentMethods = [
-    { brand: 'Visa', last4: '4242', exp: '08 / 28', primary: true },
-    { brand: 'Mastercard', last4: '0909', exp: '02 / 27', primary: false }
+    { id: 'notifications', label: 'Notifications', icon: 'pi-bell' }
   ];
 
   readonly notifications: NotificationPref[] = [
@@ -106,13 +105,23 @@ export class ProfilePage implements OnInit {
       bio: this.form.bio || undefined
     }).subscribe({
       next: dto => {
-        this.userService.updateProfile(dto.name, dto.surname, dto.email, dto.phone, dto.bio);
+        this.userService.updateProfile(
+          dto.name,
+          dto.surname,
+          dto.email,
+          dto.phone,
+          dto.bio,
+          dto.emailVerified,
+          dto.emailVerificationPending,
+        );
         this.form.name    = dto.name;
         this.form.surname = dto.surname ?? '';
         this.form.email   = dto.email;
         this.form.phone   = dto.phone   ?? '';
         this.form.bio     = dto.bio     ?? '';
         this.originalForm = { name: this.form.name, surname: this.form.surname, email: this.form.email, phone: this.form.phone, bio: this.form.bio };
+        this.emailVerificationRequested.set(false);
+        this.verificationCode.set('');
         this.saving.set(false);
       },
       error: () => {
@@ -122,8 +131,81 @@ export class ProfilePage implements OnInit {
   }
 
   verificationProgress(): number {
-    const done = this.verificationSteps.filter(s => s.done).length;
-    return Math.round((done / this.verificationSteps.length) * 100);
+    const steps = this.verificationSteps();
+    const done = steps.filter(s => s.status === 'verified').length;
+    return Math.round((done / steps.length) * 100);
+  }
+
+  verificationSteps(): VerificationStep[] {
+    const status = this.emailVerified()
+      ? 'verified'
+      : this.emailVerificationPending() || this.emailVerificationRequested()
+        ? 'pending'
+        : 'unverified';
+
+    return [
+      { label: 'Email address', status }
+    ];
+  }
+
+  requestEmailVerification(): void {
+    this.sendingEmailCode.set(true);
+    this.profileService.requestEmailVerification().subscribe({
+      next: () => {
+        this.sendingEmailCode.set(false);
+        this.emailVerificationRequested.set(true);
+        this.userService.updateProfile(
+          this.form.name,
+          this.form.surname,
+          this.form.email,
+          this.form.phone || null,
+          this.form.bio || null,
+          false,
+          true,
+        );
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Verification email sent',
+          detail: 'Enter the code from your email to verify the address.'
+        });
+      },
+      error: () => {
+        this.sendingEmailCode.set(false);
+      }
+    });
+  }
+
+  confirmEmailVerification(): void {
+    const code = this.verificationCode().trim();
+    if (!code) {
+      return;
+    }
+
+    this.confirmingEmailCode.set(true);
+    this.profileService.confirmEmailVerification(code).subscribe({
+      next: dto => {
+        this.userService.updateProfile(
+          dto.name,
+          dto.surname,
+          dto.email,
+          dto.phone,
+          dto.bio,
+          dto.emailVerified,
+          dto.emailVerificationPending,
+        );
+        this.confirmingEmailCode.set(false);
+        this.emailVerificationRequested.set(false);
+        this.verificationCode.set('');
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Email verified',
+          detail: 'Your email address is now verified.'
+        });
+      },
+      error: () => {
+        this.confirmingEmailCode.set(false);
+      }
+    });
   }
 
   openAvatarUpload(): void {

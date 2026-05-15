@@ -94,24 +94,31 @@
 
     i { color: var(--text-muted); }
     &.done i { color: var(--accent); }
+    &.pending i { color: #f59e0b; }
 
     span { flex: 1; }
   }
 }
 
-.cards { list-style: none; margin: 0 0 16px; padding: 0; }
+.verify__status {
+  flex: 0 0 auto !important;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-dark);
+}
 
-.pay-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  margin-bottom: 10px;
+.verify__status--pending {
+  color: #b45309;
+}
 
-  strong { font-size: 14px; }
-  p { margin: 2px 0 0; font-size: 12px; color: var(--text-muted); }
+.verify-code {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
 }
 
 .notif {
@@ -128,26 +135,6 @@
   th:nth-child(2), th:nth-child(3), td:nth-child(2), td:nth-child(3) { text-align: center; width: 80px; }
 
   p { margin: 2px 0 0; font-size: 12px; color: var(--text-muted); }
-}
-
-.security__list {
-  list-style: none;
-  margin: 16px 0 0;
-  padding: 0;
-
-  li {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-
-    &:last-child { border-bottom: 0; }
-
-    i { font-size: 18px; color: var(--text-muted); }
-    strong { font-size: 14px; }
-    p { margin: 2px 0 0; font-size: 12px; color: var(--text-muted); }
-  }
 }
 
 // ─── Avatar upload ────────────────────────────────────────────────────────────
@@ -247,4 +234,5 @@
   .profile__tabs { flex-direction: row; overflow-x: auto; }
   .grid-2 { grid-template-columns: 1fr; }
   .span-2 { grid-column: span 1; }
+  .verify-code { grid-template-columns: 1fr; }
 }

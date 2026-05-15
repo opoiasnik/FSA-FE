@@ -6,5 +6,7 @@ export interface UserProfileDto {
   phone: string | null;
   bio: string | null;
   role: string;
+  emailVerified: boolean;
+  emailVerificationPending: boolean;
   avatarUrl: string | null;
 }

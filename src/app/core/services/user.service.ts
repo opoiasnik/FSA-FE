@@ -15,10 +15,14 @@ export class UserService {
   private readonly _avatarUrl = signal<string | null>(null);
   private readonly _phone = signal<string | null>(null);
   private readonly _bio = signal<string | null>(null);
+  private readonly _emailVerified = signal(false);
+  private readonly _emailVerificationPending = signal(false);
   private avatarObjectUrl: string | null = null;
   readonly avatarUrl = this._avatarUrl.asReadonly();
   readonly phone = this._phone.asReadonly();
   readonly bio = this._bio.asReadonly();
+  readonly emailVerified = this._emailVerified.asReadonly();
+  readonly emailVerificationPending = this._emailVerificationPending.asReadonly();
 
   constructor(
     private readonly oauthService: OAuthService,
@@ -82,10 +86,24 @@ export class UserService {
     void this.setAvatarFromContentUrl(url);
   }
 
-  updateProfile(name: string, surname: string, email: string, phone: string | null, bio: string | null): void {
+  updateProfile(
+    name: string,
+    surname: string,
+    email: string,
+    phone: string | null,
+    bio: string | null,
+    emailVerified?: boolean,
+    emailVerificationPending?: boolean,
+  ): void {
     this.userState.update(u => u ? { ...u, name, surname, email } : u);
     this._phone.set(phone);
     this._bio.set(bio);
+    if (emailVerified !== undefined) {
+      this._emailVerified.set(emailVerified);
+    }
+    if (emailVerificationPending !== undefined) {
+      this._emailVerificationPending.set(emailVerificationPending);
+    }
   }
 
   async logout(): Promise<void> {
@@ -120,6 +138,8 @@ export class UserService {
     this.clearAvatarObjectUrl();
     this._phone.set(null);
     this._bio.set(null);
+    this._emailVerified.set(false);
+    this._emailVerificationPending.set(false);
   }
 
   private async loadUserProfile(): Promise<void> {
@@ -129,6 +149,8 @@ export class UserService {
       await this.setAvatarFromContentUrl(dto.avatarUrl);
       this._phone.set(dto.phone);
       this._bio.set(dto.bio);
+      this._emailVerified.set(dto.emailVerified);
+      this._emailVerificationPending.set(dto.emailVerificationPending);
     } catch {
       // non-critical
     }
