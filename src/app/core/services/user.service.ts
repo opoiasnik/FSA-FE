@@ -18,6 +18,9 @@ export class UserService {
   private readonly _createdAt = signal<string | null>(null);
   private readonly _emailVerified = signal(false);
   private readonly _emailVerificationPending = signal(false);
+  private readonly _messageEmailNotifications = signal(true);
+  private readonly _viewingEmailNotifications = signal(true);
+  private readonly _viewingRequestEmailNotifications = signal(true);
   private avatarObjectUrl: string | null = null;
   readonly avatarUrl = this._avatarUrl.asReadonly();
   readonly phone = this._phone.asReadonly();
@@ -25,6 +28,9 @@ export class UserService {
   readonly createdAt = this._createdAt.asReadonly();
   readonly emailVerified = this._emailVerified.asReadonly();
   readonly emailVerificationPending = this._emailVerificationPending.asReadonly();
+  readonly messageEmailNotifications = this._messageEmailNotifications.asReadonly();
+  readonly viewingEmailNotifications = this._viewingEmailNotifications.asReadonly();
+  readonly viewingRequestEmailNotifications = this._viewingRequestEmailNotifications.asReadonly();
 
   constructor(
     private readonly oauthService: OAuthService,
@@ -143,6 +149,9 @@ export class UserService {
     this._createdAt.set(null);
     this._emailVerified.set(false);
     this._emailVerificationPending.set(false);
+    this._messageEmailNotifications.set(true);
+    this._viewingEmailNotifications.set(true);
+    this._viewingRequestEmailNotifications.set(true);
   }
 
   private async loadUserProfile(): Promise<void> {
@@ -155,9 +164,20 @@ export class UserService {
       this._bio.set(dto.bio);
       this._emailVerified.set(dto.emailVerified);
       this._emailVerificationPending.set(dto.emailVerificationPending);
+      this.updateNotificationPreferences(
+        dto.messageEmailNotifications,
+        dto.viewingEmailNotifications,
+        dto.viewingRequestEmailNotifications,
+      );
     } catch {
       // non-critical
     }
+  }
+
+  updateNotificationPreferences(messageEmails: boolean, viewingEmails: boolean, viewingRequestEmails: boolean): void {
+    this._messageEmailNotifications.set(messageEmails);
+    this._viewingEmailNotifications.set(viewingEmails);
+    this._viewingRequestEmailNotifications.set(viewingRequestEmails);
   }
 
   private async setAvatarFromContentUrl(url: string | null | undefined): Promise<void> {

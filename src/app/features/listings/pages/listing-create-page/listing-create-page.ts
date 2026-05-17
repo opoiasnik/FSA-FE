@@ -42,6 +42,7 @@ export class ListingCreatePage {
   readonly createError = signal<string | null>(null);
   readonly selectedPhotos = signal<File[]>([]);
   readonly photoPreviews = signal<string[]>([]);
+  readonly maxYearBuilt = new Date().getFullYear() + 1;
 
   readonly activeStep = computed(() => this.steps[this.currentStep()]);
   readonly isLastStep = computed(() => this.currentStep() === this.steps.length - 1);
@@ -89,6 +90,7 @@ export class ListingCreatePage {
     area: [null as number | null, [Validators.required, Validators.min(1)]],
     roomCount: [null as number | null, [Validators.required, Validators.min(0)]],
     floor: [null as number | null],
+    yearBuilt: [null as number | null, [Validators.min(1800), Validators.max(this.maxYearBuilt)]],
     energyClass: ['' as '' | 'A' | 'B' | 'C' | 'D'],
     furnished: [false],
     parkingAvailable: [false],
@@ -167,7 +169,8 @@ export class ListingCreatePage {
         balcony: v.balcony,
         elevator: v.elevator,
         petsAllowed: v.petsAllowed,
-        energyClass: v.energyClass || undefined
+        energyClass: v.energyClass || undefined,
+        yearBuilt: v.yearBuilt != null ? Number(v.yearBuilt) : undefined
       }
     };
 

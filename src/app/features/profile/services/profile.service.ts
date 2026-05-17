@@ -11,6 +11,12 @@ export interface UpdateProfileRequest {
   bio?: string;
 }
 
+export interface UpdateNotificationPreferencesRequest {
+  messageEmailNotifications: boolean;
+  viewingEmailNotifications: boolean;
+  viewingRequestEmailNotifications: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   private readonly api = inject(ApiService);
@@ -31,5 +37,9 @@ export class ProfileService {
 
   confirmEmailVerification(code: string): Observable<UserProfileDto> {
     return this.api.post<UserProfileDto>('/user/email-verification/confirm', { code });
+  }
+
+  updateNotificationPreferences(request: UpdateNotificationPreferencesRequest): Observable<UserProfileDto> {
+    return this.api.patch<UserProfileDto>('/user/notification-preferences', request);
   }
 }

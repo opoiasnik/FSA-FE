@@ -9,5 +9,8 @@ export interface UserProfileDto {
   role: string;
   emailVerified: boolean;
   emailVerificationPending: boolean;
+  messageEmailNotifications: boolean;
+  viewingEmailNotifications: boolean;
+  viewingRequestEmailNotifications: boolean;
   avatarUrl: string | null;
 }

@@ -68,6 +68,7 @@
         <label class="field"><span>Area (m²) <span class="req">*</span></span><input type="number" class="ra-input" [class.ra-input--invalid]="isFieldInvalid('area')" formControlName="area" /></label>
         <label class="field"><span>Rooms <span class="req">*</span></span><input type="number" class="ra-input" [class.ra-input--invalid]="isFieldInvalid('roomCount')" formControlName="roomCount" /></label>
         <label class="field"><span>Floor</span><input type="number" class="ra-input" formControlName="floor" /></label>
+        <label class="field"><span>Year built</span><input type="number" class="ra-input" [class.ra-input--invalid]="isFieldInvalid('yearBuilt')" formControlName="yearBuilt" placeholder="Optional" min="1800" [max]="maxYearBuilt" /></label>
         <label class="field">
           <span>Energy class</span>
           <select class="ra-input" formControlName="energyClass">
@@ -155,6 +156,7 @@
               <span class="ra-pill">{{ form.controls.area.value }} m²</span>
               <span class="ra-pill">{{ form.controls.roomCount.value }} rooms</span>
               <span class="ra-pill">Floor {{ form.controls.floor.value }}</span>
+              <span class="ra-pill" *ngIf="form.controls.yearBuilt.value">Built {{ form.controls.yearBuilt.value }}</span>
               <span class="ra-pill ra-pill--success">Energy {{ form.controls.energyClass.value }}</span>
             </div>
             <div class="review__price">{{ form.controls.amount.value }} {{ form.controls.currency.value }}

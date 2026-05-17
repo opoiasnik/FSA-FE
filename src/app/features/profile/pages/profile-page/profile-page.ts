@@ -10,10 +10,10 @@ import { ProfileService } from '../../services/profile.service';
 type Tab = 'profile' | 'verification' | 'notifications';
 
 interface NotificationPref {
-  key: string;
+  key: 'messageEmailNotifications' | 'viewingEmailNotifications' | 'viewingRequestEmailNotifications';
   label: string;
   body: string;
-  channels: { email: boolean; push: boolean };
+  audience?: 'owner' | 'user';
 }
 
 interface VerificationStep {
@@ -46,6 +46,7 @@ export class ProfilePage implements OnInit {
   readonly saving = signal(false);
   readonly sendingEmailCode = signal(false);
   readonly confirmingEmailCode = signal(false);
+  readonly savingNotificationPreferences = signal(false);
   readonly emailVerificationRequested = signal(false);
   readonly isDragOver = signal(false);
   readonly verificationCode = signal('');
@@ -84,10 +85,9 @@ export class ProfilePage implements OnInit {
   ];
 
   readonly notifications: NotificationPref[] = [
-    { key: 'new-match', label: 'New listing matches', body: 'When a listing matches your saved search.', channels: { email: true, push: true } },
-    { key: 'message', label: 'New messages', body: 'Chat replies from owners or tenants.', channels: { email: false, push: true } },
-    { key: 'viewing', label: 'Viewing reminders', body: '24h before a scheduled viewing.', channels: { email: true, push: true } },
-    { key: 'promo', label: 'Tips & product news', body: 'Occasional updates. No spam.', channels: { email: false, push: false } }
+    { key: 'messageEmailNotifications', label: 'New messages', body: 'Email me when another user sends a chat message.' },
+    { key: 'viewingEmailNotifications', label: 'Viewing request status', body: 'Email me when an owner approves or rejects my viewing request.', audience: 'user' },
+    { key: 'viewingRequestEmailNotifications', label: 'New viewing requests', body: 'Email me when someone requests a viewing for my listing.', audience: 'owner' }
   ];
 
   ngOnInit(): void {
@@ -213,6 +213,53 @@ export class ProfilePage implements OnInit {
       },
       error: () => {
         this.confirmingEmailCode.set(false);
+      }
+    });
+  }
+
+  notificationValue(key: NotificationPref['key']): boolean {
+    switch (key) {
+      case 'messageEmailNotifications':
+        return this.userService.messageEmailNotifications();
+      case 'viewingEmailNotifications':
+        return this.userService.viewingEmailNotifications();
+      case 'viewingRequestEmailNotifications':
+        return this.userService.viewingRequestEmailNotifications();
+    }
+  }
+
+  visibleNotifications(): NotificationPref[] {
+    return this.notifications.filter(n => {
+      if (!n.audience) {
+        return true;
+      }
+
+      return n.audience === 'owner'
+        ? this.userService.hasRole('OWNER')
+        : this.userService.hasRole('USER');
+    });
+  }
+
+  toggleNotificationPreference(key: NotificationPref['key']): void {
+    const next = {
+      messageEmailNotifications: this.userService.messageEmailNotifications(),
+      viewingEmailNotifications: this.userService.viewingEmailNotifications(),
+      viewingRequestEmailNotifications: this.userService.viewingRequestEmailNotifications()
+    };
+
+    next[key] = !next[key];
+    this.savingNotificationPreferences.set(true);
+    this.profileService.updateNotificationPreferences(next).subscribe({
+      next: dto => {
+        this.userService.updateNotificationPreferences(
+          dto.messageEmailNotifications,
+          dto.viewingEmailNotifications,
+          dto.viewingRequestEmailNotifications,
+        );
+        this.savingNotificationPreferences.set(false);
+      },
+      error: () => {
+        this.savingNotificationPreferences.set(false);
       }
     });
   }

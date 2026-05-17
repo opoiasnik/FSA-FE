@@ -112,9 +112,12 @@
             </button>
             <button type="button" class="ra-btn ra-btn--ghost ra-btn--lg"
                     [disabled]="!canBookViewing()" (click)="openViewingForm()">
-              <i class="pi pi-calendar"></i>Book a viewing
+              <i class="pi pi-calendar"></i>{{ loadingCurrentViewingRequest() ? 'Checking request' : currentViewingRequest() ? 'Viewing request sent' : 'Book a viewing' }}
             </button>
-            <p *ngIf="viewingSuccess()" class="viewing-form__success">Viewing request sent.</p>
+            <p *ngIf="currentViewingRequest() as request" class="viewing-form__success">
+              {{ request.status === 'APPROVED' ? 'Viewing request approved.' : 'Viewing request sent.' }}
+            </p>
+            <p *ngIf="viewingSuccess() && !currentViewingRequest()" class="viewing-form__success">Viewing request sent.</p>
             <button type="button" class="ra-btn ra-btn--text">
               <i class="pi pi-phone"></i>Show phone number
             </button>

@@ -13,7 +13,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { UserService } from '../../../../core/services/user.service';
 import { FavoriteStore } from '../../../favourites/services/favorite.store';
 import { MessageService } from '../../../messages/services/message.service';
-import { ViewingService } from '../../../viewings/services/viewing.service';
+import { ViewingRequestResponse, ViewingService, ViewingStatus } from '../../../viewings/services/viewing.service';
 import { ListingResponse } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
@@ -62,17 +62,23 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   readonly creatingViewing = signal(false);
   readonly viewingError = signal<string | null>(null);
   readonly viewingSuccess = signal(false);
+  readonly currentViewingRequest = signal<ViewingRequestResponse | null>(null);
+  readonly loadingCurrentViewingRequest = signal(false);
   readonly openingConversation = signal(false);
   readonly today = new Date();
   private photoObjectUrls: string[] = [];
 
   readonly canBookViewing = computed(() => {
+    return this.canContactOwner() && !this.loadingCurrentViewingRequest() && !this.hasActiveViewingRequest();
+  });
+  readonly canMessageOwner = computed(() => this.canContactOwner());
+
+  private canContactOwner(): boolean {
     const item = this.listing();
     if (!item || !this.userService.isUserLoggedIn()) return false;
     const userEmail = this.userService.getUserSnapshot()?.email;
     return !!userEmail && item.owner?.email !== userEmail;
-  });
-  readonly canMessageOwner = computed(() => this.canBookViewing());
+  }
 
   readonly owner = computed(() => {
     const item = this.listing();
@@ -156,6 +162,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
       next: (listing) => {
         this.listing.set(listing);
         this.loadPhotoContents(listing);
+        this.loadCurrentViewingRequest(listing.id);
         this.loading.set(false);
         this.listingService.recordView(id).subscribe({ error: () => {} });
       },
@@ -215,6 +222,9 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   }
 
   openViewingForm(): void {
+    if (this.hasActiveViewingRequest()) {
+      return;
+    }
     this.viewingError.set(null);
     this.viewingSuccess.set(false);
     this.viewingForm.set(true);
@@ -247,7 +257,8 @@ export class ListingDetailPage implements OnInit, OnDestroy {
       requestedDate: date.toISOString(),
       note: this.viewingNote() || undefined
     }).subscribe({
-      next: () => {
+      next: viewingRequest => {
+        this.currentViewingRequest.set(viewingRequest);
         this.viewingSuccess.set(true);
         this.creatingViewing.set(false);
         this.viewingForm.set(false);
@@ -263,5 +274,36 @@ export class ListingDetailPage implements OnInit, OnDestroy {
 
   private toMessage(error: unknown): string {
     return this.errorHandler.toMessage(error);
+  }
+
+  private loadCurrentViewingRequest(listingId: number): void {
+    this.currentViewingRequest.set(null);
+    if (!this.userService.isUserLoggedIn()) {
+      return;
+    }
+
+    this.loadingCurrentViewingRequest.set(true);
+    this.viewingService.getMy().subscribe({
+      next: requests => {
+        const current = (requests ?? []).find(request =>
+          request.listing.id === listingId && this.isActiveViewingStatus(request.status)
+        );
+        this.currentViewingRequest.set(current ?? null);
+        this.loadingCurrentViewingRequest.set(false);
+      },
+      error: () => {
+        this.currentViewingRequest.set(null);
+        this.loadingCurrentViewingRequest.set(false);
+      }
+    });
+  }
+
+  private hasActiveViewingRequest(): boolean {
+    const request = this.currentViewingRequest();
+    return !!request && this.isActiveViewingStatus(request.status);
+  }
+
+  private isActiveViewingStatus(status: ViewingStatus): boolean {
+    return status === 'PENDING' || status === 'APPROVED';
   }
 }
