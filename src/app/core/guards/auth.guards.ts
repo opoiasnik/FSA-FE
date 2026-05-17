@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { canAccess } from '../access/access';
 import { UserService } from '../services/user.service';
 
 export const isLoggedInGuard: CanActivateFn = async (_, state) => {
@@ -44,7 +45,7 @@ export const isOwnerGuard: CanActivateFn = async (_, state) => {
     return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
   }
 
-  if (userService.hasRole('OWNER')) {
+  if (user.roles.some(role => canAccess('viewOwnerStudio', role))) {
     return true;
   }
 

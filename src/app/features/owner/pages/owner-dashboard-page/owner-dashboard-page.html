@@ -121,7 +121,12 @@
   <div class="ra-card dash__list">
     <div class="dash__list-head">
       <h2>Your listings</h2>
-      <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm">Export CSV</button>
+      <button type="button"
+              class="ra-btn ra-btn--ghost ra-btn--sm"
+              [disabled]="loading() || !listings().length"
+              (click)="exportCsv()">
+        Export CSV
+      </button>
     </div>
 
     <div *ngIf="loading()" class="skeleton-rows">

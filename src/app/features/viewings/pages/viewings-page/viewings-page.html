@@ -1,8 +1,8 @@
 <section class="viewings">
   <header class="viewings__head">
-    <div class="ra-eyebrow">{{ ownerMode ? 'Owner activity' : 'Your activity' }}</div>
+    <div class="ra-eyebrow">{{ ownerMode() ? 'Owner activity' : 'Your activity' }}</div>
     <h1>Viewing requests</h1>
-    <p>{{ ownerMode ? 'Review requests sent to your listings.' : 'Track requests you have sent to property owners.' }}</p>
+    <p>{{ ownerMode() ? 'Review requests sent to your listings.' : 'Track requests you have sent to property owners.' }}</p>
   </header>
 
   <p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
@@ -16,10 +16,10 @@
       <div class="viewing__main" (click)="open(v.listing.id)">
         <h3>{{ v.listing.title }}</h3>
         <p class="viewing__city">{{ v.listing.city }}</p>
-        <p *ngIf="ownerMode && v.requester" class="viewing__person">
+        <p *ngIf="ownerMode() && v.requester" class="viewing__person">
           <i class="pi pi-user"></i>{{ v.requester.name }} {{ v.requester.surname || '' }}
         </p>
-        <p *ngIf="!ownerMode && v.owner" class="viewing__person">
+        <p *ngIf="!ownerMode() && v.owner" class="viewing__person">
           <i class="pi pi-user"></i>{{ v.owner.name }} {{ v.owner.surname || '' }}
         </p>
         <p class="viewing__date"><i class="pi pi-calendar"></i> {{ v.requestedDate | date:'medium' }}</p>
@@ -31,7 +31,7 @@
               [class.viewing__status--danger]="v.status === 'REJECTED' || v.status === 'CANCELLED'">
           {{ v.status }}
         </span>
-        <ng-container *ngIf="ownerMode && v.status === 'PENDING'">
+        <ng-container *ngIf="ownerMode() && v.status === 'PENDING'">
           <button type="button" class="ra-btn ra-btn--sm viewing__approve" (click)="approve(v.id)">
             Approve
           </button>
@@ -39,7 +39,7 @@
             Reject
           </button>
         </ng-container>
-        <button *ngIf="!ownerMode && (v.status === 'PENDING' || v.status === 'APPROVED')"
+        <button *ngIf="!ownerMode() && (v.status === 'PENDING' || v.status === 'APPROVED')"
                 type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="cancel(v.id)">
           Cancel
         </button>
@@ -47,7 +47,7 @@
     </li>
 
     <li *ngIf="!items().length" class="viewings__empty">
-      {{ ownerMode ? 'No viewing requests for your listings yet.' : 'You have not requested any viewings yet.' }}
+      {{ ownerMode() ? 'No viewing requests for your listings yet.' : 'You have not requested any viewings yet.' }}
     </li>
   </ul>
 </section>

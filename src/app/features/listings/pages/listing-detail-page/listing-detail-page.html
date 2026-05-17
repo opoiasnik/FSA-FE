@@ -49,11 +49,11 @@
 
           <div class="actions">
             <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm"><i class="pi pi-share-alt"></i>Share</button>
-            <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="toggleSave()">
+            <button *ngIf="!isOwnListing()" type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="toggleSave()">
               <i class="pi" [class.pi-heart-fill]="saved()" [class.pi-heart]="!saved()" [style.color]="saved() ? 'var(--accent)' : ''"></i>
               {{ saved() ? 'Saved' : 'Save' }}
             </button>
-            <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm"><i class="pi pi-flag"></i>Report</button>
+            <button *ngIf="!isOwnListing()" type="button" class="ra-btn ra-btn--ghost ra-btn--sm"><i class="pi pi-flag"></i>Report</button>
           </div>
         </div>
 
@@ -98,6 +98,11 @@
           </div>
           <div class="price-row__sub" *ngIf="pricePerSqm()">approx. {{ pricePerSqm() }}</div>
 
+          <div *ngIf="canViewListingStats()" class="listing-views">
+            <i class="pi pi-eye"></i>
+            <span>{{ listingViews() }} views</span>
+          </div>
+
           <div class="owner">
             <app-avatar [name]="own.name" [hue]="own.avatarHue" [size]="44" [verified]="own.verified"></app-avatar>
             <div class="owner__meta">
@@ -106,6 +111,20 @@
             </div>
           </div>
 
+          <div *ngIf="isOwnListing(); else renterActions" class="owner-tools">
+            <div class="owner-tools__icon">
+              <i class="pi pi-home"></i>
+            </div>
+            <div>
+              <h3>This is your listing</h3>
+              <p>Manage viewing requests, listing performance, and owner tools from your studio.</p>
+            </div>
+            <a routerLink="/owner" class="ra-btn ra-btn--lg">
+              <i class="pi pi-chart-line"></i>Open Owner Studio
+            </a>
+          </div>
+
+          <ng-template #renterActions>
           <div class="sidebar__actions">
             <button type="button" class="ra-btn ra-btn--lg" (click)="openMessages()" [disabled]="!canMessageOwner() || openingConversation()">
               <i class="pi pi-send"></i>Message {{ own.name.split(' ')[0] }}
@@ -122,8 +141,9 @@
               <i class="pi pi-phone"></i>Show phone number
             </button>
           </div>
+          </ng-template>
 
-          <div class="sidebar__notice">
+          <div *ngIf="!isOwnListing()" class="sidebar__notice">
             <i class="pi pi-shield"></i>
             Owner verified via government ID. Never wire money before a viewing.
           </div>

@@ -3,8 +3,8 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
+import { AccessService } from '../../../../core/access/access';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { UserService } from '../../../../core/services/user.service';
 import { ViewingRequestResponse, ViewingService } from '../../services/viewing.service';
 
 @Component({
@@ -17,13 +17,13 @@ import { ViewingRequestResponse, ViewingService } from '../../services/viewing.s
 export class ViewingsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly viewingService = inject(ViewingService);
-  private readonly userService = inject(UserService);
+  private readonly access = inject(AccessService);
   private readonly errorHandler = inject(ErrorHandlerService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly items = signal<ViewingRequestResponse[]>([]);
-  readonly ownerMode = this.userService.hasRole('OWNER');
+  readonly ownerMode = this.access.can('manageViewingRequests');
 
   ngOnInit(): void {
     this.load();
@@ -31,7 +31,7 @@ export class ViewingsPage implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    const request$ = this.ownerMode ? this.viewingService.getOwner() : this.viewingService.getMy();
+    const request$ = this.ownerMode() ? this.viewingService.getOwner() : this.viewingService.getMy();
     request$.subscribe({
       next: items => { this.items.set(items ?? []); this.loading.set(false); },
       error: err => { this.error.set(this.errorHandler.toMessage(err)); this.loading.set(false); }

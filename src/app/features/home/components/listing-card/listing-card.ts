@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
+import { AccessService } from '../../../../core/access/access';
 import { FavoriteStore } from '../../../favourites/services/favorite.store';
-import { UserService } from '../../../../core/services/user.service';
 import { ListingSummary } from '../../../listings/models/listing.model';
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 
@@ -19,10 +19,10 @@ export class ListingCard {
   @Input() badge = 'Top offer';
 
   private readonly favoriteStore = inject(FavoriteStore);
-  private readonly userService = inject(UserService);
+  private readonly access = inject(AccessService);
 
   readonly isFavorite = computed(() => this.favoriteStore.isFavorite(this.listing.id));
-  readonly canFavorite = computed(() => this.userService.isUserLoggedIn());
+  readonly canFavorite = this.access.can('saveFavorite');
 
   get imageUrl(): string | null {
     return this.listing.coverPhoto?.contentUrl ?? null;

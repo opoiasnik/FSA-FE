@@ -193,6 +193,55 @@ export class OwnerDashboardPage implements OnInit {
     });
   }
 
+  exportCsv(): void {
+    const rows = this.listings();
+    if (!rows.length) {
+      return;
+    }
+
+    const header = [
+      'ID',
+      'Title',
+      'City',
+      'Address',
+      'Price',
+      'Currency',
+      'Deal',
+      'Status',
+      'Property type',
+      'Area',
+      'Rooms',
+      'Floor',
+      'Year built',
+      'Created at'
+    ];
+
+    const csvRows = rows.map(listing => [
+      listing.id,
+      listing.title,
+      listing.address.city,
+      [listing.address.street, listing.address.district, listing.address.postalCode, listing.address.country]
+        .filter(Boolean)
+        .join(', '),
+      listing.price.amount,
+      listing.price.currency,
+      listing.listingType,
+      listing.status,
+      listing.features.propertyType,
+      listing.features.area ?? '',
+      listing.features.roomCount ?? '',
+      listing.features.floor ?? '',
+      listing.features.yearBuilt ?? '',
+      listing.createdAt
+    ]);
+
+    const csv = [header, ...csvRows]
+      .map(row => row.map(value => this.escapeCsv(value)).join(','))
+      .join('\r\n');
+
+    this.downloadCsv(csv);
+  }
+
   createListing(): void {
     void this.router.navigate(['/listings/create']);
   }
@@ -208,6 +257,21 @@ export class OwnerDashboardPage implements OnInit {
 
   shortLocation(listing: ListingResponse): string {
     return listing.address.city;
+  }
+
+  private escapeCsv(value: unknown): string {
+    const text = String(value ?? '');
+    return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  }
+
+  private downloadCsv(csv: string): void {
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `rentarea-listings-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   private toMessage(error: unknown): string {

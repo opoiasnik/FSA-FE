@@ -34,8 +34,8 @@ export interface PropertyFeatures {
 
 export interface ListingStats {
   views: number;
-  saves: number;
-  messages: number;
+  saves?: number;
+  messages?: number;
 }
 
 export interface PhotoResponse {

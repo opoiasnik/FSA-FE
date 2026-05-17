@@ -3,6 +3,7 @@ import { Component, ElementRef, OnInit, ViewChild, inject, signal } from '@angul
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { MessageModule } from 'primeng/message';
+import { AccessService } from '../../../../core/access/access';
 import { UserService } from '../../../../core/services/user.service';
 import { Avatar } from '../../../../shared/component/avatar/avatar';
 import { ProfileService } from '../../services/profile.service';
@@ -30,6 +31,7 @@ interface VerificationStep {
 })
 export class ProfilePage implements OnInit {
   private readonly userService = inject(UserService);
+  private readonly access = inject(AccessService);
   private readonly profileService = inject(ProfileService);
   private readonly messageService = inject(MessageService);
 
@@ -40,6 +42,8 @@ export class ProfilePage implements OnInit {
   readonly avatarUrl = this.userService.avatarUrl;
   readonly emailVerified = this.userService.emailVerified;
   readonly emailVerificationPending = this.userService.emailVerificationPending;
+  private readonly canViewOwnerNotificationSettings = this.access.can('viewOwnerNotificationSettings');
+  private readonly canViewUserNotificationSettings = this.access.can('viewUserNotificationSettings');
 
   readonly showUploadPanel = signal(false);
   readonly uploading = signal(false);
@@ -235,8 +239,8 @@ export class ProfilePage implements OnInit {
       }
 
       return n.audience === 'owner'
-        ? this.userService.hasRole('OWNER')
-        : this.userService.hasRole('USER');
+        ? this.canViewOwnerNotificationSettings()
+        : this.canViewUserNotificationSettings();
     });
   }
 

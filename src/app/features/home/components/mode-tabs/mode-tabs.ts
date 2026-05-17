@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, computed, inject } from '@angular/core';
-import { UserService } from '../../../../core/services/user.service';
+import { AccessAction, AccessService } from '../../../../core/access/access';
 
 export type HomeMode = 'listings' | 'favorites' | 'viewings' | 'messages';
 
@@ -12,21 +12,35 @@ export type HomeMode = 'listings' | 'favorites' | 'viewings' | 'messages';
   styleUrl: './mode-tabs.scss'
 })
 export class ModeTabs {
-  private readonly userService = inject(UserService);
+  private readonly access = inject(AccessService);
 
   @Input() active: HomeMode = 'listings';
   @Output() readonly activeChange = new EventEmitter<HomeMode>();
 
-  private readonly allTabs: { id: HomeMode; label: string; icon: string; requiresAuth: boolean }[] = [
-    { id: 'listings', label: 'Listings', icon: 'pi pi-home', requiresAuth: false },
-    { id: 'favorites', label: 'Favorites', icon: 'pi pi-heart', requiresAuth: true },
-    { id: 'viewings', label: 'Viewings', icon: 'pi pi-calendar', requiresAuth: true },
-    { id: 'messages', label: 'Messages', icon: 'pi pi-comments', requiresAuth: true }
+  private readonly allTabs: { id: HomeMode; label: string; icon: string; access?: AccessAction }[] = [
+    { id: 'listings', label: 'Listings', icon: 'pi pi-home' },
+    { id: 'favorites', label: 'Favorites', icon: 'pi pi-heart', access: 'viewFavorites' },
+    { id: 'viewings', label: 'Viewings', icon: 'pi pi-calendar', access: 'viewViewings' },
+    { id: 'messages', label: 'Messages', icon: 'pi pi-comments', access: 'viewMessages' }
   ];
 
+  private readonly canViewFavorites = this.access.can('viewFavorites');
+  private readonly canViewViewings = this.access.can('viewViewings');
+  private readonly canViewMessages = this.access.can('viewMessages');
+
   readonly tabs = computed(() => {
-    const isLoggedIn = this.userService.isUserLoggedIn();
-    return this.allTabs.filter(t => !t.requiresAuth || isLoggedIn);
+    return this.allTabs.filter(tab => {
+      switch (tab.access) {
+        case 'viewFavorites':
+          return this.canViewFavorites();
+        case 'viewViewings':
+          return this.canViewViewings();
+        case 'viewMessages':
+          return this.canViewMessages();
+        default:
+          return true;
+      }
+    });
   });
 
   select(tab: HomeMode): void {

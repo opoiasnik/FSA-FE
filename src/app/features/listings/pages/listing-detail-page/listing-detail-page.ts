@@ -9,6 +9,7 @@ import { Modal } from '../../../../shared/component/modal/modal';
 import { MapView, MapPin } from '../../../../shared/component/map-view/map-view';
 import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 import { formatAmount, fullAddress } from '../../models/listing.helpers';
+import { AccessService } from '../../../../core/access/access';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { UserService } from '../../../../core/services/user.service';
 import { FavoriteStore } from '../../../favourites/services/favorite.store';
@@ -43,6 +44,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly favoriteStore = inject(FavoriteStore);
   private readonly userService = inject(UserService);
+  private readonly access = inject(AccessService);
   private readonly messageService = inject(MessageService);
   private readonly viewingService = inject(ViewingService);
 
@@ -54,7 +56,9 @@ export class ListingDetailPage implements OnInit, OnDestroy {
     const item = this.listing();
     return item ? this.favoriteStore.isFavorite(item.id) : false;
   });
-  readonly canFavorite = computed(() => this.userService.isUserLoggedIn());
+  readonly canFavorite = this.access.can('saveFavorite');
+  private readonly canBookViewingAccess = this.access.can('bookViewing');
+  private readonly canSendMessageAccess = this.access.can('sendMessage');
 
   readonly viewingForm = signal(false);
   readonly viewingDate = signal<Date | null>(null);
@@ -69,15 +73,19 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   private photoObjectUrls: string[] = [];
 
   readonly canBookViewing = computed(() => {
-    return this.canContactOwner() && !this.loadingCurrentViewingRequest() && !this.hasActiveViewingRequest();
+    return this.canBookViewingAccess() && !this.isOwnListing()
+      && !this.loadingCurrentViewingRequest() && !this.hasActiveViewingRequest();
   });
-  readonly canMessageOwner = computed(() => this.canContactOwner());
+  readonly canMessageOwner = computed(() => this.canSendMessageAccess() && !this.isOwnListing());
+  readonly isOwnListing = computed(() => {
+    const item = this.listing();
+    const userEmail = this.userService.getUserSnapshot()?.email;
+    return !!item?.owner?.email && !!userEmail
+      && item.owner.email.trim().toLowerCase() === userEmail.trim().toLowerCase();
+  });
 
   private canContactOwner(): boolean {
-    const item = this.listing();
-    if (!item || !this.userService.isUserLoggedIn()) return false;
-    const userEmail = this.userService.getUserSnapshot()?.email;
-    return !!userEmail && item.owner?.email !== userEmail;
+    return !!this.listing() && this.canSendMessageAccess() && !this.isOwnListing();
   }
 
   readonly owner = computed(() => {
@@ -111,11 +119,14 @@ export class ListingDetailPage implements OnInit, OnDestroy {
     return formatAmount(perM2) + ' / m²';
   });
 
+  readonly listingViews = computed(() => this.listing()?.stats?.views ?? 0);
+  readonly canViewListingStats = this.access.can('viewListingStats');
+
   readonly facts = computed<Fact[]>(() => {
     const item = this.listing();
     if (!item) return [];
     const f = item.features;
-    return [
+    const facts: Fact[] = [
       { icon: 'pi-home', label: 'Type', value: f.propertyType.toLowerCase() },
       { icon: 'pi-expand', label: 'Area', value: f.area ? `${f.area} m²` : '—' },
       { icon: 'pi-th-large', label: 'Rooms', value: f.roomCount?.toString() ?? '—' },
@@ -123,6 +134,8 @@ export class ListingDetailPage implements OnInit, OnDestroy {
       { icon: 'pi-bolt', label: 'Energy', value: f.energyClass ? `Class ${f.energyClass}` : '—' },
       { icon: 'pi-calendar', label: 'Built', value: f.yearBuilt?.toString() ?? '—' }
     ];
+
+    return facts;
   });
 
   readonly amenities: Amenity[] = [
@@ -162,9 +175,13 @@ export class ListingDetailPage implements OnInit, OnDestroy {
       next: (listing) => {
         this.listing.set(listing);
         this.loadPhotoContents(listing);
-        this.loadCurrentViewingRequest(listing.id);
+        if (!this.isOwnListing()) {
+          this.loadCurrentViewingRequest(listing.id);
+        }
         this.loading.set(false);
-        this.listingService.recordView(id).subscribe({ error: () => {} });
+        if (!this.isOwnListing()) {
+          this.listingService.recordView(id).subscribe({ error: () => {} });
+        }
       },
       error: (error) => {
         this.error.set(this.toMessage(error));
@@ -222,7 +239,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   }
 
   openViewingForm(): void {
-    if (this.hasActiveViewingRequest()) {
+    if (!this.canBookViewing()) {
       return;
     }
     this.viewingError.set(null);
@@ -278,7 +295,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
 
   private loadCurrentViewingRequest(listingId: number): void {
     this.currentViewingRequest.set(null);
-    if (!this.userService.isUserLoggedIn()) {
+    if (!this.canBookViewingAccess()) {
       return;
     }
 

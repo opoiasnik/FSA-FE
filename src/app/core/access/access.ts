@@ -7,11 +7,19 @@ export type AccessAction =
   | 'deleteListing'
   | 'activateListing'
   | 'viewOwnerStudio'
+  | 'viewFavorites'
+  | 'viewViewings'
+  | 'viewMessages'
+  | 'manageViewingRequests'
+  | 'viewSentViewingRequests'
   | 'saveFavorite'
   | 'bookViewing'
   | 'sendMessage'
   | 'viewProfile'
+  | 'viewOwnerNotificationSettings'
+  | 'viewUserNotificationSettings'
   | 'viewListingDetails'
+  | 'viewListingStats'
   | 'searchListings';
 
 export type AppRole = 'OWNER' | 'USER';
@@ -22,12 +30,20 @@ const rolesAccess: Record<AccessAction, Partial<Record<AppRole, boolean>>> = {
   deleteListing:      { OWNER: true },
   activateListing:    { OWNER: true },
   viewOwnerStudio:    { OWNER: true },
+  manageViewingRequests: { OWNER: true },
+  viewOwnerNotificationSettings: { OWNER: true },
 
+  viewFavorites:      { OWNER: true, USER: true },
+  viewViewings:       { OWNER: true, USER: true },
+  viewMessages:       { OWNER: true, USER: true },
+  viewSentViewingRequests: { OWNER: true, USER: true },
   saveFavorite:       { OWNER: true, USER: true },
   bookViewing:        { OWNER: true, USER: true },
   sendMessage:        { OWNER: true, USER: true },
   viewProfile:        { OWNER: true, USER: true },
+  viewUserNotificationSettings: { OWNER: true, USER: true },
   viewListingDetails: { OWNER: true, USER: true },
+  viewListingStats:   { OWNER: true, USER: true },
   searchListings:     { OWNER: true, USER: true }
 };
 
