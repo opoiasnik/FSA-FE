@@ -40,7 +40,7 @@ export class HomePage implements OnInit {
   readonly listings = signal<ListingSummary[]>([]);
 
   readonly firstCity       = computed(() => this.listings()[0]?.city ?? 'Featured');
-  readonly featuredListings = computed(() => this.listings().slice(0, 6));
+  readonly featuredListings = computed(() => this.listings().slice(0, 5));
 
   ngOnInit(): void {
     this.favoriteStore.loadIfNeeded();
