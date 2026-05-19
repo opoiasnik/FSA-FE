@@ -18,10 +18,6 @@
 .regions__marquee {
   overflow: hidden;
   width: 100%;
-
-  &:hover .regions__track {
-    animation-play-state: paused;
-  }
 }
 
 .regions__track {
@@ -52,16 +48,7 @@
   cursor: pointer;
   color: var(--text);
   text-decoration: none;
-  transition: color 0.15s ease;
   white-space: nowrap;
-
-  &:hover {
-    color: var(--accent);
-  }
-
-  &:hover .regions__name {
-    text-decoration: underline;
-  }
 }
 
 .regions__code {

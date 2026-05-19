@@ -3,7 +3,6 @@ import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
 import { AppFooter } from './shared/component/app-footer/app-footer';
 import { AppHeader } from './shared/component/app-header/app-header';
 
