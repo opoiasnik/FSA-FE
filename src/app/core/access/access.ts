@@ -62,7 +62,7 @@ export class AccessService {
   can(action: AccessAction) {
     return computed(() => {
       const user = this.userService.getUserSignal()();
-      if (!user) return false;
+      if (!user || !this.userService.isUserLoggedIn()) return false;
       return user.roles.some(role => canAccess(action, role));
     });
   }

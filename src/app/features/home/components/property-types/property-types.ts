@@ -22,6 +22,6 @@ export class PropertyTypes {
   readonly cards: PropertyTypeCard[] = [
     { id: 'apartments', label: 'Apartments', description: 'City flats and studios', icon: 'pi pi-building' },
     { id: 'houses', label: 'Houses', description: 'Family homes and villas', icon: 'pi pi-home' },
-    { id: 'rooms', label: 'Rooms', description: 'Single rooms in shared housing', icon: 'pi pi-bed' }
+    { id: 'rooms', label: 'Rooms', description: 'Single rooms in shared housing', icon: 'pi pi-th-large' }
   ];
 }

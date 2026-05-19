@@ -22,7 +22,7 @@ export const routes: Routes = [
   { path: 'viewings', component: ViewingsPage, canActivate: [isLoggedInWithToastGuard] },
   { path: 'messages', component: MessagesPage, canActivate: [isLoggedInWithToastGuard] },
   { path: 'messages/:id', component: MessagesPage, canActivate: [isLoggedInWithToastGuard] },
-  { path: 'profile', component: ProfilePage },
+  { path: 'profile', component: ProfilePage, canActivate: [isLoggedInWithToastGuard] },
   { path: 'owner', component: OwnerDashboardPage, canActivate: [isOwnerGuard] },
   { path: 'login', component: LoginPage },
   { path: 'register', component: RegisterPage },

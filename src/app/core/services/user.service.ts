@@ -59,8 +59,8 @@ export class UserService {
     this.cleanupOidcParams();
 
     const accessToken = this.oauthService.getAccessToken();
-    if (!accessToken) {
-      this.userState.set(undefined);
+    if (!accessToken || !this.isAccessTokenValid()) {
+      this.clearExpiredSession();
       return undefined;
     }
 
@@ -132,9 +132,7 @@ export class UserService {
 
   isUserLoggedIn(): boolean {
     const currentUser = this.userState();
-    const token = this.oauthService.getAccessToken();
-    const expiration = this.oauthService.getAccessTokenExpiration();
-    return !!currentUser && !!token && expiration > Date.now();
+    return !!currentUser && this.isAccessTokenValid();
   }
 
   hasRole(role: string): boolean {
@@ -152,6 +150,17 @@ export class UserService {
     this._messageEmailNotifications.set(true);
     this._viewingEmailNotifications.set(true);
     this._viewingRequestEmailNotifications.set(true);
+  }
+
+  private clearExpiredSession(): void {
+    this.oauthService.logOut(true);
+    this.clearUserState();
+  }
+
+  private isAccessTokenValid(): boolean {
+    const token = this.oauthService.getAccessToken();
+    const expiration = this.oauthService.getAccessTokenExpiration();
+    return !!token && expiration > Date.now();
   }
 
   private async loadUserProfile(): Promise<void> {

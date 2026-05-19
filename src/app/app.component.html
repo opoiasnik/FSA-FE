@@ -1,10 +1,12 @@
 <p-toast position="bottom-right"></p-toast>
 <app-header></app-header>
 
-<main class="app-content">
-<p-message *ngIf="authError()" severity="error" [text]="authError() || ''"></p-message>
+<div class="app-scroll">
+  <main class="app-content">
+  <p-message *ngIf="authError()" severity="error" [text]="authError() || ''"></p-message>
 
-  <router-outlet></router-outlet>
-</main>
+    <router-outlet></router-outlet>
+  </main>
 
-<app-footer></app-footer>
+  <app-footer></app-footer>
+</div>
