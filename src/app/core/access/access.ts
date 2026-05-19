@@ -6,6 +6,7 @@ export type AccessAction =
   | 'editListing'
   | 'deleteListing'
   | 'activateListing'
+  | 'deactivateListing'
   | 'viewOwnerStudio'
   | 'viewFavorites'
   | 'viewViewings'
@@ -29,6 +30,7 @@ const rolesAccess: Record<AccessAction, Partial<Record<AppRole, boolean>>> = {
   editListing:        { OWNER: true },
   deleteListing:      { OWNER: true },
   activateListing:    { OWNER: true },
+  deactivateListing:  { OWNER: true },
   viewOwnerStudio:    { OWNER: true },
   manageViewingRequests: { OWNER: true },
   viewOwnerNotificationSettings: { OWNER: true },

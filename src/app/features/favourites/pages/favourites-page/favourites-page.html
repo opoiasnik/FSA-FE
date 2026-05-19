@@ -27,7 +27,13 @@
   <div *ngIf="!loading()" class="grid">
     <article *ngFor="let item of filtered()" class="card" (click)="open(item.id)">
       <div class="card__media">
-        <app-photo-placeholder [seed]="item.id" [rounded]="0"></app-photo-placeholder>
+        <img *ngIf="item.coverPhoto?.contentUrl; else photoPlaceholder"
+             [src]="item.coverPhoto?.contentUrl"
+             [alt]="item.title"
+             loading="lazy" />
+        <ng-template #photoPlaceholder>
+          <app-photo-placeholder [seed]="item.id" [rounded]="0"></app-photo-placeholder>
+        </ng-template>
         <button type="button" class="card__remove" (click)="remove($event, item.id)" aria-label="Remove from favourites">
           <i class="pi pi-heart-fill"></i>
         </button>

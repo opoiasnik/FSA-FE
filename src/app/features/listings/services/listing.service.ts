@@ -40,6 +40,14 @@ export class ListingService {
     return this.api.post<ListingResponse>(this.base, payload);
   }
 
+  activate(id: number): Observable<ListingResponse> {
+    return this.api.patch<ListingResponse>(`${this.base}/${id}/activate`);
+  }
+
+  deactivate(id: number): Observable<ListingResponse> {
+    return this.api.patch<ListingResponse>(`${this.base}/${id}/deactivate`);
+  }
+
   uploadPhoto(listingId: number, file: File, altText?: string): Observable<PhotoResponse> {
     const formData = new FormData();
     formData.append('file', file);

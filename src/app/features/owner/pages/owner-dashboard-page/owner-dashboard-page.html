@@ -150,8 +150,23 @@
           <td>{{ shortLocation(l) }}</td>
           <td>{{ formatPrice(l) }}</td>
           <td>{{ l.listingType === 'RENT' ? 'Rent' : 'Sale' }}</td>
-          <td><span class="ra-pill" [class.ra-pill--success]="l.status === 'ACTIVE'">{{ l.status }}</span></td>
-          <td class="dash__table-actions"><i class="pi pi-chevron-right"></i></td>
+          <td>
+            <span class="ra-pill dash__status"
+                  [class.ra-pill--success]="l.status === 'ACTIVE'"
+                  [class.dash__status--inactive]="l.status === 'INACTIVE'">
+              {{ l.status === 'ACTIVE' ? 'Active' : 'Passive' }}
+            </span>
+          </td>
+          <td class="dash__table-actions">
+            <button type="button"
+                    class="dash__status-toggle"
+                    [disabled]="!canToggleListingStatus(l)"
+                    (click)="toggleListingStatus($event, l)">
+              <i class="pi" [ngClass]="l.status === 'ACTIVE' ? 'pi-pause' : 'pi-play'"></i>
+              {{ l.status === 'ACTIVE' ? 'Set passive' : 'Activate' }}
+            </button>
+            <i class="pi pi-chevron-right"></i>
+          </td>
         </tr>
       </tbody>
     </table>

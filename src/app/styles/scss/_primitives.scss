@@ -27,6 +27,11 @@
     color: var(--warn);
     border-color: transparent;
   }
+  &--danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border-color: transparent;
+  }
   &--ghost {
     background: transparent;
   }
@@ -91,6 +96,17 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 
   &::placeholder { color: var(--text-faint); }
+
+  &[type='number'] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+
+  &[type='number']::-webkit-outer-spin-button,
+  &[type='number']::-webkit-inner-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+  }
 
   /* Suppress native :invalid red border (browser default) */
   &:invalid {

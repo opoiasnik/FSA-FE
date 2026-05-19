@@ -68,6 +68,66 @@ app-search-pill {
   border: 1px dashed var(--border);
 }
 
+.pagination {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 0 4px;
+}
+
+.pagination__pages {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.pagination__btn,
+.pagination__page {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--r-pill);
+  min-height: 38px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.pagination__page {
+  width: 38px;
+  padding: 0;
+}
+
+.pagination__page--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: var(--accent);
+    color: #fff;
+  }
+}
+
 @media (max-width: 1024px) {
   .split { grid-template-columns: 1fr; }
   .split__map { position: static; height: 400px; }
@@ -76,4 +136,7 @@ app-search-pill {
 
 @media (max-width: 600px) {
   .split__list { grid-template-columns: 1fr; }
+  .pagination {
+    flex-wrap: wrap;
+  }
 }

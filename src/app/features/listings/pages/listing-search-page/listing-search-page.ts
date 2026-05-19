@@ -44,8 +44,12 @@ export class ListingSearchPage implements OnInit {
   readonly error         = signal<string | null>(null);
   readonly listings      = signal<ListingResponse[]>([]);
   readonly totalElements = signal(0);
+  readonly page          = signal(0);
+  readonly pageSize      = signal(20);
+  readonly totalPages    = signal(0);
   readonly selectedId    = signal<number | null>(null);
   readonly cityLabel     = computed(() => this.pillValues().q || 'Slovakia');
+  readonly visiblePages  = computed(() => this.buildVisiblePages());
 
   readonly mapPins = computed<MapPin[]>(() =>
     this.listings()
@@ -73,11 +77,19 @@ export class ListingSearchPage implements OnInit {
 
   onPillSearch(values: SearchPillValues): void {
     this.pillValues.set(values);
+    this.page.set(0);
     this.load();
   }
 
   onFiltersSearch(filters: ChipFilters): void {
     this.chipFilters.set(filters);
+    this.page.set(0);
+    this.load();
+  }
+
+  onSortChange(value: SortBy | null): void {
+    this.sortBy.set(value);
+    this.page.set(0);
     this.load();
   }
 
@@ -102,18 +114,22 @@ export class ListingSearchPage implements OnInit {
       petsAllowed:      f.petsAllowed      ?? undefined,
       energyClass:      f.energyClass      ?? undefined,
       sortBy:           this.sortBy()      ?? undefined,
-      page: 0,
-      size: 20,
+      page:             this.page(),
+      size:             this.pageSize(),
     };
 
     this.listingService.search(params).subscribe({
       next: res => {
         this.listings.set(res.content);
         this.totalElements.set(res.pagination.totalElements);
+        this.page.set(res.pagination.page);
+        this.pageSize.set(res.pagination.size);
+        this.totalPages.set(res.pagination.totalPages);
         this.loading.set(false);
       },
       error: err => {
         this.listings.set([]);
+        this.totalPages.set(0);
         this.error.set(this.errorHandler.toMessage(err));
         this.loading.set(false);
       },
@@ -122,7 +138,29 @@ export class ListingSearchPage implements OnInit {
 
   openDetail(id: number): void { void this.router.navigate(['/listings', id]); }
 
+  goToPage(page: number): void {
+    const lastPage = Math.max(this.totalPages() - 1, 0);
+    const nextPage = Math.max(0, Math.min(page, lastPage));
+    if (nextPage === this.page() || this.loading()) {
+      return;
+    }
+    this.page.set(nextPage);
+    this.load();
+  }
+
   toggleSave(id: number): void { this.favoriteStore.toggle(id); }
 
   isSaved(id: number): boolean { return this.favoriteStore.isFavorite(id); }
+
+  private buildVisiblePages(): number[] {
+    const total = this.totalPages();
+    const current = this.page();
+    if (total <= 1) {
+      return [];
+    }
+
+    const start = Math.max(0, Math.min(current - 2, total - 5));
+    const end = Math.min(total, start + 5);
+    return Array.from({ length: end - start }, (_, index) => start + index);
+  }
 }

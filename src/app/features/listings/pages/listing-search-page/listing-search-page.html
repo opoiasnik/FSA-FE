@@ -13,7 +13,7 @@
       Sort by
       <select class="ra-input"
               [ngModel]="sortBy()"
-              (ngModelChange)="sortBy.set($any($event) || null); load()"
+              (ngModelChange)="onSortChange($any($event) || null)"
               [ngModelOptions]="{standalone: true}">
         <option [ngValue]="null">Most relevant</option>
         <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
@@ -42,6 +42,35 @@
       <div *ngIf="!listings().length" class="no-results">
         No listings match your filters. Try widening the search.
       </div>
+
+      <nav *ngIf="totalPages() > 1" class="pagination" aria-label="Listing pagination">
+        <button type="button"
+                class="pagination__btn"
+                [disabled]="page() === 0 || loading()"
+                (click)="goToPage(page() - 1)">
+          <i class="pi pi-chevron-left"></i>
+          Previous
+        </button>
+
+        <div class="pagination__pages">
+          <button type="button"
+                  *ngFor="let p of visiblePages()"
+                  class="pagination__page"
+                  [class.pagination__page--active]="p === page()"
+                  [disabled]="loading()"
+                  (click)="goToPage(p)">
+            {{ p + 1 }}
+          </button>
+        </div>
+
+        <button type="button"
+                class="pagination__btn"
+                [disabled]="page() >= totalPages() - 1 || loading()"
+                (click)="goToPage(page() + 1)">
+          Next
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </nav>
     </div>
 
     <aside class="split__map">

@@ -3,6 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
+import { AccessService } from '../../../../core/access/access';
 import { OwnerService, OwnerStats } from '../../services/owner.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ListingResponse } from '../../../listings/models/listing.model';
@@ -46,12 +47,15 @@ export class OwnerDashboardPage implements OnInit {
   private readonly viewingService = inject(ViewingService);
   private readonly ownerService = inject(OwnerService);
   private readonly errorHandler = inject(ErrorHandlerService);
+  private readonly access = inject(AccessService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly listings = signal<ListingResponse[]>([]);
   readonly stats = signal<OwnerStats | null>(null);
   readonly viewingRequests = signal<ViewingRequestResponse[]>([]);
+  readonly canActivateListing = this.access.can('activateListing');
+  readonly canDeactivateListing = this.access.can('deactivateListing');
 
   readonly statCards = computed<StatCard[]>(() => {
     const s = this.stats();
@@ -193,6 +197,18 @@ export class OwnerDashboardPage implements OnInit {
     });
   }
 
+  toggleListingStatus(event: MouseEvent, listing: ListingResponse): void {
+    event.stopPropagation();
+    const request$ = listing.status === 'ACTIVE'
+      ? this.listingService.deactivate(listing.id)
+      : this.listingService.activate(listing.id);
+
+    request$.subscribe({
+      next: updated => this.listings.update(items => items.map(item => item.id === updated.id ? updated : item)),
+      error: err => this.error.set(this.toMessage(err))
+    });
+  }
+
   exportCsv(): void {
     const rows = this.listings();
     if (!rows.length) {
@@ -248,6 +264,10 @@ export class OwnerDashboardPage implements OnInit {
 
   openListing(id: number): void {
     void this.router.navigate(['/listings', id]);
+  }
+
+  canToggleListingStatus(listing: ListingResponse): boolean {
+    return listing.status === 'ACTIVE' ? this.canDeactivateListing() : this.canActivateListing();
   }
 
   formatPrice(listing: ListingResponse): string {
