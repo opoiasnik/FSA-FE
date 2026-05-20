@@ -139,4 +139,16 @@
 
 @media (max-width: 720px) {
   .favs__head { flex-direction: column; align-items: flex-start; }
+
+  .favs__tabs {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+}
+
+@media (max-width: 420px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }

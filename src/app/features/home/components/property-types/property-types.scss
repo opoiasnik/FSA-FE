@@ -78,3 +78,22 @@
     font-size: 1.3rem;
   }
 }
+
+@media (max-width: 640px) {
+  :host {
+    margin: 2rem 0;
+  }
+
+  .property-types__head {
+    margin-bottom: 1.25rem;
+  }
+
+  .property-types__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .property-types__card {
+    border-radius: var(--r-lg);
+    padding: 1.25rem;
+  }
+}

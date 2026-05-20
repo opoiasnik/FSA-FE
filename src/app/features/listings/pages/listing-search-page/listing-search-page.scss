@@ -134,7 +134,23 @@ app-search-pill {
 }
 
 @media (max-width: 600px) {
+  .results-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .sort {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 6px;
+
+    select {
+      width: 100%;
+    }
+  }
+
   .split__list { grid-template-columns: 1fr; }
+  .split__map { height: 300px; min-height: 300px; }
   .pagination {
     flex-wrap: wrap;
   }

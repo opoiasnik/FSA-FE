@@ -263,9 +263,45 @@
 // ─── Responsive ───────────────────────────────────────────────────────────────
 
 @media (max-width: 760px) {
+  .profile__head {
+    align-items: flex-start;
+  }
+
   .profile__layout { grid-template-columns: 1fr; }
-  .profile__tabs { flex-direction: row; overflow-x: auto; }
+  .profile__tabs {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .profile__tab {
+    flex: 0 0 auto;
+  }
+
+  .profile__panel {
+    padding: 20px;
+    overflow-x: auto;
+  }
+
   .grid-2 { grid-template-columns: 1fr; }
   .span-2 { grid-column: span 1; }
   .verify-code { grid-template-columns: 1fr; }
+
+  .profile__actions .ra-btn {
+    width: 100%;
+  }
+
+  .verify__list li {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .notif {
+    min-width: 520px;
+  }
+
+  .avatar-upload {
+    left: 0;
+    width: min(280px, calc(100vw - 32px));
+  }
 }

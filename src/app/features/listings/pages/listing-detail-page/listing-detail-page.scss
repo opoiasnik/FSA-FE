@@ -309,3 +309,71 @@
   .facts { grid-template-columns: repeat(3, 1fr); }
   .sidebar { position: static; }
 }
+
+@media (max-width: 640px) {
+  .detail {
+    padding: 0 0 28px;
+  }
+
+  .breadcrumb {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 2px;
+  }
+
+  .gallery {
+    grid-template-columns: 1fr;
+    grid-template-rows: 280px;
+    border-radius: var(--r-md);
+  }
+
+  .gallery .gallery__main {
+    grid-column: auto;
+  }
+
+  .gallery__photo:not(.gallery__main) {
+    display: none;
+  }
+
+  .title-row {
+    flex-direction: column;
+
+    h1 {
+      font-size: 24px;
+      line-height: 1.15;
+    }
+  }
+
+  .actions,
+  .actions .ra-btn {
+    width: 100%;
+  }
+
+  .facts {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .amenities {
+    grid-template-columns: 1fr;
+  }
+
+  .map-wrap {
+    height: 260px;
+  }
+
+  .sidebar__card {
+    padding: 18px;
+  }
+
+  .price-row__amount {
+    font-size: 24px;
+  }
+
+  .viewing-dialog__actions {
+    flex-direction: column-reverse;
+
+    .ra-btn {
+      width: 100%;
+    }
+  }
+}

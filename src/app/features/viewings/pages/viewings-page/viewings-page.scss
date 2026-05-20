@@ -87,3 +87,22 @@
   display: grid;
   gap: 12px;
 }
+
+@media (max-width: 640px) {
+  .viewings {
+    padding: 12px 0 24px;
+  }
+
+  .viewing {
+    flex-direction: column;
+  }
+
+  .viewing__side {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .viewing__side .ra-btn {
+    width: 100%;
+  }
+}

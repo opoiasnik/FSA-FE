@@ -67,13 +67,15 @@
   .hero {
     border-radius: 1rem;
     aspect-ratio: 4 / 3;
+    min-height: 360px;
+    margin-bottom: 1.5rem;
   }
 
   .hero__overlay {
-    padding: 1.5rem 1.25rem;
+    padding: 1.25rem 1rem;
   }
 
   .hero__slot {
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
   }
 }

@@ -166,3 +166,22 @@
     border-color: var(--accent);
   }
 }
+
+@media (max-width: 640px) {
+  :host {
+    display: block;
+  }
+
+  .chip {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .chip-panel {
+    left: 12px !important;
+    right: 12px !important;
+    width: auto;
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+  }
+}

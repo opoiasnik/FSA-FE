@@ -235,10 +235,47 @@
 .skeleton-rows { display: flex; flex-direction: column; gap: 10px; }
 
 @media (max-width: 960px) {
+  .dash__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .dash__stats { grid-template-columns: repeat(2, 1fr); }
   .dash__row { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
   .dash__stats { grid-template-columns: 1fr; }
+
+  .dash__head .ra-btn {
+    width: 100%;
+  }
+
+  .dash__chart,
+  .dash__viewings,
+  .dash__list {
+    padding: 18px;
+  }
+
+  .dash__viewings ul li {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .dash__viewing-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .dash__list {
+    overflow-x: auto;
+  }
+
+  .dash__table {
+    min-width: 760px;
+  }
 }

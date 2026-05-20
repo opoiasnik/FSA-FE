@@ -26,3 +26,9 @@
     padding: 1rem 1.25rem 2rem;
   }
 }
+
+@media (max-width: 640px) {
+  .app-content {
+    padding: 0.875rem 1rem 1.75rem;
+  }
+}

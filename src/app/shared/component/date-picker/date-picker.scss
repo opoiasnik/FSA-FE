@@ -178,3 +178,16 @@
     }
   }
 }
+
+@media (max-width: 640px) {
+  .dp__panel {
+    left: 12px !important;
+    right: 12px !important;
+    width: auto;
+    max-width: calc(100vw - 24px);
+  }
+
+  .dp__day {
+    height: 34px;
+  }
+}

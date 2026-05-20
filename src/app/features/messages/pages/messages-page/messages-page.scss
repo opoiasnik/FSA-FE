@@ -179,6 +179,34 @@
 }
 
 @media (max-width: 720px) {
-  .inbox__grid { grid-template-columns: 1fr; }
-  .inbox__threads { max-height: 340px; }
+  .inbox__grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .inbox__threads {
+    max-height: 300px;
+  }
+
+  .inbox__conversation {
+    min-height: 520px;
+  }
+
+  .inbox__messages {
+    padding: 14px;
+  }
+
+  .bubble {
+    max-width: 88%;
+  }
+
+  .inbox__composer {
+    align-items: stretch;
+    flex-direction: column;
+
+    .ra-btn {
+      width: 100%;
+    }
+  }
 }

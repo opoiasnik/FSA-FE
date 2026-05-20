@@ -63,3 +63,29 @@
   0%, 100% { transform: translateX(0); }
   50%       { transform: translateX(10px); }
 }
+
+@media (max-width: 900px) {
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .explore-cta {
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 560px) {
+  .section-head h2 {
+    font-size: 1.25rem;
+  }
+
+  .cards-row {
+    grid-template-columns: 1fr;
+  }
+
+  .explore-cta {
+    min-height: 140px;
+  }
+}
