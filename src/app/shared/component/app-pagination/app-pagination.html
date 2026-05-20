@@ -1,0 +1,28 @@
+<nav *ngIf="totalPages > 1" class="pagination" [attr.aria-label]="ariaLabel">
+  <button type="button"
+          class="pagination__btn"
+          [disabled]="page === 0 || disabled"
+          (click)="goTo(page - 1)">
+    <i class="pi pi-chevron-left"></i>
+    Previous
+  </button>
+
+  <div class="pagination__pages">
+    <button type="button"
+            *ngFor="let p of visiblePages()"
+            class="pagination__page"
+            [class.pagination__page--active]="p === page"
+            [disabled]="disabled"
+            (click)="goTo(p)">
+      {{ p + 1 }}
+    </button>
+  </div>
+
+  <button type="button"
+          class="pagination__btn"
+          [disabled]="page >= totalPages - 1 || disabled"
+          (click)="goTo(page + 1)">
+    Next
+    <i class="pi pi-chevron-right"></i>
+  </button>
+</nav>

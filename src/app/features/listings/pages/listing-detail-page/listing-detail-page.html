@@ -14,178 +14,56 @@
   </div>
 
   <ng-container *ngIf="listing() as item">
-    <div class="gallery" *ngIf="item.photos?.length; else placeholderGallery">
-      <div class="gallery__photo gallery__main" *ngFor="let photo of item.photos | slice:0:1">
-        <img *ngIf="photoImageUrls()[photo.id]" [src]="photoImageUrls()[photo.id]" [alt]="photo.altText || item.title" />
-      </div>
-      <div class="gallery__photo" *ngFor="let photo of item.photos | slice:1:5">
-        <img *ngIf="photoImageUrls()[photo.id]" [src]="photoImageUrls()[photo.id]" [alt]="photo.altText || item.title" />
-      </div>
-    </div>
-    <ng-template #placeholderGallery>
-    <div class="gallery">
-      <app-photo-placeholder class="gallery__main" [seed]="item.id" [rounded]="0" [label]="'Main photo'"></app-photo-placeholder>
-      <app-photo-placeholder [seed]="item.id + 1" [rounded]="0" [label]="'photo 2'"></app-photo-placeholder>
-      <app-photo-placeholder [seed]="item.id + 2" [rounded]="0" [label]="'photo 3'"></app-photo-placeholder>
-      <app-photo-placeholder [seed]="item.id + 3" [rounded]="0" [label]="'photo 4'"></app-photo-placeholder>
-      <app-photo-placeholder [seed]="item.id + 4" [rounded]="0" [label]="'photo 5'">
-        <button type="button" class="gallery__all ra-btn ra-btn--ghost ra-btn--sm">
-          <i class="pi pi-images"></i>Show all photos
-        </button>
-      </app-photo-placeholder>
-    </div>
-    </ng-template>
+    <app-listing-gallery
+      [listingId]="item.id"
+      [title]="item.title"
+      [photos]="item.photos ?? []"
+      [imageUrls]="photoImageUrls()">
+    </app-listing-gallery>
 
     <div class="layout">
-      <main class="content">
-        <div class="title-row">
-          <div>
-            <span class="ra-pill ra-pill--accent">For {{ item.listingType === 'RENT' ? 'rent' : 'sale' }}</span>
-            <h1>{{ item.title }}</h1>
-            <p class="address">
-              <i class="pi pi-map-marker"></i>{{ fullAddress() }}
-            </p>
-          </div>
+      <app-listing-detail-overview
+        [listing]="item"
+        [facts]="facts()"
+        [amenities]="amenities"
+        [mapPins]="mapPin()"
+        [address]="fullAddress()"
+        [saved]="saved()"
+        [ownListing]="isOwnListing()"
+        (saveToggled)="toggleSave()">
+      </app-listing-detail-overview>
 
-          <div class="actions">
-            <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm"><i class="pi pi-share-alt"></i>Share</button>
-            <button *ngIf="!isOwnListing()" type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="toggleSave()">
-              <i class="pi" [class.pi-heart-fill]="saved()" [class.pi-heart]="!saved()" [style.color]="saved() ? 'var(--accent)' : ''"></i>
-              {{ saved() ? 'Saved' : 'Save' }}
-            </button>
-            <button *ngIf="!isOwnListing()" type="button" class="ra-btn ra-btn--ghost ra-btn--sm"><i class="pi pi-flag"></i>Report</button>
-          </div>
-        </div>
-
-        <div class="facts">
-          <div class="fact" *ngFor="let f of facts()">
-            <i class="pi" [ngClass]="f.icon"></i>
-            <div class="fact__label">{{ f.label }}</div>
-            <div class="fact__value">{{ f.value }}</div>
-          </div>
-        </div>
-
-        <section class="block">
-          <h2>About this home</h2>
-          <p>{{ item.description }}</p>
-        </section>
-
-        <section class="block">
-          <h2>What's included</h2>
-          <div class="amenities">
-            <div *ngFor="let a of amenities" class="amenity" [class.amenity--off]="!hasAmenity(a.key)">
-              <i class="pi" [ngClass]="a.icon"></i>
-              <span>{{ a.label }}</span>
-            </div>
-          </div>
-        </section>
-
-        <section class="block">
-          <h2>Where you'll be</h2>
-          <div class="map-wrap">
-            <app-map-view *ngIf="mapPin().length" [pins]="mapPin()" [selectedId]="item.id" [showPrices]="false"></app-map-view>
-            <div *ngIf="!mapPin().length" class="map-empty">Coordinates not provided for this listing.</div>
-          </div>
-          <p class="address-hint">{{ fullAddress() }}</p>
-        </section>
-      </main>
-
-      <aside class="sidebar" *ngIf="owner() as own">
-        <div class="ra-card sidebar__card">
-          <div class="price-row">
-            <span class="price-row__amount">{{ priceAmount() }}</span>
-            <span class="price-row__suffix">{{ item.listingType === 'RENT' ? 'per month' : 'total' }}</span>
-          </div>
-          <div class="price-row__sub" *ngIf="pricePerSqm()">approx. {{ pricePerSqm() }}</div>
-
-          <div *ngIf="canViewListingStats()" class="listing-views">
-            <i class="pi pi-eye"></i>
-            <span>{{ listingViews() }} views</span>
-          </div>
-
-          <div class="owner">
-            <app-avatar [name]="own.name" [hue]="own.avatarHue" [size]="44" [verified]="own.verified"></app-avatar>
-            <div class="owner__meta">
-              <div class="owner__name">{{ own.name }}</div>
-              <div class="owner__role">{{ own.role }}</div>
-            </div>
-          </div>
-
-          <div *ngIf="isOwnListing(); else renterActions" class="owner-tools">
-            <div class="owner-tools__icon">
-              <i class="pi pi-home"></i>
-            </div>
-            <div>
-              <h3>This is your listing</h3>
-              <p>Manage viewing requests, listing performance, and owner tools from your studio.</p>
-            </div>
-            <a routerLink="/owner" class="ra-btn ra-btn--lg">
-              <i class="pi pi-chart-line"></i>Open Owner Studio
-            </a>
-          </div>
-
-          <ng-template #renterActions>
-          <div class="sidebar__actions">
-            <button type="button" class="ra-btn ra-btn--lg" (click)="openMessages()" [disabled]="!canMessageOwner() || openingConversation()">
-              <i class="pi pi-send"></i>Message {{ own.name.split(' ')[0] }}
-            </button>
-            <button type="button" class="ra-btn ra-btn--ghost ra-btn--lg"
-                    [disabled]="!canBookViewing()" (click)="openViewingForm()">
-              <i class="pi pi-calendar"></i>{{ loadingCurrentViewingRequest() ? 'Checking request' : currentViewingRequest() ? 'Viewing request sent' : 'Book a viewing' }}
-            </button>
-            <p *ngIf="currentViewingRequest() as request" class="viewing-form__success">
-              {{ request.status === 'APPROVED' ? 'Viewing request approved.' : 'Viewing request sent.' }}
-            </p>
-            <p *ngIf="viewingSuccess() && !currentViewingRequest()" class="viewing-form__success">Viewing request sent.</p>
-            <button type="button" class="ra-btn ra-btn--text">
-              <i class="pi pi-phone"></i>Show phone number
-            </button>
-          </div>
-          </ng-template>
-
-          <div *ngIf="!isOwnListing()" class="sidebar__notice">
-            <i class="pi pi-shield"></i>
-            Owner verified via government ID. Never wire money before a viewing.
-          </div>
-        </div>
-      </aside>
+      <app-listing-detail-sidebar
+        *ngIf="owner() as own"
+        [listingType]="item.listingType"
+        [owner]="own"
+        [priceAmount]="priceAmount()"
+        [pricePerSqm]="pricePerSqm()"
+        [views]="listingViews()"
+        [canViewStats]="canViewListingStats()"
+        [ownListing]="isOwnListing()"
+        [canMessageOwner]="canMessageOwner()"
+        [openingConversation]="openingConversation()"
+        [canBookViewing]="canBookViewing()"
+        [loadingViewingRequest]="loadingCurrentViewingRequest()"
+        [currentViewingRequest]="currentViewingRequest()"
+        [viewingSuccess]="viewingSuccess()"
+        (messagesOpened)="openMessages()"
+        (viewingOpened)="openViewingForm()">
+      </app-listing-detail-sidebar>
     </div>
   </ng-container>
 </section>
 
-<app-modal
-  title="Book a viewing"
+<app-listing-viewing-dialog
   [visible]="viewingForm()"
-  width="420px"
-  (closed)="cancelViewingForm()">
-
-  <div class="viewing-dialog">
-    <label class="viewing-dialog__field">
-      <span>Date and time</span>
-      <app-date-picker
-        [value]="viewingDate()"
-        [minDate]="today"
-        (valueChange)="setViewingDate($event)">
-      </app-date-picker>
-    </label>
-
-    <label class="viewing-dialog__field">
-      <span>Note <small>(optional)</small></span>
-      <textarea class="ra-input" rows="3" placeholder="What time works best for you?"
-                [value]="viewingNote()"
-                (input)="setViewingNote($any($event.target).value)"></textarea>
-    </label>
-
-    <p *ngIf="viewingError()" class="viewing-dialog__error">{{ viewingError() }}</p>
-
-    <div class="viewing-dialog__actions">
-      <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="cancelViewingForm()">
-        Cancel
-      </button>
-      <button type="button" class="ra-btn ra-btn--sm"
-              [disabled]="!viewingDate() || creatingViewing()" (click)="submitViewing()">
-        <i class="pi pi-check"></i>Submit request
-      </button>
-    </div>
-  </div>
-</app-modal>
+  [date]="viewingDate()"
+  [note]="viewingNote()"
+  [minDate]="today"
+  [error]="viewingError()"
+  [submitting]="creatingViewing()"
+  (closed)="cancelViewingForm()"
+  (dateChange)="setViewingDate($event)"
+  (noteChange)="setViewingNote($event)"
+  (submitted)="submitViewing()">
+</app-listing-viewing-dialog>

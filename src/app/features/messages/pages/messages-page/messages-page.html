@@ -2,98 +2,24 @@
   <p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
 
   <div class="inbox__grid" *ngIf="!loading()">
-    <aside class="inbox__threads">
-      <header class="inbox__threads-head">
-        <h2>Messages</h2>
-        <span>{{ threads().length }} conversations</span>
-      </header>
+    <app-message-thread-list
+      [threads]="threads()"
+      [selectedId]="selectedId()"
+      [avatarUrls]="peerAvatarUrls()"
+      (selected)="select($event)">
+    </app-message-thread-list>
 
-      <app-empty-state *ngIf="!threads().length"
-        icon="pi-inbox"
-        title="Inbox is quiet"
-        body="Open a listing and reach out to start a conversation.">
-      </app-empty-state>
+    <app-message-conversation
+      [conversation]="selected()"
+      [avatarUrls]="peerAvatarUrls()"
+      [sending]="sending()"
+      (sent)="send($event)">
+    </app-message-conversation>
 
-      <button *ngFor="let t of threads()"
-              type="button"
-              class="thread"
-              [class.thread--on]="selectedId() === t.id"
-              (click)="select(t.id)">
-        <app-avatar
-          [name]="peerName(t)"
-          [hue]="t.peer.id"
-          [verified]="t.peer.role === 'OWNER'"
-          [size]="44"
-          [imageUrl]="peerAvatarUrls()[t.peer.id]">
-        </app-avatar>
-        <div class="thread__body">
-          <div class="thread__top">
-            <strong>{{ peerName(t) }}</strong>
-            <time>{{ t.updatedAt | date:'shortTime' }}</time>
-          </div>
-          <p>{{ t.preview }}</p>
-        </div>
-        <span *ngIf="t.unreadCount" class="thread__badge">{{ t.unreadCount }}</span>
-      </button>
-    </aside>
-
-    <section class="inbox__conversation" *ngIf="selected() as conv; else pickOne">
-      <header class="inbox__conv-head">
-        <app-avatar
-          [name]="peerName(conv)"
-          [hue]="conv.peer.id"
-          [verified]="conv.peer.role === 'OWNER'"
-          [size]="40"
-          [imageUrl]="peerAvatarUrls()[conv.peer.id]">
-        </app-avatar>
-        <div>
-          <strong>{{ peerName(conv) }}</strong>
-          <p>{{ peerRole(conv) }}</p>
-        </div>
-      </header>
-
-      <div class="inbox__messages">
-        <div *ngFor="let m of conv.messages; trackBy: trackMessage" class="bubble" [class.bubble--me]="m.ownMessage">
-          <p>{{ m.text }}</p>
-          <time>{{ m.sentAt | date:'shortTime' }}</time>
-        </div>
-      </div>
-
-      <footer class="inbox__composer">
-        <input class="ra-input"
-               placeholder="Write a message..."
-               [ngModel]="draft()"
-               (ngModelChange)="draft.set($event)"
-               (keydown.enter)="send()" />
-        <button type="button" class="ra-btn" (click)="send()" [disabled]="!draft().trim() || sending()">
-          <i class="pi pi-send"></i>Send
-        </button>
-      </footer>
-    </section>
-
-    <ng-template #pickOne>
-      <section class="inbox__conversation inbox__conversation--empty">
-        <app-empty-state icon="pi-comments" title="Pick a conversation" body="Select a thread on the left to read it here."></app-empty-state>
-      </section>
-    </ng-template>
-
-    <aside class="inbox__listing" *ngIf="selectedListing() as l">
-      <button type="button" class="listing-preview" (click)="openListing(l.id)">
-        <div class="listing-preview__media">
-          <img *ngIf="listingPhotoUrls()[l.id]; else listingPlaceholder"
-               [src]="listingPhotoUrls()[l.id]"
-               [alt]="l.title" />
-          <ng-template #listingPlaceholder>
-            <app-photo-placeholder [seed]="l.id" [rounded]="0"></app-photo-placeholder>
-          </ng-template>
-        </div>
-        <div class="listing-preview__body">
-          <h3>{{ l.title }}</h3>
-          <p>{{ shortLocation(l) }}</p>
-          <p class="listing-preview__price">{{ formatPrice(l) }}</p>
-          <span class="ra-btn ra-btn--ghost ra-btn--sm">Open listing</span>
-        </div>
-      </button>
-    </aside>
+    <app-message-listing-preview
+      [listing]="selectedListing()"
+      [photoUrl]="selectedListingPhotoUrl()"
+      (opened)="openListing($event)">
+    </app-message-listing-preview>
   </div>
 </section>

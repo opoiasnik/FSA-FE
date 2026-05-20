@@ -1,0 +1,31 @@
+<section>
+  <div class="dropzone">
+    <i class="pi pi-cloud-upload"></i>
+    <div class="dropzone__title">Drop photos here or click to upload</div>
+    <div class="dropzone__hint">JPG or PNG, up to 10 MB each &middot; 5-20 photos</div>
+    <label class="ra-btn ra-btn--ghost">
+      Choose files
+      <input type="file" accept="image/*" multiple (change)="onFilesSelected($event)" />
+    </label>
+  </div>
+
+  <p class="todo-note" *ngIf="!previews.length">No photos selected yet.</p>
+
+  <div class="media-grid" *ngIf="previews.length; else emptyPhotos">
+    <div class="photo-preview" *ngFor="let preview of previews; let i = index">
+      <img [src]="preview" [alt]="i === 0 ? 'Cover photo preview' : 'Photo preview ' + (i + 1)" />
+      <span>{{ i === 0 ? 'cover' : 'photo ' + (i + 1) }}</span>
+      <button type="button" class="photo-preview__remove" (click)="photoRemoved.emit(i)" aria-label="Remove photo">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <ng-template #emptyPhotos>
+    <div class="media-grid">
+      <app-photo-placeholder *ngFor="let _ of [0,1,2,3,4,5]; let i = index"
+                             [seed]="i" [label]="i === 0 ? 'cover' : 'photo ' + (i + 1)" [rounded]="10">
+      </app-photo-placeholder>
+    </div>
+  </ng-template>
+</section>

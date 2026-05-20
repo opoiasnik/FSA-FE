@@ -1,0 +1,10 @@
+<nav class="profile__tabs">
+  <button *ngFor="let t of tabs"
+          type="button"
+          class="profile__tab"
+          [class.profile__tab--on]="active === t.id"
+          (click)="activeChange.emit(t.id)">
+    <i class="pi" [ngClass]="t.icon"></i>
+    {{ t.label }}
+  </button>
+</nav>

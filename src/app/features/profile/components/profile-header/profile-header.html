@@ -1,0 +1,44 @@
+<header class="profile__head">
+  <div class="avatar-wrapper">
+    <app-avatar
+      [name]="(user?.name || '') + ' ' + (user?.surname || '')"
+      [hue]="200"
+      [verified]="true"
+      [size]="72"
+      [imageUrl]="avatarUrl"
+      [editable]="true"
+      (edit)="openAvatarUpload()">
+    </app-avatar>
+
+    <div class="avatar-spinner" *ngIf="uploading">
+      <i class="pi pi-spin pi-spinner"></i>
+    </div>
+
+    <div class="avatar-upload" *ngIf="showUploadPanel()">
+      <div class="avatar-upload__drop"
+           [class.avatar-upload__drop--over]="isDragOver()"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave()"
+           (drop)="onDrop($event)">
+        <i class="pi pi-image avatar-upload__icon"></i>
+        <p class="avatar-upload__label">Drag & drop a photo here</p>
+        <p class="avatar-upload__hint">JPG, PNG or WEBP &middot; max 5 MB</p>
+        <button type="button" class="ra-btn ra-btn--sm" (click)="triggerFileInput()">
+          <i class="pi pi-folder-open"></i> Choose file
+        </button>
+      </div>
+      <button type="button" class="avatar-upload__close" (click)="closeUploadPanel()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="avatar-backdrop" *ngIf="showUploadPanel()" (click)="closeUploadPanel()"></div>
+  <input #fileInput type="file" accept="image/*" hidden (change)="onFileInputChange($event)" />
+
+  <div>
+    <div class="ra-eyebrow">Your account</div>
+    <h1>{{ user?.name }} {{ user?.surname }}</h1>
+    <p>{{ user?.email }}<span *ngIf="memberSince"> &middot; Member since {{ memberSince }}</span></p>
+  </div>
+</header>

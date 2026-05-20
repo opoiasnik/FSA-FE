@@ -1,22 +1,20 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
-import { Avatar } from '../../../../shared/component/avatar/avatar';
-import { EmptyState } from '../../../../shared/component/empty-state/empty-state';
-import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ImageContentService } from '../../../../core/services/image-content.service';
-import { ListingSummary } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
-import { ConversationResponse, MessageResponse } from '../../models/message.model';
+import { MessageConversation } from '../../components/message-conversation/message-conversation';
+import { MessageListingPreview } from '../../components/message-listing-preview/message-listing-preview';
+import { MessageThreadList } from '../../components/message-thread-list/message-thread-list';
+import { ConversationResponse } from '../../models/message.model';
 import { MessageService } from '../../services/message.service';
 
 @Component({
   selector: 'app-messages-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, MessageModule, Avatar, EmptyState, PhotoPlaceholder],
+  imports: [CommonModule, MessageModule, MessageThreadList, MessageConversation, MessageListingPreview],
   templateUrl: './messages-page.html',
   styleUrl: './messages-page.scss'
 })
@@ -37,10 +35,13 @@ export class MessagesPage implements OnInit, OnDestroy {
   readonly listingPhotoUrls = signal<Record<number, string>>({});
   readonly peerAvatarUrls = signal<Record<number, string>>({});
   readonly selectedId = signal<number | null>(null);
-  readonly draft = signal('');
 
   readonly selected = computed(() => this.threads().find(thread => thread.id === this.selectedId()) ?? null);
   readonly selectedListing = computed(() => this.selected()?.listing ?? null);
+  readonly selectedListingPhotoUrl = computed(() => {
+    const listing = this.selectedListing();
+    return listing ? this.listingPhotoUrls()[listing.id] ?? null : null;
+  });
 
   ngOnInit(): void {
     this.loadConversations();
@@ -77,8 +78,7 @@ export class MessagesPage implements OnInit, OnDestroy {
     this.markSelectedRead();
   }
 
-  send(): void {
-    const text = this.draft().trim();
+  send(text: string): void {
     const thread = this.selected();
     if (!text || !thread || this.sending()) return;
 
@@ -95,7 +95,6 @@ export class MessagesPage implements OnInit, OnDestroy {
           .map(item => item.id === updated.id ? updated : item)
           .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)));
         this.selectedId.set(updated.id);
-        this.draft.set('');
         this.sending.set(false);
       },
       error: err => {
@@ -107,19 +106,6 @@ export class MessagesPage implements OnInit, OnDestroy {
 
   openListing(id: number): void {
     void this.router.navigate(['/listings', id]);
-  }
-
-  trackMessage(_: number, message: MessageResponse): number {
-    return message.id;
-  }
-
-  formatPrice(listing: ListingSummary): string {
-    const suffix = listing.listingType === 'RENT' ? ' / mo' : '';
-    return new Intl.NumberFormat('sk-SK').format(listing.price.amount) + ' EUR' + suffix;
-  }
-
-  shortLocation(listing: ListingSummary): string {
-    return listing.city;
   }
 
   private loadListingPhotoContents(conversations: ConversationResponse[]): void {
@@ -167,14 +153,6 @@ export class MessagesPage implements OnInit, OnDestroy {
   private revokePeerAvatarObjectUrls(): void {
     this.avatarObjectUrls.forEach(url => this.imageContentService.revokeObjectUrl(url));
     this.avatarObjectUrls = [];
-  }
-
-  peerName(conversation: ConversationResponse): string {
-    return `${conversation.peer.name} ${conversation.peer.surname ?? ''}`.trim();
-  }
-
-  peerRole(conversation: ConversationResponse): string {
-    return conversation.peer.role === 'OWNER' ? 'Private owner' : 'User';
   }
 
   private resolveSelectedId(threads: ConversationResponse[]): number | null {

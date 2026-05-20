@@ -1,0 +1,39 @@
+<section class="inbox__conversation" *ngIf="conversation as conv; else pickOne" aria-label="Selected conversation">
+  <header class="inbox__conv-head">
+    <app-avatar
+      [name]="peerName(conv)"
+      [hue]="conv.peer.id"
+      [verified]="conv.peer.role === 'OWNER'"
+      [size]="40"
+      [imageUrl]="avatarUrls[conv.peer.id]">
+    </app-avatar>
+    <div>
+      <strong>{{ peerName(conv) }}</strong>
+      <p>{{ peerRole(conv) }}</p>
+    </div>
+  </header>
+
+  <div class="inbox__messages">
+    <div *ngFor="let m of conv.messages; trackBy: trackMessage" class="bubble" [class.bubble--me]="m.ownMessage">
+      <p>{{ m.text }}</p>
+      <time>{{ m.sentAt | date:'shortTime' }}</time>
+    </div>
+  </div>
+
+  <footer class="inbox__composer">
+    <input class="ra-input"
+           placeholder="Write a message..."
+           [ngModel]="draft()"
+           (ngModelChange)="draft.set($event)"
+           (keydown.enter)="send()" />
+    <button type="button" class="ra-btn" (click)="send()" [disabled]="!draft().trim() || sending">
+      <i class="pi pi-send"></i>Send
+    </button>
+  </footer>
+</section>
+
+<ng-template #pickOne>
+  <section class="inbox__conversation inbox__conversation--empty">
+    <app-empty-state icon="pi-comments" title="Pick a conversation" body="Select a thread on the left to read it here."></app-empty-state>
+  </section>
+</ng-template>

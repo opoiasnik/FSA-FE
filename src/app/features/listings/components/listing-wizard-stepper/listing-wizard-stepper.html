@@ -1,0 +1,11 @@
+<nav class="stepper" aria-label="Listing creation steps">
+  <button *ngFor="let s of steps; let i = index"
+          type="button"
+          class="stepper__item"
+          [class.stepper__item--active]="i === currentStep"
+          [class.stepper__item--done]="i < currentStep"
+          (click)="stepSelected.emit(i)">
+    <span class="stepper__index">Step {{ i + 1 }}</span>
+    <span class="stepper__title">{{ s.title }}</span>
+  </button>
+</nav>

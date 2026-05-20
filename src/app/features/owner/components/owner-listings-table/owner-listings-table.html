@@ -1,0 +1,55 @@
+<section class="ra-card dash__list" aria-label="Owner listings">
+  <header class="dash__list-head">
+    <h2>Your listings</h2>
+    <button type="button"
+            class="ra-btn ra-btn--ghost ra-btn--sm"
+            [disabled]="loading || !listings.length"
+            (click)="exported.emit()">
+      Export CSV
+    </button>
+  </header>
+
+  <div *ngIf="loading" class="skeleton-rows">
+    <p-skeleton *ngFor="let _ of [1,2,3]" width="100%" height="54px"></p-skeleton>
+  </div>
+
+  <table *ngIf="!loading && listings.length" class="dash__table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Location</th>
+        <th>Price</th>
+        <th>Deal</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let l of listings" (click)="opened.emit(l.id)">
+        <td>{{ l.title }}</td>
+        <td>{{ shortLocation(l) }}</td>
+        <td>{{ formatPrice(l) }}</td>
+        <td>{{ l.listingType === 'RENT' ? 'Rent' : 'Sale' }}</td>
+        <td>
+          <span class="ra-pill dash__status"
+                [class.ra-pill--success]="l.status === 'ACTIVE'"
+                [class.dash__status--inactive]="l.status === 'INACTIVE'">
+            {{ l.status === 'ACTIVE' ? 'Active' : 'Passive' }}
+          </span>
+        </td>
+        <td class="dash__table-actions">
+          <button type="button"
+                  class="dash__status-toggle"
+                  [disabled]="!canToggleListingStatus(l)"
+                  (click)="toggleListingStatus($event, l)">
+            <i class="pi" [ngClass]="l.status === 'ACTIVE' ? 'pi-pause' : 'pi-play'"></i>
+            {{ l.status === 'ACTIVE' ? 'Set passive' : 'Activate' }}
+          </button>
+          <i class="pi pi-chevron-right"></i>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!loading && !listings.length" class="dash__empty">You haven't published a listing yet.</p>
+</section>

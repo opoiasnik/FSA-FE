@@ -1,0 +1,39 @@
+.profile__tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile__tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+
+  &--on {
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 760px) {
+  .profile__tabs {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .profile__tab {
+    flex: 0 0 auto;
+  }
+}

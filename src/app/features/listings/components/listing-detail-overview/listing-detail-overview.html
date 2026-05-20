@@ -1,0 +1,52 @@
+<main class="content">
+  <div class="title-row">
+    <div>
+      <span class="ra-pill ra-pill--accent">For {{ listing.listingType === 'RENT' ? 'rent' : 'sale' }}</span>
+      <h1>{{ listing.title }}</h1>
+      <p class="address">
+        <i class="pi pi-map-marker"></i>{{ address }}
+      </p>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm"><i class="pi pi-share-alt"></i>Share</button>
+      <button *ngIf="!ownListing" type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="saveToggled.emit()">
+        <i class="pi" [class.pi-heart-fill]="saved" [class.pi-heart]="!saved" [style.color]="saved ? 'var(--accent)' : ''"></i>
+        {{ saved ? 'Saved' : 'Save' }}
+      </button>
+      <button *ngIf="!ownListing" type="button" class="ra-btn ra-btn--ghost ra-btn--sm"><i class="pi pi-flag"></i>Report</button>
+    </div>
+  </div>
+
+  <div class="facts">
+    <div class="fact" *ngFor="let f of facts">
+      <i class="pi" [ngClass]="f.icon"></i>
+      <div class="fact__label">{{ f.label }}</div>
+      <div class="fact__value">{{ f.value }}</div>
+    </div>
+  </div>
+
+  <section class="block">
+    <h2>About this home</h2>
+    <p>{{ listing.description }}</p>
+  </section>
+
+  <section class="block">
+    <h2>What's included</h2>
+    <div class="amenities">
+      <div *ngFor="let a of amenities" class="amenity" [class.amenity--off]="!hasAmenity(a.key)">
+        <i class="pi" [ngClass]="a.icon"></i>
+        <span>{{ a.label }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2>Where you'll be</h2>
+    <div class="map-wrap">
+      <app-map-view *ngIf="mapPins.length" [pins]="mapPins" [selectedId]="listing.id" [showPrices]="false"></app-map-view>
+      <div *ngIf="!mapPins.length" class="map-empty">Coordinates not provided for this listing.</div>
+    </div>
+    <p class="address-hint">{{ address }}</p>
+  </section>
+</main>

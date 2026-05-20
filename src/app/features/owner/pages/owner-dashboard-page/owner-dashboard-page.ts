@@ -1,43 +1,22 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
-import { SkeletonModule } from 'primeng/skeleton';
 import { AccessService } from '../../../../core/access/access';
-import { OwnerService, OwnerStats } from '../../services/owner.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ListingResponse } from '../../../listings/models/listing.model';
 import { ListingService } from '../../../listings/services/listing.service';
 import { ViewingRequestResponse, ViewingService } from '../../../viewings/services/viewing.service';
-
-interface StatCard { label: string; value: string; delta: string; tone: 'up' | 'down' | 'flat'; }
-
-// Pure SVG drawing space — labels are HTML, not SVG text
-const CW = 300;
-const CH = 80;
-
-interface ChartData {
-  linePath: string;
-  fillPath: string;
-  gridY: number[];
-  yMax: number;
-  yMid: number;
-  xLabels: string[];
-  hasData: boolean;
-}
-
-interface HoveredPoint {
-  pct: number;    // 0..1, position along x axis
-  svgX: number;   // SVG coordinate x
-  svgY: number;   // SVG coordinate y (for dot)
-  date: string;
-  views: number;
-}
+import { OwnerListingsTable } from '../../components/owner-listings-table/owner-listings-table';
+import { OwnerStatCard, OwnerStatGrid } from '../../components/owner-stat-grid/owner-stat-grid';
+import { OwnerViewingRequests } from '../../components/owner-viewing-requests/owner-viewing-requests';
+import { OwnerViewsChart } from '../../components/owner-views-chart/owner-views-chart';
+import { OwnerService, OwnerStats } from '../../services/owner.service';
 
 @Component({
   selector: 'app-owner-dashboard-page',
   standalone: true,
-  imports: [CommonModule, DatePipe, MessageModule, SkeletonModule],
+  imports: [CommonModule, MessageModule, OwnerStatGrid, OwnerViewsChart, OwnerViewingRequests, OwnerListingsTable],
   templateUrl: './owner-dashboard-page.html',
   styleUrl: './owner-dashboard-page.scss'
 })
@@ -57,104 +36,29 @@ export class OwnerDashboardPage implements OnInit {
   readonly canActivateListing = this.access.can('activateListing');
   readonly canDeactivateListing = this.access.can('deactivateListing');
 
-  readonly statCards = computed<StatCard[]>(() => {
-    const s = this.stats();
-    if (!s) return [];
+  readonly statCards = computed<OwnerStatCard[]>(() => {
+    const stats = this.stats();
+    if (!stats) return [];
 
-    const trend = s.viewsTrend ?? [];
-    const todayViews   = trend[trend.length - 1] ?? 0;
-    const last7        = trend.slice(-7).reduce((a, b) => a + b, 0);
-    const prev7        = trend.slice(-14, -7).reduce((a, b) => a + b, 0);
-    const viewPct      = prev7 === 0 ? null : Math.round(((last7 - prev7) / prev7) * 100);
-    const viewDelta    = viewPct !== null
+    const trend = stats.viewsTrend ?? [];
+    const todayViews = trend[trend.length - 1] ?? 0;
+    const last7 = trend.slice(-7).reduce((a, b) => a + b, 0);
+    const prev7 = trend.slice(-14, -7).reduce((a, b) => a + b, 0);
+    const viewPct = prev7 === 0 ? null : Math.round(((last7 - prev7) / prev7) * 100);
+    const viewDelta = viewPct !== null
       ? `${viewPct >= 0 ? '+' : ''}${viewPct}% vs last week`
       : `+${todayViews} today`;
-    const viewTone: 'up' | 'down' | 'flat' =
+    const viewTone: OwnerStatCard['tone'] =
       viewPct === null ? (todayViews > 0 ? 'up' : 'flat')
-      : viewPct > 0 ? 'up' : viewPct < 0 ? 'down' : 'flat';
+        : viewPct > 0 ? 'up' : viewPct < 0 ? 'down' : 'flat';
 
     return [
-      { label: 'Active listings',    value: String(s.activeListings ?? 0),           delta: 'published',       tone: 'flat' },
-      { label: 'Saved by users',     value: String(s.savedByUsers ?? 0),             delta: 'by renters',      tone: 'up'   },
-      { label: 'Pending viewings',   value: String(s.pendingViewingRequests ?? 0),   delta: 'await review',    tone: 'flat' },
-      { label: 'Total views',        value: String(s.totalViews ?? 0),               delta: viewDelta,         tone: viewTone },
+      { label: 'Active listings', value: String(stats.activeListings ?? 0), delta: 'published', tone: 'flat' },
+      { label: 'Saved by users', value: String(stats.savedByUsers ?? 0), delta: 'by renters', tone: 'up' },
+      { label: 'Pending viewings', value: String(stats.pendingViewingRequests ?? 0), delta: 'await review', tone: 'flat' },
+      { label: 'Total views', value: String(stats.totalViews ?? 0), delta: viewDelta, tone: viewTone },
     ];
   });
-
-  readonly chart = computed<ChartData>(() => {
-    const trend = this.stats()?.viewsTrend;
-    const empty: ChartData = { linePath: '', fillPath: '', gridY: [], yMax: 0, yMid: 0, xLabels: [], hasData: false };
-    if (!trend || trend.length < 2 || !trend.some(v => v > 0)) return empty;
-
-    const max = Math.max(...trend, 1);
-    const yMax = max <= 10 ? max : Math.ceil(max / 5) * 5;
-    const yMid = Math.round(yMax / 2);
-
-    const toX = (i: number) => (i / (trend.length - 1)) * CW;
-    const toY = (v: number) => CH - (v / yMax) * CH;
-
-    const pts: [number, number][] = trend.map((v, i) => [toX(i), toY(v)]);
-
-    let line = `M ${pts[0][0].toFixed(2)},${pts[0][1].toFixed(2)}`;
-    for (let i = 1; i < pts.length; i++) {
-      const [x0, y0] = pts[i - 1];
-      const [x1, y1] = pts[i];
-      const cx = (x0 + x1) / 2;
-      line += ` C ${cx.toFixed(2)},${y0.toFixed(2)} ${cx.toFixed(2)},${y1.toFixed(2)} ${x1.toFixed(2)},${y1.toFixed(2)}`;
-    }
-    const fill = `${line} L ${CW},${CH} L 0,${CH} Z`;
-
-    const gridY = [0, CH / 2, CH];
-
-    const today = new Date();
-    const fmt = (daysAgo: number) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() - daysAgo);
-      return d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
-    };
-    const xLabels = [fmt(trend.length - 1), fmt(Math.floor((trend.length - 1) / 2)), 'Today'];
-
-    return { linePath: line, fillPath: fill, gridY, yMax, yMid, xLabels, hasData: true };
-  });
-
-  readonly trendTotal = computed<number>(() =>
-    this.stats()?.viewsTrend?.reduce((a, b) => a + b, 0) ?? 0
-  );
-
-  readonly hoveredPoint = signal<HoveredPoint | null>(null);
-
-  onChartMove(event: MouseEvent): void {
-    const trend = this.stats()?.viewsTrend;
-    if (!trend || !trend.some(v => v > 0)) return;
-
-    const el = event.currentTarget as HTMLElement;
-    const rect = el.getBoundingClientRect();
-    const pct = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
-    const idx = Math.round(pct * (trend.length - 1));
-    const snappedPct = idx / (trend.length - 1);
-
-    const max = Math.max(...trend, 1);
-    const yMax = max <= 10 ? max : Math.ceil(max / 5) * 5;
-    const svgX = snappedPct * CW;
-    const svgY = CH - (trend[idx] / yMax) * CH;
-
-    const today = new Date();
-    const d = new Date(today);
-    d.setDate(d.getDate() - (trend.length - 1 - idx));
-    const date = d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
-
-    this.hoveredPoint.set({ pct: snappedPct, svgX, svgY, date, views: trend[idx] });
-  }
-
-  onChartLeave(): void {
-    this.hoveredPoint.set(null);
-  }
-
-  tooltipTransform(pct: number): string {
-    if (pct < 0.12) return 'translateX(0)';
-    if (pct > 0.88) return 'translateX(-100%)';
-    return 'translateX(-50%)';
-  }
 
   ngOnInit(): void {
     this.loading.set(true);
@@ -163,17 +67,13 @@ export class OwnerDashboardPage implements OnInit {
         this.listings.set(items ?? []);
         this.loading.set(false);
       },
-      error: err => { this.error.set(this.toMessage(err)); this.loading.set(false); }
+      error: err => {
+        this.error.set(this.toMessage(err));
+        this.loading.set(false);
+      }
     });
     this.loadViewings();
     this.loadStats();
-  }
-
-  private loadStats(): void {
-    this.ownerService.getStats().subscribe({
-      next: stats => this.stats.set(stats),
-      error: () => this.stats.set(null)
-    });
   }
 
   loadViewings(): void {
@@ -197,8 +97,7 @@ export class OwnerDashboardPage implements OnInit {
     });
   }
 
-  toggleListingStatus(event: MouseEvent, listing: ListingResponse): void {
-    event.stopPropagation();
+  toggleListingStatus(listing: ListingResponse): void {
     const request$ = listing.status === 'ACTIVE'
       ? this.listingService.deactivate(listing.id)
       : this.listingService.activate(listing.id);
@@ -211,27 +110,12 @@ export class OwnerDashboardPage implements OnInit {
 
   exportCsv(): void {
     const rows = this.listings();
-    if (!rows.length) {
-      return;
-    }
+    if (!rows.length) return;
 
     const header = [
-      'ID',
-      'Title',
-      'City',
-      'Address',
-      'Price',
-      'Currency',
-      'Deal',
-      'Status',
-      'Property type',
-      'Area',
-      'Rooms',
-      'Floor',
-      'Year built',
-      'Created at'
+      'ID', 'Title', 'City', 'Address', 'Price', 'Currency', 'Deal',
+      'Status', 'Property type', 'Area', 'Rooms', 'Floor', 'Year built', 'Created at'
     ];
-
     const csvRows = rows.map(listing => [
       listing.id,
       listing.title,
@@ -250,7 +134,6 @@ export class OwnerDashboardPage implements OnInit {
       listing.features.yearBuilt ?? '',
       listing.createdAt
     ]);
-
     const csv = [header, ...csvRows]
       .map(row => row.map(value => this.escapeCsv(value)).join(','))
       .join('\r\n');
@@ -266,17 +149,11 @@ export class OwnerDashboardPage implements OnInit {
     void this.router.navigate(['/listings', id]);
   }
 
-  canToggleListingStatus(listing: ListingResponse): boolean {
-    return listing.status === 'ACTIVE' ? this.canDeactivateListing() : this.canActivateListing();
-  }
-
-  formatPrice(listing: ListingResponse): string {
-    const suffix = listing.listingType === 'RENT' ? ' / mo' : '';
-    return new Intl.NumberFormat('sk-SK').format(listing.price.amount) + ' €' + suffix;
-  }
-
-  shortLocation(listing: ListingResponse): string {
-    return listing.address.city;
+  private loadStats(): void {
+    this.ownerService.getStats().subscribe({
+      next: stats => this.stats.set(stats),
+      error: () => this.stats.set(null)
+    });
   }
 
   private escapeCsv(value: unknown): string {

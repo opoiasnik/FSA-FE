@@ -1,0 +1,46 @@
+<div [formGroup]="form" class="grid-4">
+  <label class="field">
+    <span>Area (m²) <span class="req">*</span></span>
+    <input type="number" class="ra-input" [class.ra-input--invalid]="isInvalid('area')" formControlName="area" />
+  </label>
+
+  <label class="field">
+    <span>Rooms <span class="req">*</span></span>
+    <input type="number" class="ra-input" [class.ra-input--invalid]="isInvalid('roomCount')" formControlName="roomCount" />
+  </label>
+
+  <label class="field">
+    <span>Floor</span>
+    <input type="number" class="ra-input" formControlName="floor" />
+  </label>
+
+  <label class="field">
+    <span>Year built</span>
+    <input type="number" class="ra-input" [class.ra-input--invalid]="isInvalid('yearBuilt')" formControlName="yearBuilt" placeholder="Optional" min="1800" [max]="maxYearBuilt" />
+  </label>
+
+  <label class="field">
+    <span>Energy class</span>
+    <select class="ra-input" formControlName="energyClass">
+      <option value="">—</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="C">C</option>
+      <option value="D">D</option>
+    </select>
+  </label>
+
+  <div class="amenities span-4">
+    <div class="amenities__label">Amenities</div>
+    <div class="amenities__chips">
+      <button *ngFor="let a of amenityOptions"
+              type="button"
+              class="amenity-chip"
+              [class.amenity-chip--on]="isAmenityOn(a.key)"
+              (click)="toggleAmenity(a.key)">
+        <i class="pi" [ngClass]="isAmenityOn(a.key) ? 'pi-check' : 'pi-plus'"></i>
+        {{ a.label }}
+      </button>
+    </div>
+  </div>
+</div>

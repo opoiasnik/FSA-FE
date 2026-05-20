@@ -4,21 +4,36 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { forkJoin, of, switchMap } from 'rxjs';
-import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { ListingBasicsStep } from '../../components/listing-basics-step/listing-basics-step';
+import { ListingDetailsStep } from '../../components/listing-details-step/listing-details-step';
+import { ListingLocationStep } from '../../components/listing-location-step/listing-location-step';
+import { ListingPhotoUploader } from '../../components/listing-photo-uploader/listing-photo-uploader';
+import { ListingPriceStep } from '../../components/listing-price-step/listing-price-step';
+import { ListingReviewStep } from '../../components/listing-review-step/listing-review-step';
+import { ListingWizardStep, ListingWizardStepper } from '../../components/listing-wizard-stepper/listing-wizard-stepper';
 import { CreateListingRequest } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
-interface WizardStep {
+interface WizardStep extends ListingWizardStep {
   id: 'basics' | 'location' | 'details' | 'price' | 'media' | 'review';
-  title: string;
-  sub: string;
 }
 
 @Component({
   selector: 'app-listing-create-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MessageModule, PhotoPlaceholder],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MessageModule,
+    ListingBasicsStep,
+    ListingLocationStep,
+    ListingDetailsStep,
+    ListingPriceStep,
+    ListingPhotoUploader,
+    ListingReviewStep,
+    ListingWizardStepper
+  ],
   templateUrl: './listing-create-page.html',
   styleUrl: './listing-create-page.scss'
 })
@@ -64,15 +79,6 @@ export class ListingCreatePage {
     });
   }
 
-  isFieldRequired(name: string): boolean {
-    return Object.values(this.stepRequiredFields).flat().includes(name);
-  }
-
-  isFieldInvalid(name: string): boolean {
-    const ctrl = this.form.get(name);
-    return !!ctrl && ctrl.invalid && (ctrl.touched || ctrl.dirty);
-  }
-
   canProceed(): boolean {
     return this.isStepValid(this.activeStep().id);
   }
@@ -100,14 +106,6 @@ export class ListingCreatePage {
     amount: [null as number | null, [Validators.required, Validators.min(1)]],
     currency: ['EUR', [Validators.required]]
   });
-
-  readonly amenityOptions = [
-    { key: 'furnished' as const, label: 'Furnished' },
-    { key: 'parkingAvailable' as const, label: 'Parking' },
-    { key: 'balcony' as const, label: 'Balcony' },
-    { key: 'elevator' as const, label: 'Elevator' },
-    { key: 'petsAllowed' as const, label: 'Pets allowed' }
-  ];
 
   goTo(index: number): void {
     if (index < 0 || index >= this.steps.length) return;
@@ -202,22 +200,14 @@ export class ListingCreatePage {
     });
   }
 
-  toggleAmenity(key: 'furnished' | 'parkingAvailable' | 'balcony' | 'elevator' | 'petsAllowed'): void {
-    const control = this.form.controls[key];
-    control.setValue(!control.value);
-  }
-
-  onPhotosSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const newFiles = Array.from(input.files ?? [])
-      .filter(file => file.type.startsWith('image/'));
+  addPhotos(files: File[]): void {
+    const newFiles = files.filter(file => file.type.startsWith('image/'));
 
     const remaining = 20 - this.selectedPhotos().length;
     const toAdd = newFiles.slice(0, remaining);
 
     this.selectedPhotos.update(files => [...files, ...toAdd]);
     this.photoPreviews.update(urls => [...urls, ...toAdd.map(f => URL.createObjectURL(f))]);
-    input.value = '';
   }
 
   removePhoto(index: number): void {

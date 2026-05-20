@@ -1,31 +1,26 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { MessageService } from 'primeng/api';
-import { MessageModule } from 'primeng/message';
 import { AccessService } from '../../../../core/access/access';
 import { UserService } from '../../../../core/services/user.service';
-import { Avatar } from '../../../../shared/component/avatar/avatar';
+import { ProfileHeader } from '../../components/profile-header/profile-header';
+import { NotificationPref, NotificationPreferenceKey, ProfileNotificationsPanel } from '../../components/profile-notifications-panel/profile-notifications-panel';
+import { ProfileFormModel, ProfilePersonalForm } from '../../components/profile-personal-form/profile-personal-form';
+import { ProfileTab, ProfileTabId, ProfileTabs } from '../../components/profile-tabs/profile-tabs';
+import { ProfileVerificationPanel, VerificationStep } from '../../components/profile-verification-panel/profile-verification-panel';
 import { ProfileService } from '../../services/profile.service';
 
-type Tab = 'profile' | 'verification' | 'notifications';
-
-interface NotificationPref {
-  key: 'messageEmailNotifications' | 'viewingEmailNotifications' | 'viewingRequestEmailNotifications';
+interface NotificationDefinition {
+  key: NotificationPreferenceKey;
   label: string;
   body: string;
   audience?: 'owner' | 'user';
 }
 
-interface VerificationStep {
-  label: string;
-  status: 'verified' | 'pending' | 'unverified';
-}
-
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, MessageModule, Avatar],
+  imports: [CommonModule, ProfileHeader, ProfileTabs, ProfilePersonalForm, ProfileVerificationPanel, ProfileNotificationsPanel],
   templateUrl: './profile-page.html',
   styleUrl: './profile-page.scss'
 })
@@ -35,9 +30,7 @@ export class ProfilePage implements OnInit {
   private readonly profileService = inject(ProfileService);
   private readonly messageService = inject(MessageService);
 
-  @ViewChild('fileInput') private readonly fileInputRef!: ElementRef<HTMLInputElement>;
-
-  readonly tab = signal<Tab>('profile');
+  readonly tab = signal<ProfileTabId>('profile');
   readonly user = this.userService.getUserSignal();
   readonly avatarUrl = this.userService.avatarUrl;
   readonly emailVerified = this.userService.emailVerified;
@@ -45,17 +38,15 @@ export class ProfilePage implements OnInit {
   private readonly canViewOwnerNotificationSettings = this.access.can('viewOwnerNotificationSettings');
   private readonly canViewUserNotificationSettings = this.access.can('viewUserNotificationSettings');
 
-  readonly showUploadPanel = signal(false);
   readonly uploading = signal(false);
   readonly saving = signal(false);
   readonly sendingEmailCode = signal(false);
   readonly confirmingEmailCode = signal(false);
   readonly savingNotificationPreferences = signal(false);
   readonly emailVerificationRequested = signal(false);
-  readonly isDragOver = signal(false);
   readonly verificationCode = signal('');
 
-  readonly form = {
+  readonly form: ProfileFormModel = {
     name: '',
     surname: '',
     email: '',
@@ -82,13 +73,13 @@ export class ProfilePage implements OnInit {
         || this.form.bio     !== this.originalForm.bio;
   }
 
-  readonly tabs: { id: Tab; label: string; icon: string }[] = [
+  readonly tabs: ProfileTab[] = [
     { id: 'profile', label: 'Profile', icon: 'pi-user' },
     { id: 'verification', label: 'Verification', icon: 'pi-shield' },
     { id: 'notifications', label: 'Notifications', icon: 'pi-bell' }
   ];
 
-  readonly notifications: NotificationPref[] = [
+  private readonly notifications: NotificationDefinition[] = [
     { key: 'messageEmailNotifications', label: 'New messages', body: 'Email me when another user sends a chat message.' },
     { key: 'viewingEmailNotifications', label: 'Viewing request status', body: 'Email me when an owner approves or rejects my viewing request.', audience: 'user' },
     { key: 'viewingRequestEmailNotifications', label: 'New viewing requests', body: 'Email me when someone requests a viewing for my listing.', audience: 'owner' }
@@ -104,7 +95,7 @@ export class ProfilePage implements OnInit {
     this.originalForm = { name: this.form.name, surname: this.form.surname, email: this.form.email, phone: this.form.phone, bio: this.form.bio };
   }
 
-  switch(tab: Tab): void {
+  switch(tab: ProfileTabId): void {
     this.tab.set(tab);
   }
 
@@ -221,7 +212,7 @@ export class ProfilePage implements OnInit {
     });
   }
 
-  notificationValue(key: NotificationPref['key']): boolean {
+  notificationValue(key: NotificationPreferenceKey): boolean {
     switch (key) {
       case 'messageEmailNotifications':
         return this.userService.messageEmailNotifications();
@@ -233,18 +224,20 @@ export class ProfilePage implements OnInit {
   }
 
   visibleNotifications(): NotificationPref[] {
-    return this.notifications.filter(n => {
-      if (!n.audience) {
-        return true;
-      }
+    return this.notifications
+      .filter(n => {
+        if (!n.audience) {
+          return true;
+        }
 
-      return n.audience === 'owner'
-        ? this.canViewOwnerNotificationSettings()
-        : this.canViewUserNotificationSettings();
-    });
+        return n.audience === 'owner'
+          ? this.canViewOwnerNotificationSettings()
+          : this.canViewUserNotificationSettings();
+      })
+      .map(n => ({ ...n, enabled: this.notificationValue(n.key) }));
   }
 
-  toggleNotificationPreference(key: NotificationPref['key']): void {
+  toggleNotificationPreference(key: NotificationPreferenceKey): void {
     const next = {
       messageEmailNotifications: this.userService.messageEmailNotifications(),
       viewingEmailNotifications: this.userService.viewingEmailNotifications(),
@@ -268,49 +261,7 @@ export class ProfilePage implements OnInit {
     });
   }
 
-  openAvatarUpload(): void {
-    this.showUploadPanel.set(true);
-  }
-
-  closeUploadPanel(): void {
-    this.showUploadPanel.set(false);
-    this.isDragOver.set(false);
-  }
-
-  triggerFileInput(): void {
-    this.closeUploadPanel();
-    this.fileInputRef.nativeElement.click();
-  }
-
-  onFileInputChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) {
-      this.uploadFile(file);
-    }
-    input.value = '';
-  }
-
-  onDrop(event: DragEvent): void {
-    event.preventDefault();
-    this.isDragOver.set(false);
-    const file = event.dataTransfer?.files?.[0];
-    if (file) {
-      this.closeUploadPanel();
-      this.uploadFile(file);
-    }
-  }
-
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    this.isDragOver.set(true);
-  }
-
-  onDragLeave(): void {
-    this.isDragOver.set(false);
-  }
-
-  private uploadFile(file: File): void {
+  uploadFile(file: File): void {
     this.uploading.set(true);
     this.profileService.uploadAvatar(file).subscribe({
       next: dto => {

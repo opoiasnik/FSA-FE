@@ -4,9 +4,9 @@ import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { EmptyState } from '../../../../shared/component/empty-state/empty-state';
-import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ListingSummary } from '../../../listings/models/listing.model';
+import { FavouriteListingCard } from '../../components/favourite-listing-card/favourite-listing-card';
 import { FavoriteService } from '../../services/favorite.service';
 import { FavoriteStore } from '../../services/favorite.store';
 
@@ -15,7 +15,7 @@ type Tab = 'ALL' | 'RENT' | 'SALE';
 @Component({
   selector: 'app-favourites-page',
   standalone: true,
-  imports: [CommonModule, MessageModule, SkeletonModule, EmptyState, PhotoPlaceholder],
+  imports: [CommonModule, MessageModule, SkeletonModule, EmptyState, FavouriteListingCard],
   templateUrl: './favourites-page.html',
   styleUrl: './favourites-page.scss'
 })
@@ -58,22 +58,12 @@ export class FavouritesPage implements OnInit {
     void this.router.navigate(['/listings', id]);
   }
 
-  remove(event: Event, id: number): void {
-    event.stopPropagation();
+  remove(id: number): void {
     this.favoriteStore.toggle(id);
   }
 
   browse(): void {
     void this.router.navigate(['/listings']);
-  }
-
-  formatPrice(listing: ListingSummary): string {
-    const suffix = listing.listingType === 'RENT' ? ' / mo' : '';
-    return new Intl.NumberFormat('sk-SK').format(listing.price.amount) + ' €' + suffix;
-  }
-
-  shortLocation(listing: ListingSummary): string {
-    return listing.city;
   }
 
   private toMessage(error: unknown): string {

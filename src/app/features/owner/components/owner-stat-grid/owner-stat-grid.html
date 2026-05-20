@@ -1,0 +1,11 @@
+<section class="dash__stats" aria-label="Owner statistics">
+  <article *ngFor="let s of cards" class="ra-card stat">
+    <div class="stat__label">{{ s.label }}</div>
+    <div class="stat__value">{{ s.value }}</div>
+    <div class="stat__delta" [class.up]="s.tone === 'up'" [class.down]="s.tone === 'down'">
+      <i *ngIf="s.tone !== 'flat'" class="pi"
+         [ngClass]="s.tone === 'up' ? 'pi-arrow-up' : 'pi-arrow-down'"></i>
+      {{ s.delta }}
+    </div>
+  </article>
+</section>

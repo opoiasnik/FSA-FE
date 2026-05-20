@@ -25,25 +25,12 @@
   </div>
 
   <div *ngIf="!loading()" class="grid">
-    <article *ngFor="let item of filtered()" class="card" (click)="open(item.id)">
-      <div class="card__media">
-        <img *ngIf="item.coverPhoto?.contentUrl; else photoPlaceholder"
-             [src]="item.coverPhoto?.contentUrl"
-             [alt]="item.title"
-             loading="lazy" />
-        <ng-template #photoPlaceholder>
-          <app-photo-placeholder [seed]="item.id" [rounded]="0"></app-photo-placeholder>
-        </ng-template>
-        <button type="button" class="card__remove" (click)="remove($event, item.id)" aria-label="Remove from favourites">
-          <i class="pi pi-heart-fill"></i>
-        </button>
-      </div>
-      <div class="card__body">
-        <h3>{{ item.title }}</h3>
-        <p class="card__loc">{{ shortLocation(item) }}</p>
-        <p class="card__price">{{ formatPrice(item) }}</p>
-      </div>
-    </article>
+    <app-favourite-listing-card
+      *ngFor="let item of filtered()"
+      [listing]="item"
+      (opened)="open($event)"
+      (removed)="remove($event)">
+    </app-favourite-listing-card>
 
     <app-empty-state
       *ngIf="!filtered().length"

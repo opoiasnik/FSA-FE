@@ -1,0 +1,26 @@
+<div [formGroup]="form" class="grid-2">
+  <label class="field span-2">
+    <span>Street & number <span class="req">*</span></span>
+    <input class="ra-input" [class.ra-input--invalid]="isInvalid('street')" formControlName="street" />
+  </label>
+
+  <label class="field">
+    <span>City <span class="req">*</span></span>
+    <input class="ra-input" [class.ra-input--invalid]="isInvalid('city')" formControlName="city" />
+  </label>
+
+  <label class="field">
+    <span>District</span>
+    <input class="ra-input" formControlName="district" />
+  </label>
+
+  <label class="field">
+    <span>Postal code <span class="req">*</span></span>
+    <input class="ra-input" [class.ra-input--invalid]="isInvalid('postalCode')" formControlName="postalCode" />
+  </label>
+
+  <label class="field">
+    <span>Country <span class="req">*</span></span>
+    <input class="ra-input" [class.ra-input--invalid]="isInvalid('country')" formControlName="country" />
+  </label>
+</div>

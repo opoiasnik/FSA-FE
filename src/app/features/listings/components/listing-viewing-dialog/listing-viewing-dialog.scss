@@ -1,0 +1,45 @@
+.viewing-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.viewing-dialog__field {
+  display: block;
+
+  span {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+
+    small {
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+  }
+}
+
+.viewing-dialog__error {
+  margin: 0;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+.viewing-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .viewing-dialog__actions {
+    flex-direction: column-reverse;
+
+    .ra-btn {
+      width: 100%;
+    }
+  }
+}

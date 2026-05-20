@@ -1,0 +1,36 @@
+<app-modal
+  title="Book a viewing"
+  [visible]="visible"
+  width="420px"
+  (closed)="closed.emit()">
+
+  <div class="viewing-dialog">
+    <label class="viewing-dialog__field">
+      <span>Date and time</span>
+      <app-date-picker
+        [value]="date"
+        [minDate]="minDate"
+        (valueChange)="dateChange.emit($event)">
+      </app-date-picker>
+    </label>
+
+    <label class="viewing-dialog__field">
+      <span>Note <small>(optional)</small></span>
+      <textarea class="ra-input" rows="3" placeholder="What time works best for you?"
+                [value]="note"
+                (input)="noteChange.emit($any($event.target).value)"></textarea>
+    </label>
+
+    <p *ngIf="error" class="viewing-dialog__error">{{ error }}</p>
+
+    <div class="viewing-dialog__actions">
+      <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="closed.emit()">
+        Cancel
+      </button>
+      <button type="button" class="ra-btn ra-btn--sm"
+              [disabled]="!date || submitting" (click)="submitted.emit()">
+        <i class="pi pi-check"></i>Submit request
+      </button>
+    </div>
+  </div>
+</app-modal>

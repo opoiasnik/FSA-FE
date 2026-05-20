@@ -1,0 +1,34 @@
+<aside class="inbox__threads" aria-label="Message conversations">
+  <header class="inbox__threads-head">
+    <h2>Messages</h2>
+    <span>{{ threads.length }} conversations</span>
+  </header>
+
+  <app-empty-state *ngIf="!threads.length"
+    icon="pi-inbox"
+    title="Inbox is quiet"
+    body="Open a listing and reach out to start a conversation.">
+  </app-empty-state>
+
+  <button *ngFor="let t of threads"
+          type="button"
+          class="thread"
+          [class.thread--on]="selectedId === t.id"
+          (click)="selected.emit(t.id)">
+    <app-avatar
+      [name]="peerName(t)"
+      [hue]="t.peer.id"
+      [verified]="t.peer.role === 'OWNER'"
+      [size]="44"
+      [imageUrl]="avatarUrls[t.peer.id]">
+    </app-avatar>
+    <div class="thread__body">
+      <div class="thread__top">
+        <strong>{{ peerName(t) }}</strong>
+        <time>{{ t.updatedAt | date:'shortTime' }}</time>
+      </div>
+      <p>{{ t.preview }}</p>
+    </div>
+    <span *ngIf="t.unreadCount" class="thread__badge">{{ t.unreadCount }}</span>
+  </button>
+</aside>

@@ -1,0 +1,19 @@
+<section>
+  <h2>Personal info</h2>
+  <p class="profile__sub">Information you can share with owners you message.</p>
+
+  <div class="grid-2">
+    <label class="field"><span>First name</span><input class="ra-input" [(ngModel)]="form.name" /></label>
+    <label class="field"><span>Last name</span><input class="ra-input" [(ngModel)]="form.surname" /></label>
+    <label class="field span-2"><span>Email</span><input class="ra-input" [(ngModel)]="form.email" /></label>
+    <label class="field"><span>Phone</span><input class="ra-input" [(ngModel)]="form.phone" /></label>
+    <label class="field span-2"><span>Short bio</span><textarea class="ra-input" rows="4" [(ngModel)]="form.bio"></textarea></label>
+  </div>
+
+  <div class="profile__actions">
+    <button type="button" class="ra-btn" [disabled]="saving || !dirty" (click)="saved.emit()">
+      <i *ngIf="saving" class="pi pi-spin pi-spinner"></i>
+      Save changes
+    </button>
+  </div>
+</section>

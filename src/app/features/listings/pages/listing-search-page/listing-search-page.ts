@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
+import { AppPagination } from '../../../../shared/component/app-pagination/app-pagination';
 import { MapView, MapPin } from '../../../../shared/component/map-view/map-view';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { FavoriteStore } from '../../../favourites/services/favorite.store';
@@ -26,7 +27,7 @@ const emptyPill = (): SearchPillValues => ({
 @Component({
   selector: 'app-listing-search-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, MessageModule, SkeletonModule, MapView, ListingCard, ListingFilterBar, SearchPill],
+  imports: [CommonModule, FormsModule, MessageModule, SkeletonModule, AppPagination, MapView, ListingCard, ListingFilterBar, SearchPill],
   templateUrl: './listing-search-page.html',
   styleUrl: './listing-search-page.scss',
 })
@@ -49,7 +50,6 @@ export class ListingSearchPage implements OnInit {
   readonly totalPages    = signal(0);
   readonly selectedId    = signal<number | null>(null);
   readonly cityLabel     = computed(() => this.pillValues().q || 'Slovakia');
-  readonly visiblePages  = computed(() => this.buildVisiblePages());
 
   readonly mapPins = computed<MapPin[]>(() =>
     this.listings()
@@ -151,16 +151,4 @@ export class ListingSearchPage implements OnInit {
   toggleSave(id: number): void { this.favoriteStore.toggle(id); }
 
   isSaved(id: number): boolean { return this.favoriteStore.isFavorite(id); }
-
-  private buildVisiblePages(): number[] {
-    const total = this.totalPages();
-    const current = this.page();
-    if (total <= 1) {
-      return [];
-    }
-
-    const start = Math.max(0, Math.min(current - 2, total - 5));
-    const end = Math.min(total, start + 5);
-    return Array.from({ length: end - start }, (_, index) => start + index);
-  }
 }

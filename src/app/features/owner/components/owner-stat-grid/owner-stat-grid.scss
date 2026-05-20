@@ -1,0 +1,28 @@
+.dash__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.stat { padding: 20px; }
+.stat__label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.stat__value { font-size: 28px; font-weight: 700; margin: 6px 0 8px; }
+.stat__delta {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  &.up { color: var(--success, #2fa968); }
+  &.down { color: var(--accent); }
+}
+
+@media (max-width: 960px) {
+  .dash__stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .dash__stats { grid-template-columns: 1fr; }
+}

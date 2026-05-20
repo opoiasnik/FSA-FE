@@ -1,0 +1,59 @@
+<aside class="sidebar">
+  <div class="ra-card sidebar__card">
+    <div class="price-row">
+      <span class="price-row__amount">{{ priceAmount }}</span>
+      <span class="price-row__suffix">{{ listingType === 'RENT' ? 'per month' : 'total' }}</span>
+    </div>
+    <div class="price-row__sub" *ngIf="pricePerSqm">approx. {{ pricePerSqm }}</div>
+
+    <div *ngIf="canViewStats" class="listing-views">
+      <i class="pi pi-eye"></i>
+      <span>{{ views }} views</span>
+    </div>
+
+    <div class="owner">
+      <app-avatar [name]="owner.name" [hue]="owner.avatarHue" [size]="44" [verified]="owner.verified"></app-avatar>
+      <div class="owner__meta">
+        <div class="owner__name">{{ owner.name }}</div>
+        <div class="owner__role">{{ owner.role }}</div>
+      </div>
+    </div>
+
+    <div *ngIf="ownListing; else renterActions" class="owner-tools">
+      <div class="owner-tools__icon">
+        <i class="pi pi-home"></i>
+      </div>
+      <div>
+        <h3>This is your listing</h3>
+        <p>Manage viewing requests, listing performance, and owner tools from your studio.</p>
+      </div>
+      <a routerLink="/owner" class="ra-btn ra-btn--lg">
+        <i class="pi pi-chart-line"></i>Open Owner Studio
+      </a>
+    </div>
+
+    <ng-template #renterActions>
+      <div class="sidebar__actions">
+        <button type="button" class="ra-btn ra-btn--lg" (click)="messagesOpened.emit()" [disabled]="!canMessageOwner || openingConversation">
+          <i class="pi pi-send"></i>Message {{ owner.name.split(' ')[0] }}
+        </button>
+        <button type="button" class="ra-btn ra-btn--ghost ra-btn--lg"
+                [disabled]="!canBookViewing" (click)="viewingOpened.emit()">
+          <i class="pi pi-calendar"></i>{{ loadingViewingRequest ? 'Checking request' : currentViewingRequest ? 'Viewing request sent' : 'Book a viewing' }}
+        </button>
+        <p *ngIf="currentViewingRequest as request" class="viewing-form__success">
+          {{ request.status === 'APPROVED' ? 'Viewing request approved.' : 'Viewing request sent.' }}
+        </p>
+        <p *ngIf="viewingSuccess && !currentViewingRequest" class="viewing-form__success">Viewing request sent.</p>
+        <button type="button" class="ra-btn ra-btn--text">
+          <i class="pi pi-phone"></i>Show phone number
+        </button>
+      </div>
+    </ng-template>
+
+    <div *ngIf="!ownListing" class="sidebar__notice">
+      <i class="pi pi-shield"></i>
+      Owner verified via government ID. Never wire money before a viewing.
+    </div>
+  </div>
+</aside>

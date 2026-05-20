@@ -1,0 +1,16 @@
+<div [formGroup]="form" class="grid-2">
+  <label class="field">
+    <span>{{ form.get('listingType')?.value === 'RENT' ? 'Monthly rent' : 'Selling price' }} <span class="req">*</span></span>
+    <input type="number" class="ra-input" [class.ra-input--invalid]="isInvalid('amount')" formControlName="amount" />
+  </label>
+
+  <label class="field">
+    <span>Currency <span class="req">*</span></span>
+    <select class="ra-input" formControlName="currency"><option>EUR</option></select>
+  </label>
+
+  <div class="insight span-2">
+    <i class="pi pi-info-circle"></i>
+    <div><strong>Market insight:</strong> Similar properties in this area are priced competitively.</div>
+  </div>
+</div>

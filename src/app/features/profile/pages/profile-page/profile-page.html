@@ -1,163 +1,46 @@
 <section class="profile">
-  <header class="profile__head">
-
-    <!-- Avatar with hover-pencil and upload panel -->
-    <div class="avatar-wrapper">
-      <app-avatar
-        [name]="(user()?.name || '') + ' ' + (user()?.surname || '')"
-        [hue]="200"
-        [verified]="true"
-        [size]="72"
-        [imageUrl]="avatarUrl()"
-        [editable]="true"
-        (edit)="openAvatarUpload()">
-      </app-avatar>
-
-      <!-- Upload spinner overlay -->
-      <div class="avatar-spinner" *ngIf="uploading()">
-        <i class="pi pi-spin pi-spinner"></i>
-      </div>
-
-      <!-- Upload panel -->
-      <div class="avatar-upload" *ngIf="showUploadPanel()">
-        <div class="avatar-upload__drop"
-             [class.avatar-upload__drop--over]="isDragOver()"
-             (dragover)="onDragOver($event)"
-             (dragleave)="onDragLeave()"
-             (drop)="onDrop($event)">
-          <i class="pi pi-image avatar-upload__icon"></i>
-          <p class="avatar-upload__label">Drag & drop a photo here</p>
-          <p class="avatar-upload__hint">JPG, PNG or WEBP &middot; max 5 MB</p>
-          <button type="button" class="ra-btn ra-btn--sm" (click)="triggerFileInput()">
-            <i class="pi pi-folder-open"></i> Choose file
-          </button>
-        </div>
-        <button type="button" class="avatar-upload__close" (click)="closeUploadPanel()">
-          <i class="pi pi-times"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Backdrop closes panel on outside click -->
-    <div class="avatar-backdrop" *ngIf="showUploadPanel()" (click)="closeUploadPanel()"></div>
-
-    <!-- Hidden file input -->
-    <input #fileInput type="file" accept="image/*" style="display:none" (change)="onFileInputChange($event)" />
-
-    <div>
-      <div class="ra-eyebrow">Your account</div>
-      <h1>{{ user()?.name }} {{ user()?.surname }}</h1>
-      <p>{{ user()?.email }}<span *ngIf="memberSince()"> &middot; Member since {{ memberSince() }}</span></p>
-    </div>
-  </header>
+  <app-profile-header
+    [user]="user()"
+    [avatarUrl]="avatarUrl()"
+    [memberSince]="memberSince()"
+    [uploading]="uploading()"
+    (fileSelected)="uploadFile($event)">
+  </app-profile-header>
 
   <div class="profile__layout">
-    <nav class="profile__tabs">
-      <button *ngFor="let t of tabs"
-              type="button"
-              class="profile__tab"
-              [class.profile__tab--on]="tab() === t.id"
-              (click)="switch(t.id)">
-        <i class="pi" [ngClass]="t.icon"></i>
-        {{ t.label }}
-      </button>
-    </nav>
+    <app-profile-tabs [tabs]="tabs" [active]="tab()" (activeChange)="switch($event)"></app-profile-tabs>
 
     <div class="ra-card profile__panel">
       <ng-container [ngSwitch]="tab()">
 
-        <div *ngSwitchCase="'profile'">
-          <h2>Personal info</h2>
-          <p class="profile__sub">Information you can share with owners you message.</p>
-          <div class="grid-2">
-            <label class="field"><span>First name</span><input class="ra-input" [(ngModel)]="form.name" /></label>
-            <label class="field"><span>Last name</span><input class="ra-input" [(ngModel)]="form.surname" /></label>
-            <label class="field span-2"><span>Email</span><input class="ra-input" [(ngModel)]="form.email" /></label>
-            <label class="field"><span>Phone</span><input class="ra-input" [(ngModel)]="form.phone" /></label>
-            <label class="field span-2"><span>Short bio</span><textarea class="ra-input" rows="4" [(ngModel)]="form.bio"></textarea></label>
-          </div>
-          <div class="profile__actions">
-            <button type="button" class="ra-btn" [disabled]="saving() || !isDirty" (click)="saveProfile()">
-              <i *ngIf="saving()" class="pi pi-spin pi-spinner"></i>
-              Save changes
-            </button>
-          </div>
-        </div>
+        <app-profile-personal-form
+          *ngSwitchCase="'profile'"
+          [form]="form"
+          [saving]="saving()"
+          [dirty]="isDirty"
+          (saved)="saveProfile()">
+        </app-profile-personal-form>
 
-        <div *ngSwitchCase="'verification'">
-          <h2>Verification</h2>
-          <p class="profile__sub">Verified accounts are trusted faster and appear higher in owner inboxes.</p>
-          <div class="verify">
-            <div class="verify__bar">
-              <div class="verify__fill" [style.width.%]="verificationProgress()"></div>
-            </div>
-            <p>{{ verificationProgress() }}% complete</p>
-          </div>
-          <ul class="verify__list">
-            <li *ngFor="let s of verificationSteps()" [class.done]="s.status === 'verified'" [class.pending]="s.status === 'pending'">
-              <i class="pi" [ngClass]="s.status === 'verified' ? 'pi-check-circle' : s.status === 'pending' ? 'pi-clock' : 'pi-circle'"></i>
-              <span>{{ s.label }}</span>
-              <span class="verify__status" *ngIf="s.status === 'verified'">Verified</span>
-              <span class="verify__status verify__status--pending" *ngIf="s.status === 'pending'">Pending</span>
-              <button type="button"
-                      class="ra-btn ra-btn--sm ra-btn--ghost"
-                      *ngIf="s.status !== 'verified'"
-                      [disabled]="sendingEmailCode()"
-                      (click)="requestEmailVerification()">
-                <i *ngIf="sendingEmailCode()" class="pi pi-spin pi-spinner"></i>
-                {{ s.status === 'pending' ? 'Resend' : 'Verify' }}
-              </button>
-            </li>
-          </ul>
-          <form class="verify-code"
-                *ngIf="emailVerificationRequested() || emailVerificationPending()"
-                (ngSubmit)="confirmEmailVerification()">
-            <label class="field">
-              <span>Email verification code</span>
-              <input class="ra-input"
-                     [ngModel]="verificationCode()"
-                     (ngModelChange)="verificationCode.set($event)"
-                     name="verificationCode"
-                     inputmode="numeric"
-                     autocomplete="one-time-code"
-                     placeholder="123456" />
-            </label>
-            <button type="submit"
-                    class="ra-btn"
-                    [disabled]="confirmingEmailCode() || !verificationCode().trim()">
-              <i *ngIf="confirmingEmailCode()" class="pi pi-spin pi-spinner"></i>
-              Confirm email
-            </button>
-          </form>
-        </div>
+        <app-profile-verification-panel
+          *ngSwitchCase="'verification'"
+          [progress]="verificationProgress()"
+          [steps]="verificationSteps()"
+          [code]="verificationCode()"
+          [requested]="emailVerificationRequested()"
+          [pending]="emailVerificationPending()"
+          [sending]="sendingEmailCode()"
+          [confirming]="confirmingEmailCode()"
+          (codeChange)="verificationCode.set($event)"
+          (verificationRequested)="requestEmailVerification()"
+          (verificationConfirmed)="confirmEmailVerification()">
+        </app-profile-verification-panel>
 
-        <div *ngSwitchCase="'notifications'">
-          <h2>Notifications</h2>
-          <p class="profile__sub">Pick which updates should reach your email inbox.</p>
-          <table class="notif">
-            <thead>
-              <tr><th>Event</th><th>Email</th></tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let n of visibleNotifications()">
-                <td>
-                  <strong>{{ n.label }}</strong>
-                  <p>{{ n.body }}</p>
-                </td>
-                <td>
-                  <button type="button"
-                          class="notif-toggle"
-                          [class.notif-toggle--on]="notificationValue(n.key)"
-                          [disabled]="savingNotificationPreferences()"
-                          (click)="toggleNotificationPreference(n.key)"
-                          [attr.aria-pressed]="notificationValue(n.key)">
-                    <span></span>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <app-profile-notifications-panel
+          *ngSwitchCase="'notifications'"
+          [notifications]="visibleNotifications()"
+          [saving]="savingNotificationPreferences()"
+          (toggled)="toggleNotificationPreference($event)">
+        </app-profile-notifications-panel>
 
       </ng-container>
     </div>

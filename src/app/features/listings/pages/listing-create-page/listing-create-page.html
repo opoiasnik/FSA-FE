@@ -6,165 +6,41 @@
     </div>
   </div>
 
-  <div class="stepper">
-    <div *ngFor="let s of steps; let i = index"
-         class="stepper__item"
-         [class.stepper__item--active]="i === currentStep()"
-         [class.stepper__item--done]="i < currentStep()"
-         (click)="goTo(i)">
-      <div class="stepper__index">Step {{ i + 1 }}</div>
-      <div class="stepper__title">{{ s.title }}</div>
-    </div>
-  </div>
+  <app-listing-wizard-stepper
+    [steps]="steps"
+    [currentStep]="currentStep()"
+    (stepSelected)="goTo($event)">
+  </app-listing-wizard-stepper>
 
   <div class="ra-card wizard__panel">
     <h2>{{ activeStep().title }}</h2>
     <p class="wizard__sub">{{ activeStep().sub }}</p>
 
     <form [formGroup]="form" class="wizard__form" novalidate>
-      <!-- Basics -->
-      <div *ngIf="activeStep().id === 'basics'" class="grid-2">
-        <label class="field span-2">
-          <span>Listing title <span class="req">*</span></span>
-          <input class="ra-input" [class.ra-input--invalid]="isFieldInvalid('title')" formControlName="title" />
-          <small>Up to 80 characters. Be descriptive.</small>
-        </label>
-        <label class="field">
-          <span>Deal type</span>
-          <select class="ra-input" formControlName="listingType">
-            <option value="RENT">For rent</option>
-            <option value="SALE">For sale</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>Property type</span>
-          <select class="ra-input" formControlName="propertyType">
-            <option value="APARTMENT">Apartment</option>
-            <option value="HOUSE">House</option>
-            <option value="ROOM">Room</option>
-          </select>
-        </label>
-        <label class="field span-2">
-          <span>Description <span class="req">*</span></span>
-          <textarea class="ra-input" [class.ra-input--invalid]="isFieldInvalid('description')" rows="6" formControlName="description"></textarea>
-          <small>Mention the neighbourhood, building, what's nearby, any quirks.</small>
-        </label>
-      </div>
+      <app-listing-basics-step *ngIf="activeStep().id === 'basics'" [form]="form"></app-listing-basics-step>
 
-      <!-- Location -->
-      <div *ngIf="activeStep().id === 'location'" class="grid-2">
-        <label class="field span-2">
-          <span>Street & number <span class="req">*</span></span>
-          <input class="ra-input" [class.ra-input--invalid]="isFieldInvalid('street')" formControlName="street" />
-        </label>
-        <label class="field"><span>City <span class="req">*</span></span><input class="ra-input" [class.ra-input--invalid]="isFieldInvalid('city')" formControlName="city" /></label>
-        <label class="field"><span>District</span><input class="ra-input" formControlName="district" /></label>
-        <label class="field"><span>Postal code <span class="req">*</span></span><input class="ra-input" [class.ra-input--invalid]="isFieldInvalid('postalCode')" formControlName="postalCode" /></label>
-        <label class="field"><span>Country <span class="req">*</span></span><input class="ra-input" [class.ra-input--invalid]="isFieldInvalid('country')" formControlName="country" /></label>
-      </div>
+      <app-listing-location-step *ngIf="activeStep().id === 'location'" [form]="form"></app-listing-location-step>
 
-      <!-- Details -->
-      <div *ngIf="activeStep().id === 'details'" class="grid-4">
-        <label class="field"><span>Area (m²) <span class="req">*</span></span><input type="number" class="ra-input" [class.ra-input--invalid]="isFieldInvalid('area')" formControlName="area" /></label>
-        <label class="field"><span>Rooms <span class="req">*</span></span><input type="number" class="ra-input" [class.ra-input--invalid]="isFieldInvalid('roomCount')" formControlName="roomCount" /></label>
-        <label class="field"><span>Floor</span><input type="number" class="ra-input" formControlName="floor" /></label>
-        <label class="field"><span>Year built</span><input type="number" class="ra-input" [class.ra-input--invalid]="isFieldInvalid('yearBuilt')" formControlName="yearBuilt" placeholder="Optional" min="1800" [max]="maxYearBuilt" /></label>
-        <label class="field">
-          <span>Energy class</span>
-          <select class="ra-input" formControlName="energyClass">
-            <option value="">—</option>
-            <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
-          </select>
-        </label>
+      <app-listing-details-step
+        *ngIf="activeStep().id === 'details'"
+        [form]="form"
+        [maxYearBuilt]="maxYearBuilt">
+      </app-listing-details-step>
 
-        <div class="amenities span-4">
-          <div class="amenities__label">Amenities</div>
-          <div class="amenities__chips">
-            <button *ngFor="let a of amenityOptions"
-                    type="button"
-                    class="amenity-chip"
-                    [class.amenity-chip--on]="form.controls[a.key].value"
-                    (click)="toggleAmenity(a.key)">
-              <i class="pi" [ngClass]="form.controls[a.key].value ? 'pi-check' : 'pi-plus'"></i>
-              {{ a.label }}
-            </button>
-          </div>
-        </div>
-      </div>
+      <app-listing-price-step *ngIf="activeStep().id === 'price'" [form]="form"></app-listing-price-step>
 
-      <!-- Price -->
-      <div *ngIf="activeStep().id === 'price'" class="grid-2">
-        <label class="field">
-          <span>{{ form.controls.listingType.value === 'RENT' ? 'Monthly rent' : 'Selling price' }} <span class="req">*</span></span>
-          <input type="number" class="ra-input" [class.ra-input--invalid]="isFieldInvalid('amount')" formControlName="amount" />
-        </label>
-        <label class="field"><span>Currency <span class="req">*</span></span>
-          <select class="ra-input" formControlName="currency"><option>EUR</option></select>
-        </label>
-        <div class="insight span-2">
-          <i class="pi pi-info-circle"></i>
-          <div><strong>Market insight:</strong> Similar properties in this area are priced competitively.</div>
-        </div>
-      </div>
+      <app-listing-photo-uploader
+        *ngIf="activeStep().id === 'media'"
+        [previews]="photoPreviews()"
+        (filesSelected)="addPhotos($event)"
+        (photoRemoved)="removePhoto($event)">
+      </app-listing-photo-uploader>
 
-      <!-- Media -->
-      <div *ngIf="activeStep().id === 'media'">
-        <div class="dropzone">
-          <i class="pi pi-cloud-upload"></i>
-          <div class="dropzone__title">Drop photos here or click to upload</div>
-          <div class="dropzone__hint">JPG or PNG, up to 10 MB each · 5–20 photos</div>
-          <label class="ra-btn ra-btn--ghost">
-            Choose files
-            <input type="file" accept="image/*" multiple (change)="onPhotosSelected($event)" />
-          </label>
-        </div>
-        <p class="todo-note" *ngIf="!photoPreviews().length">No photos selected yet.</p>
-        <div class="media-grid" *ngIf="photoPreviews().length; else emptyPhotos">
-          <div class="photo-preview" *ngFor="let preview of photoPreviews(); let i = index">
-            <img [src]="preview" [alt]="i === 0 ? 'Cover photo preview' : 'Photo preview ' + (i + 1)" />
-            <span>{{ i === 0 ? 'cover' : 'photo ' + (i + 1) }}</span>
-            <button type="button" class="photo-preview__remove" (click)="removePhoto(i)" aria-label="Remove photo">
-              <i class="pi pi-times"></i>
-            </button>
-          </div>
-        </div>
-        <ng-template #emptyPhotos>
-        <div class="media-grid">
-          <app-photo-placeholder *ngFor="let _ of [0,1,2,3,4,5]; let i = index"
-                                 [seed]="i" [label]="i === 0 ? 'cover' : 'photo ' + (i + 1)" [rounded]="10">
-          </app-photo-placeholder>
-        </div>
-        </ng-template>
-      </div>
-
-      <!-- Review -->
-      <div *ngIf="activeStep().id === 'review'">
-        <p-message severity="success" text="Ready to publish. Your listing passes all required checks."></p-message>
-        <div class="review">
-          <div class="review__cover">
-            <img *ngIf="photoPreviews()[0]; else reviewPhotoPlaceholder"
-                 [src]="photoPreviews()[0]"
-                 alt="Cover photo preview" />
-            <ng-template #reviewPhotoPlaceholder>
-              <app-photo-placeholder [seed]="1" [label]="'cover'" [rounded]="14"></app-photo-placeholder>
-            </ng-template>
-          </div>
-          <div>
-            <h3>{{ form.controls.title.value }}</h3>
-            <p>{{ form.controls.street.value }}, {{ form.controls.city.value }}</p>
-            <div class="review__chips">
-              <span class="ra-pill">{{ form.controls.area.value }} m²</span>
-              <span class="ra-pill">{{ form.controls.roomCount.value }} rooms</span>
-              <span class="ra-pill">Floor {{ form.controls.floor.value }}</span>
-              <span class="ra-pill" *ngIf="form.controls.yearBuilt.value">Built {{ form.controls.yearBuilt.value }}</span>
-              <span class="ra-pill ra-pill--success">Energy {{ form.controls.energyClass.value }}</span>
-            </div>
-            <div class="review__price">{{ form.controls.amount.value }} {{ form.controls.currency.value }}
-              <span *ngIf="form.controls.listingType.value === 'RENT'">/ mo</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <app-listing-review-step
+        *ngIf="activeStep().id === 'review'"
+        [form]="form"
+        [photoPreviews]="photoPreviews()">
+      </app-listing-review-step>
     </form>
 
     <p-message *ngIf="createError()" severity="error" [text]="createError() || ''"></p-message>

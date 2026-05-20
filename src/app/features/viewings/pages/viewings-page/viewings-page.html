@@ -12,38 +12,15 @@
   </div>
 
   <ul *ngIf="!loading()" class="viewings__list">
-    <li *ngFor="let v of items()" class="ra-card viewing">
-      <div class="viewing__main" (click)="open(v.listing.id)">
-        <h3>{{ v.listing.title }}</h3>
-        <p class="viewing__city">{{ v.listing.city }}</p>
-        <p *ngIf="ownerMode() && v.requester" class="viewing__person">
-          <i class="pi pi-user"></i>{{ v.requester.name }} {{ v.requester.surname || '' }}
-        </p>
-        <p *ngIf="!ownerMode() && v.owner" class="viewing__person">
-          <i class="pi pi-user"></i>{{ v.owner.name }} {{ v.owner.surname || '' }}
-        </p>
-        <p class="viewing__date"><i class="pi pi-calendar"></i> {{ v.requestedDate | date:'medium' }}</p>
-        <p *ngIf="v.note" class="viewing__note">{{ v.note }}</p>
-      </div>
-      <div class="viewing__side">
-        <span class="ra-pill"
-              [class.ra-pill--success]="v.status === 'APPROVED'"
-              [class.viewing__status--danger]="v.status === 'REJECTED' || v.status === 'CANCELLED'">
-          {{ v.status }}
-        </span>
-        <ng-container *ngIf="ownerMode() && v.status === 'PENDING'">
-          <button type="button" class="ra-btn ra-btn--sm viewing__approve" (click)="approve(v.id)">
-            Approve
-          </button>
-          <button type="button" class="ra-btn ra-btn--sm viewing__reject" (click)="reject(v.id)">
-            Reject
-          </button>
-        </ng-container>
-        <button *ngIf="!ownerMode() && (v.status === 'PENDING' || v.status === 'APPROVED')"
-                type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="cancel(v.id)">
-          Cancel
-        </button>
-      </div>
+    <li *ngFor="let v of items()">
+      <app-viewing-request-card
+        [request]="v"
+        [ownerMode]="ownerMode()"
+        (opened)="open($event)"
+        (approved)="approve($event)"
+        (rejected)="reject($event)"
+        (cancelled)="cancel($event)">
+      </app-viewing-request-card>
     </li>
 
     <li *ngIf="!items().length" class="viewings__empty">

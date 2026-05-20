@@ -1,0 +1,29 @@
+<section [formGroup]="form">
+  <p-message severity="success" text="Ready to publish. Your listing passes all required checks."></p-message>
+
+  <div class="review">
+    <div class="review__cover">
+      <img *ngIf="photoPreviews[0]; else reviewPhotoPlaceholder"
+           [src]="photoPreviews[0]"
+           alt="Cover photo preview" />
+      <ng-template #reviewPhotoPlaceholder>
+        <app-photo-placeholder [seed]="1" [label]="'cover'" [rounded]="14"></app-photo-placeholder>
+      </ng-template>
+    </div>
+
+    <div>
+      <h3>{{ form.get('title')?.value }}</h3>
+      <p>{{ form.get('street')?.value }}, {{ form.get('city')?.value }}</p>
+      <div class="review__chips">
+        <span class="ra-pill">{{ form.get('area')?.value }} m²</span>
+        <span class="ra-pill">{{ form.get('roomCount')?.value }} rooms</span>
+        <span class="ra-pill">Floor {{ form.get('floor')?.value }}</span>
+        <span class="ra-pill" *ngIf="form.get('yearBuilt')?.value">Built {{ form.get('yearBuilt')?.value }}</span>
+        <span class="ra-pill ra-pill--success">Energy {{ form.get('energyClass')?.value }}</span>
+      </div>
+      <div class="review__price">{{ form.get('amount')?.value }} {{ form.get('currency')?.value }}
+        <span *ngIf="form.get('listingType')?.value === 'RENT'">/ mo</span>
+      </div>
+    </div>
+  </div>
+</section>

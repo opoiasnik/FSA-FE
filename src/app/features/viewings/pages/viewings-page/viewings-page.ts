@@ -1,16 +1,17 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { AccessService } from '../../../../core/access/access';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { ViewingRequestCard } from '../../components/viewing-request-card/viewing-request-card';
 import { ViewingRequestResponse, ViewingService } from '../../services/viewing.service';
 
 @Component({
   selector: 'app-viewings-page',
   standalone: true,
-  imports: [CommonModule, DatePipe, MessageModule, SkeletonModule],
+  imports: [CommonModule, MessageModule, SkeletonModule, ViewingRequestCard],
   templateUrl: './viewings-page.html',
   styleUrl: './viewings-page.scss'
 })

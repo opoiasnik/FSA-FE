@@ -1,0 +1,30 @@
+<div [formGroup]="form" class="grid-2">
+  <label class="field span-2">
+    <span>Listing title <span class="req">*</span></span>
+    <input class="ra-input" [class.ra-input--invalid]="isInvalid('title')" formControlName="title" />
+    <small>Up to 80 characters. Be descriptive.</small>
+  </label>
+
+  <label class="field">
+    <span>Deal type</span>
+    <select class="ra-input" formControlName="listingType">
+      <option value="RENT">For rent</option>
+      <option value="SALE">For sale</option>
+    </select>
+  </label>
+
+  <label class="field">
+    <span>Property type</span>
+    <select class="ra-input" formControlName="propertyType">
+      <option value="APARTMENT">Apartment</option>
+      <option value="HOUSE">House</option>
+      <option value="ROOM">Room</option>
+    </select>
+  </label>
+
+  <label class="field span-2">
+    <span>Description <span class="req">*</span></span>
+    <textarea class="ra-input" [class.ra-input--invalid]="isInvalid('description')" rows="6" formControlName="description"></textarea>
+    <small>Mention the neighbourhood, building, what's nearby, any quirks.</small>
+  </label>
+</div>

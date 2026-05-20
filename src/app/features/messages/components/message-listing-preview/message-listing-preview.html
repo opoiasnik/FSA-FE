@@ -1,0 +1,18 @@
+<aside class="inbox__listing" *ngIf="listing as l">
+  <button type="button" class="listing-preview" (click)="openListing()">
+    <div class="listing-preview__media">
+      <img *ngIf="photoUrl; else listingPlaceholder"
+           [src]="photoUrl"
+           [alt]="l.title" />
+      <ng-template #listingPlaceholder>
+        <app-photo-placeholder [seed]="l.id" [rounded]="0"></app-photo-placeholder>
+      </ng-template>
+    </div>
+    <div class="listing-preview__body">
+      <h3>{{ l.title }}</h3>
+      <p>{{ l.city }}</p>
+      <p class="listing-preview__price">{{ formatPrice(l) }}</p>
+      <span class="ra-btn ra-btn--ghost ra-btn--sm">Open listing</span>
+    </div>
+  </button>
+</aside>

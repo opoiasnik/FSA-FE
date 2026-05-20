@@ -1,0 +1,28 @@
+<section>
+  <h2>Notifications</h2>
+  <p class="profile__sub">Pick which updates should reach your email inbox.</p>
+
+  <table class="notif">
+    <thead>
+      <tr><th>Event</th><th>Email</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let n of notifications">
+        <td>
+          <strong>{{ n.label }}</strong>
+          <p>{{ n.body }}</p>
+        </td>
+        <td>
+          <button type="button"
+                  class="notif-toggle"
+                  [class.notif-toggle--on]="n.enabled"
+                  [disabled]="saving"
+                  (click)="toggled.emit(n.key)"
+                  [attr.aria-pressed]="n.enabled">
+            <span></span>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>

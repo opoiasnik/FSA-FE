@@ -1,0 +1,21 @@
+<article class="card" (click)="open()">
+  <div class="card__media">
+    <img *ngIf="listing.coverPhoto?.contentUrl; else photoPlaceholder"
+         [src]="listing.coverPhoto?.contentUrl"
+         [alt]="listing.title"
+         loading="lazy" />
+    <ng-template #photoPlaceholder>
+      <app-photo-placeholder [seed]="listing.id" [rounded]="0"></app-photo-placeholder>
+    </ng-template>
+
+    <button type="button" class="card__remove" (click)="remove($event)" aria-label="Remove from favourites">
+      <i class="pi pi-heart-fill"></i>
+    </button>
+  </div>
+
+  <div class="card__body">
+    <h3>{{ listing.title }}</h3>
+    <p class="card__loc">{{ listing.city }}</p>
+    <p class="card__price">{{ formatPrice() }}</p>
+  </div>
+</article>

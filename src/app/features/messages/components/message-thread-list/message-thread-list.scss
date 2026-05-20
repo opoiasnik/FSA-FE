@@ -1,0 +1,76 @@
+.inbox__threads {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.inbox__threads-head {
+  padding: 18px 18px 12px;
+  border-bottom: 1px solid var(--border);
+
+  h2 { margin: 0; font-size: 17px; font-weight: 700; }
+  span { font-size: 12px; color: var(--text-muted); }
+}
+
+.thread {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-family: inherit;
+
+  &--on {
+    background: var(--accent-soft);
+
+    .thread__top strong,
+    .thread__body p,
+    time {
+      color: var(--text);
+    }
+  }
+}
+
+.thread__body { flex: 1; min-width: 0; }
+
+.thread__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+
+  strong { font-size: 14px; }
+  time { font-size: 11px; color: var(--text-muted); }
+}
+
+.thread__body p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.thread__badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .inbox__threads {
+    max-height: 300px;
+  }
+}

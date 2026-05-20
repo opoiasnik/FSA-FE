@@ -3,11 +3,7 @@ import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
-import { Avatar } from '../../../../shared/component/avatar/avatar';
-import { DatePicker } from '../../../../shared/component/date-picker/date-picker';
-import { Modal } from '../../../../shared/component/modal/modal';
-import { MapView, MapPin } from '../../../../shared/component/map-view/map-view';
-import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder/photo-placeholder';
+import { MapPin } from '../../../../shared/component/map-view/map-view';
 import { formatAmount, fullAddress } from '../../models/listing.helpers';
 import { AccessService } from '../../../../core/access/access';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
@@ -15,25 +11,17 @@ import { UserService } from '../../../../core/services/user.service';
 import { FavoriteStore } from '../../../favourites/services/favorite.store';
 import { MessageService } from '../../../messages/services/message.service';
 import { ViewingRequestResponse, ViewingService, ViewingStatus } from '../../../viewings/services/viewing.service';
+import { ListingDetailSidebar, ListingSidebarOwner } from '../../components/listing-detail-sidebar/listing-detail-sidebar';
+import { ListingAmenity, ListingDetailOverview, ListingFact } from '../../components/listing-detail-overview/listing-detail-overview';
+import { ListingGallery } from '../../components/listing-gallery/listing-gallery';
+import { ListingViewingDialog } from '../../components/listing-viewing-dialog/listing-viewing-dialog';
 import { ListingResponse } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
-
-interface Fact {
-  icon: string;
-  label: string;
-  value: string;
-}
-
-interface Amenity {
-  key: 'furnished' | 'parkingAvailable' | 'balcony' | 'elevator' | 'petsAllowed';
-  label: string;
-  icon: string;
-}
 
 @Component({
   selector: 'app-listing-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, MessageModule, SkeletonModule, Avatar, DatePicker, Modal, MapView, PhotoPlaceholder],
+  imports: [CommonModule, RouterLink, MessageModule, SkeletonModule, ListingGallery, ListingDetailOverview, ListingDetailSidebar, ListingViewingDialog],
   templateUrl: './listing-detail-page.html',
   styleUrl: './listing-detail-page.scss'
 })
@@ -88,17 +76,14 @@ export class ListingDetailPage implements OnInit, OnDestroy {
     return !!this.listing() && this.canSendMessageAccess() && !this.isOwnListing();
   }
 
-  readonly owner = computed(() => {
+  readonly owner = computed<ListingSidebarOwner | undefined>(() => {
     const item = this.listing();
     if (!item?.owner) return undefined;
     return {
       name: item.owner.name,
-      email: item.owner.email,
       role: item.owner.role === 'OWNER' ? 'Private owner' : 'User',
       avatarHue: 200,
-      verified: true,
-      rating: null as number | null,
-      responseRate: null as number | null
+      verified: true
     };
   });
 
@@ -122,11 +107,11 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   readonly listingViews = computed(() => this.listing()?.stats?.views ?? 0);
   readonly canViewListingStats = this.access.can('viewListingStats');
 
-  readonly facts = computed<Fact[]>(() => {
+  readonly facts = computed<ListingFact[]>(() => {
     const item = this.listing();
     if (!item) return [];
     const f = item.features;
-    const facts: Fact[] = [
+    const facts: ListingFact[] = [
       { icon: 'pi-home', label: 'Type', value: f.propertyType.toLowerCase() },
       { icon: 'pi-expand', label: 'Area', value: f.area ? `${f.area} m²` : '—' },
       { icon: 'pi-th-large', label: 'Rooms', value: f.roomCount?.toString() ?? '—' },
@@ -138,7 +123,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
     return facts;
   });
 
-  readonly amenities: Amenity[] = [
+  readonly amenities: ListingAmenity[] = [
     { key: 'furnished', label: 'Furnished', icon: 'pi-inbox' },
     { key: 'parkingAvailable', label: 'Parking included', icon: 'pi-car' },
     { key: 'balcony', label: 'Balcony', icon: 'pi-sun' },
@@ -214,11 +199,6 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   private revokePhotoObjectUrls(): void {
     this.photoObjectUrls.forEach(url => this.listingService.revokePhotoObjectUrl(url));
     this.photoObjectUrls = [];
-  }
-
-  hasAmenity(key: Amenity['key']): boolean {
-    const features = this.listing()?.features;
-    return !!features && !!features[key];
   }
 
   openMessages(): void {
