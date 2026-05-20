@@ -16,4 +16,19 @@ export class ListingLocationStep {
     const ctrl = this.form.get(name);
     return !!ctrl && ctrl.invalid && (ctrl.touched || ctrl.dirty);
   }
+
+  errorMessage(name: string): string | null {
+    const ctrl = this.form.get(name);
+    if (!ctrl || !this.isInvalid(name)) {
+      return null;
+    }
+
+    if (ctrl.errors?.['server']) {
+      return ctrl.errors['server'];
+    }
+    if (ctrl.errors?.['required']) {
+      return 'This field is required.';
+    }
+    return null;
+  }
 }

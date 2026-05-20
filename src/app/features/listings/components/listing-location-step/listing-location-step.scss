@@ -35,6 +35,15 @@
   }
 }
 
+.field__error {
+  display: block;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-top: 6px;
+}
+
 @media (max-width: 760px) {
   .grid-2 {
     grid-template-columns: 1fr;

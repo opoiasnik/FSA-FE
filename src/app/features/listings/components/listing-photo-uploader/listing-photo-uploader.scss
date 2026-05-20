@@ -40,6 +40,17 @@
   font-style: italic;
 }
 
+.media-error {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border: 1px solid #fecdd3;
+  border-radius: 10px;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .media-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

@@ -3,7 +3,8 @@
           type="button"
           class="stepper__item"
           [class.stepper__item--active]="i === currentStep"
-          [class.stepper__item--done]="i < currentStep"
+          [class.stepper__item--done]="isCompleted(s)"
+          [class.stepper__item--invalid]="isInvalid(s)"
           (click)="stepSelected.emit(i)">
     <span class="stepper__index">Step {{ i + 1 }}</span>
     <span class="stepper__title">{{ s.title }}</span>

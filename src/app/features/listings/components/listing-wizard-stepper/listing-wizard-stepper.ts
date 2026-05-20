@@ -17,6 +17,16 @@ export interface ListingWizardStep {
 export class ListingWizardStepper {
   @Input() steps: ListingWizardStep[] = [];
   @Input() currentStep = 0;
+  @Input() completedStepIds: string[] = [];
+  @Input() invalidStepIds: string[] = [];
 
   @Output() stepSelected = new EventEmitter<number>();
+
+  isCompleted(step: ListingWizardStep): boolean {
+    return this.completedStepIds.includes(step.id);
+  }
+
+  isInvalid(step: ListingWizardStep): boolean {
+    return this.invalidStepIds.includes(step.id);
+  }
 }

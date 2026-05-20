@@ -9,6 +9,7 @@
     </label>
   </div>
 
+  <p class="media-error" *ngIf="error">{{ error }}</p>
   <p class="todo-note" *ngIf="!previews.length">No photos selected yet.</p>
 
   <div class="media-grid" *ngIf="previews.length; else emptyPhotos">

@@ -9,6 +9,8 @@
   <app-listing-wizard-stepper
     [steps]="steps"
     [currentStep]="currentStep()"
+    [completedStepIds]="completedStepIds()"
+    [invalidStepIds]="invalidStepIds()"
     (stepSelected)="goTo($event)">
   </app-listing-wizard-stepper>
 
@@ -32,6 +34,7 @@
       <app-listing-photo-uploader
         *ngIf="activeStep().id === 'media'"
         [previews]="photoPreviews()"
+        [error]="mediaError()"
         (filesSelected)="addPhotos($event)"
         (photoRemoved)="removePhoto($event)">
       </app-listing-photo-uploader>

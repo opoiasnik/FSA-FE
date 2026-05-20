@@ -17,8 +17,15 @@
   text-align: left;
 
   &--done {
-    background: var(--accent-soft);
-    color: var(--accent-dark);
+    background: #ecfdf5;
+    color: #047857;
+    border-color: #a7f3d0;
+  }
+
+  &--invalid {
+    background: #fff1f2;
+    color: #be123c;
+    border-color: #fecdd3;
   }
 
   &--active {

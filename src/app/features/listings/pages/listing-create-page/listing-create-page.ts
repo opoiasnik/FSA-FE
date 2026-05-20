@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
 import { forkJoin, of, switchMap } from 'rxjs';
-import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { ErrorHandlerService, ErrorResult } from '../../../../core/services/error-handler.service';
 import { ListingBasicsStep } from '../../components/listing-basics-step/listing-basics-step';
 import { ListingDetailsStep } from '../../components/listing-details-step/listing-details-step';
 import { ListingLocationStep } from '../../components/listing-location-step/listing-location-step';
@@ -55,12 +55,26 @@ export class ListingCreatePage {
   readonly currentStep = signal(0);
   readonly creating = signal(false);
   readonly createError = signal<string | null>(null);
+  readonly mediaError = signal<string | null>(null);
+  readonly publishAttempted = signal(false);
+  readonly completedStepIdsState = signal<WizardStep['id'][]>([]);
   readonly selectedPhotos = signal<File[]>([]);
   readonly photoPreviews = signal<string[]>([]);
   readonly maxYearBuilt = new Date().getFullYear() + 1;
 
   readonly activeStep = computed(() => this.steps[this.currentStep()]);
   readonly isLastStep = computed(() => this.currentStep() === this.steps.length - 1);
+  readonly completedStepIds = computed(() => {
+    const invalid = this.invalidStepIds();
+    return this.completedStepIdsState().filter(stepId => this.isStepValid(stepId) && !invalid.includes(stepId));
+  });
+  readonly invalidStepIds = computed(() =>
+    this.publishAttempted()
+      ? this.steps
+          .filter(step => step.id !== 'review' && !this.isStepValid(step.id))
+          .map(step => step.id)
+      : []
+  );
 
   private readonly stepRequiredFields: Record<WizardStep['id'], string[]> = {
     basics: ['title', 'description'],
@@ -71,7 +85,40 @@ export class ListingCreatePage {
     review: []
   };
 
+  private readonly fieldStepMap: Record<string, WizardStep['id']> = {
+    title: 'basics',
+    description: 'basics',
+    listingType: 'basics',
+    propertyType: 'basics',
+    address: 'location',
+    street: 'location',
+    city: 'location',
+    district: 'location',
+    postalCode: 'location',
+    country: 'location',
+    area: 'details',
+    roomCount: 'details',
+    floor: 'details',
+    yearBuilt: 'details',
+    energyClass: 'details',
+    furnished: 'details',
+    parkingAvailable: 'details',
+    balcony: 'details',
+    elevator: 'details',
+    petsAllowed: 'details',
+    amount: 'price',
+    currency: 'price',
+    price: 'price'
+  };
+
   isStepValid(stepId: WizardStep['id']): boolean {
+    if (stepId === 'media') {
+      return this.selectedPhotos().length > 0;
+    }
+    if (stepId === 'review') {
+      return this.form.valid && this.selectedPhotos().length > 0;
+    }
+
     const fields = this.stepRequiredFields[stepId];
     return fields.every(name => {
       const ctrl = this.form.get(name);
@@ -113,9 +160,11 @@ export class ListingCreatePage {
       for (let i = this.currentStep(); i < index; i++) {
         if (!this.isStepValid(this.steps[i].id)) {
           this.markStepFieldsTouched(this.steps[i].id);
+          this.applyStepError(this.steps[i].id);
           this.currentStep.set(i);
           return;
         }
+        this.markStepCompleted(this.steps[i].id);
       }
     }
     this.currentStep.set(index);
@@ -124,12 +173,14 @@ export class ListingCreatePage {
   next(): void {
     if (!this.canProceed()) {
       this.markStepFieldsTouched(this.activeStep().id);
+      this.applyStepError(this.activeStep().id);
       return;
     }
     if (this.isLastStep()) {
       this.publish();
       return;
     }
+    this.markStepCompleted(this.activeStep().id);
     this.currentStep.update(v => v + 1);
   }
 
@@ -137,18 +188,44 @@ export class ListingCreatePage {
     this.stepRequiredFields[stepId].forEach(name => this.form.get(name)?.markAsTouched());
   }
 
+  private markStepCompleted(stepId: WizardStep['id']): void {
+    this.completedStepIdsState.update(stepIds =>
+      stepIds.includes(stepId) ? stepIds : [...stepIds, stepId]
+    );
+  }
+
+  private applyStepError(stepId: WizardStep['id']): void {
+    if (stepId === 'media') {
+      this.publishAttempted.set(true);
+      this.mediaError.set('Upload at least one listing photo before publishing.');
+      this.createError.set('Upload at least one listing photo before publishing.');
+      return;
+    }
+
+    this.createError.set('Please fix the highlighted fields before continuing.');
+  }
+
   prev(): void {
     this.currentStep.update(v => Math.max(0, v - 1));
   }
 
   publish(): void {
-    if (this.form.invalid) {
+    this.publishAttempted.set(true);
+    this.mediaError.set(null);
+
+    if (this.form.invalid || this.selectedPhotos().length === 0) {
       this.form.markAllAsTouched();
+      if (this.selectedPhotos().length === 0) {
+        this.mediaError.set('Upload at least one listing photo before publishing.');
+      }
+      this.focusFirstInvalidStep();
+      this.createError.set('Please fix the highlighted steps before publishing.');
       return;
     }
 
     this.creating.set(true);
     this.createError.set(null);
+    this.steps.forEach(step => this.markStepCompleted(step.id));
 
     const v = this.form.getRawValue();
     const payload: CreateListingRequest = {
@@ -186,18 +263,53 @@ export class ListingCreatePage {
       },
       error: (error) => {
         const result = this.errorHandler.toResult(error);
-        this.createError.set(result.message);
-        if (result.field) {
-          const fieldName = result.field.split('.').pop()!;
-          const ctrl = this.form.get(fieldName);
-          if (ctrl) {
-            ctrl.setErrors({ server: result.message });
-            ctrl.markAsTouched();
-          }
-        }
+        this.publishAttempted.set(true);
+        this.applyServerError(result);
         this.creating.set(false);
       }
     });
+  }
+
+  private applyServerError(result: ErrorResult): void {
+    const fieldName = this.resolveServerField(result);
+    if (!fieldName) {
+      this.createError.set(result.message);
+      return;
+    }
+
+    this.createError.set(null);
+    const ctrl = this.form.get(fieldName);
+    if (ctrl) {
+      ctrl.setErrors({ ...(ctrl.errors ?? {}), server: result.message });
+      ctrl.markAsTouched();
+    }
+
+    this.markStepFieldsTouched(this.fieldStepMap[fieldName]);
+    queueMicrotask(() => this.focusStepForField(fieldName));
+  }
+
+  private resolveServerField(result: ErrorResult): string | null {
+    const field = result.field?.split('.').pop();
+    if (field && this.form.get(field)) {
+      return field;
+    }
+    if (result.field === 'address' || this.isAddressError(result.message)) {
+      return 'street';
+    }
+    return null;
+  }
+
+  private isAddressError(message: string): boolean {
+    const normalized = message.toLowerCase();
+    return normalized.includes('address') || normalized.includes('street') || normalized.includes('postal');
+  }
+
+  private focusStepForField(fieldName: string): void {
+    const stepId = this.fieldStepMap[fieldName];
+    const stepIndex = this.steps.findIndex(step => step.id === stepId);
+    if (stepIndex >= 0) {
+      this.currentStep.set(stepIndex);
+    }
   }
 
   addPhotos(files: File[]): void {
@@ -208,6 +320,12 @@ export class ListingCreatePage {
 
     this.selectedPhotos.update(files => [...files, ...toAdd]);
     this.photoPreviews.update(urls => [...urls, ...toAdd.map(f => URL.createObjectURL(f))]);
+    if (toAdd.length) {
+      this.mediaError.set(null);
+      if (this.createError() === 'Upload at least one listing photo before publishing.') {
+        this.createError.set(null);
+      }
+    }
   }
 
   removePhoto(index: number): void {
@@ -215,6 +333,16 @@ export class ListingCreatePage {
     URL.revokeObjectURL(previews[index]);
     this.selectedPhotos.update(files => files.filter((_, i) => i !== index));
     this.photoPreviews.update(urls => urls.filter((_, i) => i !== index));
+    if (this.publishAttempted() && this.selectedPhotos().length === 0) {
+      this.mediaError.set('Upload at least one listing photo before publishing.');
+    }
+  }
+
+  private focusFirstInvalidStep(): void {
+    const index = this.steps.findIndex(step => !this.isStepValid(step.id));
+    if (index >= 0) {
+      this.currentStep.set(index);
+    }
   }
 
 }
