@@ -1,5 +1,9 @@
 <aside class="inbox__listing" *ngIf="listing as l">
-  <button type="button" class="listing-preview" (click)="openListing()">
+  <button type="button"
+          class="listing-preview"
+          [class.listing-preview--deleted]="isDeleted(l)"
+          [disabled]="isDeleted(l)"
+          (click)="openListing()">
     <div class="listing-preview__media">
       <img *ngIf="photoUrl; else listingPlaceholder"
            [src]="photoUrl"
@@ -9,10 +13,13 @@
       </ng-template>
     </div>
     <div class="listing-preview__body">
+      <span *ngIf="isDeleted(l)" class="listing-preview__deleted">Listing deleted</span>
       <h3>{{ l.title }}</h3>
       <p>{{ l.city }}</p>
       <p class="listing-preview__price">{{ formatPrice(l) }}</p>
-      <span class="ra-btn ra-btn--ghost ra-btn--sm">Open listing</span>
+      <span class="ra-btn ra-btn--ghost ra-btn--sm">
+        {{ isDeleted(l) ? 'Unavailable' : 'Open listing' }}
+      </span>
     </div>
   </button>
 </aside>

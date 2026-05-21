@@ -79,6 +79,32 @@
   }
 }
 
+.dash__delete {
+  border: 1px solid rgba(220, 38, 38, 0.22);
+  background: #fff5f5;
+  color: #b91c1c;
+  border-radius: 999px;
+  padding: 8px 12px;
+  margin-right: 10px;
+  font-weight: 700;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: #ef4444;
+    background: #fee2e2;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
 .dash__empty {
   padding: 40px;
   text-align: center;

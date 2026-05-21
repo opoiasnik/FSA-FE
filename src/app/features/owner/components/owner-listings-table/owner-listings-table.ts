@@ -15,9 +15,11 @@ export class OwnerListingsTable {
   @Input() loading = false;
   @Input() canActivateListing = false;
   @Input() canDeactivateListing = false;
+  @Input() canDeleteListing = false;
   @Output() exported = new EventEmitter<void>();
   @Output() opened = new EventEmitter<number>();
   @Output() statusToggled = new EventEmitter<ListingResponse>();
+  @Output() deleted = new EventEmitter<ListingResponse>();
 
   canToggleListingStatus(listing: ListingResponse): boolean {
     return listing.status === 'ACTIVE' ? this.canDeactivateListing : this.canActivateListing;
@@ -26,6 +28,11 @@ export class OwnerListingsTable {
   toggleListingStatus(event: MouseEvent, listing: ListingResponse): void {
     event.stopPropagation();
     this.statusToggled.emit(listing);
+  }
+
+  deleteListing(event: MouseEvent, listing: ListingResponse): void {
+    event.stopPropagation();
+    this.deleted.emit(listing);
   }
 
   formatPrice(listing: ListingResponse): string {

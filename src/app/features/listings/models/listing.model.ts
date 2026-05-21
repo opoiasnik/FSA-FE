@@ -16,7 +16,7 @@ export interface Price {
 
 export type PropertyType = 'APARTMENT' | 'HOUSE' | 'ROOM';
 export type ListingType = 'RENT' | 'SALE';
-export type ListingStatus = 'ACTIVE' | 'INACTIVE';
+export type ListingStatus = 'ACTIVE' | 'INACTIVE' | 'DELETED';
 
 export interface PropertyFeatures {
   propertyType: PropertyType;
@@ -77,6 +77,7 @@ export interface ListingSummary {
   id: number;
   title: string;
   listingType: ListingType;
+  status?: ListingStatus;
   city: string;
   price: Price;
   coverPhoto?: PhotoResponse;

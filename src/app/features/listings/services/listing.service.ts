@@ -48,6 +48,10 @@ export class ListingService {
     return this.api.patch<ListingResponse>(`${this.base}/${id}/deactivate`);
   }
 
+  delete(id: number): Observable<void> {
+    return this.api.delete<void>(`${this.base}/${id}`);
+  }
+
   uploadPhoto(listingId: number, file: File, altText?: string): Observable<PhotoResponse> {
     const formData = new FormData();
     formData.append('file', file);

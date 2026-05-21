@@ -16,6 +16,17 @@
   font-family: inherit;
   display: flex;
   flex-direction: column;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.listing-preview--deleted {
+  .listing-preview__media {
+    filter: grayscale(1);
+    opacity: 0.65;
+  }
 }
 
 .listing-preview__media {
@@ -42,6 +53,19 @@
 .listing-preview__price { font-size: 15px; font-weight: 700; color: var(--text) !important; margin-top: 8px !important; }
 
 .listing-preview .ra-btn { margin-top: 12px; }
+
+.listing-preview__deleted {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-bottom: 8px;
+  border-radius: var(--r-pill);
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
 
 @media (max-width: 1024px) {
   .inbox__listing { display: none; }

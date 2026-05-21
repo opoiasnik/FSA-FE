@@ -35,6 +35,7 @@ export class OwnerDashboardPage implements OnInit {
   readonly viewingRequests = signal<ViewingRequestResponse[]>([]);
   readonly canActivateListing = this.access.can('activateListing');
   readonly canDeactivateListing = this.access.can('deactivateListing');
+  readonly canDeleteListing = this.access.can('deleteListing');
 
   readonly statCards = computed<OwnerStatCard[]>(() => {
     const stats = this.stats();
@@ -104,6 +105,18 @@ export class OwnerDashboardPage implements OnInit {
 
     request$.subscribe({
       next: updated => this.listings.update(items => items.map(item => item.id === updated.id ? updated : item)),
+      error: err => this.error.set(this.toMessage(err))
+    });
+  }
+
+  deleteListing(listing: ListingResponse): void {
+    const confirmed = window.confirm(`Delete "${listing.title}"? This listing will no longer be visible.`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.listingService.delete(listing.id).subscribe({
+      next: () => this.listings.update(items => items.filter(item => item.id !== listing.id)),
       error: err => this.error.set(this.toMessage(err))
     });
   }

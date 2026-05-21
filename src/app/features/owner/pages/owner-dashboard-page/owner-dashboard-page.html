@@ -28,8 +28,10 @@
     [loading]="loading()"
     [canActivateListing]="canActivateListing()"
     [canDeactivateListing]="canDeactivateListing()"
+    [canDeleteListing]="canDeleteListing()"
     (exported)="exportCsv()"
     (opened)="openListing($event)"
-    (statusToggled)="toggleListingStatus($event)">
+    (statusToggled)="toggleListingStatus($event)"
+    (deleted)="deleteListing($event)">
   </app-owner-listings-table>
 </section>

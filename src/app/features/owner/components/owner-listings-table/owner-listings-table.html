@@ -45,6 +45,14 @@
             <i class="pi" [ngClass]="l.status === 'ACTIVE' ? 'pi-pause' : 'pi-play'"></i>
             {{ l.status === 'ACTIVE' ? 'Set passive' : 'Activate' }}
           </button>
+          <button type="button"
+                  class="dash__delete"
+                  [disabled]="!canDeleteListing"
+                  (click)="deleteListing($event, l)"
+                  aria-label="Delete listing">
+            <i class="pi pi-trash"></i>
+            Delete
+          </button>
           <i class="pi pi-chevron-right"></i>
         </td>
       </tr>

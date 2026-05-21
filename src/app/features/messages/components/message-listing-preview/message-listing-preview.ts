@@ -20,8 +20,12 @@ export class MessageListingPreview {
     return new Intl.NumberFormat('sk-SK').format(listing.price.amount) + ' EUR' + suffix;
   }
 
+  isDeleted(listing: ListingSummary): boolean {
+    return listing.status === 'DELETED';
+  }
+
   openListing(): void {
-    if (this.listing) {
+    if (this.listing && !this.isDeleted(this.listing)) {
       this.opened.emit(this.listing.id);
     }
   }
