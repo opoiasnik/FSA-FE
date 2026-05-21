@@ -1,4 +1,7 @@
-:host { display: block; }
+:host {
+  --carousel-card-width: clamp(220px, 15vw, 280px);
+  display: block;
+}
 
 .section-head {
   margin: 0.5rem 0 1rem;
@@ -15,16 +18,22 @@
   display: flex;
   gap: 1.5rem;
   align-items: stretch;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
 
-  app-listing-card {
-    flex: 1 1 0;
-    min-width: 0;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  app-listing-card,
+  .explore-cta {
+    flex: 0 0 var(--carousel-card-width);
+    width: var(--carousel-card-width);
   }
 }
 
 .explore-cta {
-  flex: 1 1 0;
-  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -65,9 +74,11 @@
 }
 
 @media (max-width: 900px) {
+  :host {
+    --carousel-card-width: min(42vw, 260px);
+  }
+
   .cards-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
   }
 
@@ -77,12 +88,12 @@
 }
 
 @media (max-width: 560px) {
-  .section-head h2 {
-    font-size: 1.25rem;
+  :host {
+    --carousel-card-width: min(78vw, 320px);
   }
 
-  .cards-row {
-    grid-template-columns: 1fr;
+  .section-head h2 {
+    font-size: 1.25rem;
   }
 
   .explore-cta {
