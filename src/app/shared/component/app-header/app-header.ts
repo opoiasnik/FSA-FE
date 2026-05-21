@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
@@ -30,6 +30,7 @@ export class AppHeader {
   readonly avatarUrl = this.userService.avatarUrl;
   readonly isAuthenticated = computed(() => this.userService.isUserLoggedIn());
   readonly canViewOwnerStudio = this.access.can('viewOwnerStudio');
+  readonly mobileMenuOpen = signal(false);
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -42,7 +43,16 @@ export class AppHeader {
 
   readonly isOwnerStudioActive = computed(() => this.currentUrl().startsWith('/listings/create'));
 
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen.update(open => !open);
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
+  }
+
   logout(): void {
+    this.closeMobileMenu();
     this.userService.logout();
   }
 }

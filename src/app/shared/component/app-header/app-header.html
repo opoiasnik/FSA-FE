@@ -7,28 +7,31 @@
       </a>
     </div>
 
-    <nav class="header-center">
-      <a routerLink="/home" routerLinkActive="active" class="nav-item">Home</a>
-      <a routerLink="/listings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">Explore</a>
+    <nav class="header-center" aria-label="Primary navigation">
+      <a routerLink="/home" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">Home</a>
+      <a routerLink="/listings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item" (click)="closeMobileMenu()">Explore</a>
       <a
         *ngIf="isAuthenticated()"
         routerLink="/favourites"
         routerLinkActive="active"
-        class="nav-item">
+        class="nav-item"
+        (click)="closeMobileMenu()">
         Saved
       </a>
       <a
         *ngIf="isAuthenticated()"
         routerLink="/viewings"
         routerLinkActive="active"
-        class="nav-item">
+        class="nav-item"
+        (click)="closeMobileMenu()">
         Viewings
       </a>
       <a
         *ngIf="isAuthenticated()"
         routerLink="/messages"
         routerLinkActive="active"
-        class="nav-item">
+        class="nav-item"
+        (click)="closeMobileMenu()">
         Inbox
       </a>
       <a
@@ -36,7 +39,8 @@
         routerLink="/owner"
         routerLinkActive="active"
         [class.active]="isOwnerStudioActive()"
-        class="nav-item">
+        class="nav-item"
+        (click)="closeMobileMenu()">
         Owner Studio
       </a>
     </nav>
@@ -65,6 +69,55 @@
           label="Login"
           [text]="true"
           class="auth-btn">
+        </a>
+      </ng-template>
+    </div>
+
+    <button
+      type="button"
+      class="mobile-menu-btn"
+      [class.mobile-menu-btn--open]="mobileMenuOpen()"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      aria-controls="mobile-navigation"
+      aria-label="Toggle navigation menu"
+      (click)="toggleMobileMenu()">
+      <i class="pi" [ngClass]="mobileMenuOpen() ? 'pi-times' : 'pi-bars'"></i>
+    </button>
+  </div>
+
+  <div id="mobile-navigation" class="mobile-panel" *ngIf="mobileMenuOpen()">
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a routerLink="/home" routerLinkActive="active" class="mobile-nav__item" (click)="closeMobileMenu()">Home</a>
+      <a routerLink="/listings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="mobile-nav__item" (click)="closeMobileMenu()">Explore</a>
+      <a *ngIf="isAuthenticated()" routerLink="/favourites" routerLinkActive="active" class="mobile-nav__item" (click)="closeMobileMenu()">Saved</a>
+      <a *ngIf="isAuthenticated()" routerLink="/viewings" routerLinkActive="active" class="mobile-nav__item" (click)="closeMobileMenu()">Viewings</a>
+      <a *ngIf="isAuthenticated()" routerLink="/messages" routerLinkActive="active" class="mobile-nav__item" (click)="closeMobileMenu()">Inbox</a>
+      <a
+        *ngIf="canViewOwnerStudio()"
+        routerLink="/owner"
+        routerLinkActive="active"
+        [class.active]="isOwnerStudioActive()"
+        class="mobile-nav__item"
+        (click)="closeMobileMenu()">
+        Owner Studio
+      </a>
+    </nav>
+
+    <div class="mobile-actions">
+      <ng-container *ngIf="isAuthenticated(); else mobileGuestActions">
+        <a routerLink="/profile" class="mobile-user" *ngIf="user() as currentUser" (click)="closeMobileMenu()">
+          <app-avatar [name]="currentUser.name + ' ' + currentUser.surname" [hue]="200" [verified]="true" [size]="36" [imageUrl]="avatarUrl()"></app-avatar>
+          <span>{{ currentUser.name }} {{ currentUser.surname }}</span>
+        </a>
+        <button type="button" class="mobile-auth" (click)="logout()">
+          <i class="pi pi-sign-out"></i>
+          <span>Logout</span>
+        </button>
+      </ng-container>
+      <ng-template #mobileGuestActions>
+        <a routerLink="/login" class="mobile-auth" (click)="closeMobileMenu()">
+          <i class="pi pi-sign-in"></i>
+          <span>Login</span>
         </a>
       </ng-template>
     </div>
