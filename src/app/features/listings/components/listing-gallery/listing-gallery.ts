@@ -15,4 +15,20 @@ export class ListingGallery {
   @Input() imageUrls: Record<number, string> = {};
   @Input({ required: true }) listingId = 0;
   @Input({ required: true }) title = '';
+
+  get sortedPhotos(): PhotoResponse[] {
+    return [...this.photos].sort((left, right) => (left.position ?? 0) - (right.position ?? 0));
+  }
+
+  get coverPhoto(): PhotoResponse | undefined {
+    return this.sortedPhotos[0];
+  }
+
+  get thumbnailPhotos(): PhotoResponse[] {
+    return this.sortedPhotos.slice(1);
+  }
+
+  trackPhoto(_: number, photo: PhotoResponse): number {
+    return photo.id;
+  }
 }

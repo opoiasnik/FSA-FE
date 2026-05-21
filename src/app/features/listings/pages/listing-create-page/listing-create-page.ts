@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { ErrorHandlerService, ErrorResult } from '../../../../core/services/error-handler.service';
@@ -42,6 +43,7 @@ export class ListingCreatePage {
   private readonly listingService = inject(ListingService);
   private readonly router = inject(Router);
   private readonly errorHandler = inject(ErrorHandlerService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly steps: WizardStep[] = [
     { id: 'basics', title: 'Basics', sub: 'Title, description, deal type' },
@@ -66,7 +68,12 @@ export class ListingCreatePage {
   readonly isLastStep = computed(() => this.currentStep() === this.steps.length - 1);
   readonly completedStepIds = computed(() => {
     const invalid = this.invalidStepIds();
-    return this.completedStepIdsState().filter(stepId => this.isStepValid(stepId) && !invalid.includes(stepId));
+    const completed = new Set(this.completedStepIdsState());
+    this.steps
+      .filter((step, index) => index < this.currentStep() && this.isStepValid(step.id))
+      .forEach(step => completed.add(step.id));
+
+    return [...completed].filter(stepId => this.isStepValid(stepId) && !invalid.includes(stepId));
   });
   readonly invalidStepIds = computed(() =>
     this.publishAttempted()
@@ -154,6 +161,12 @@ export class ListingCreatePage {
     currency: ['EUR', [Validators.required]]
   });
 
+  constructor() {
+    this.form.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.clearFormErrors());
+  }
+
   goTo(index: number): void {
     if (index < 0 || index >= this.steps.length) return;
     if (index > this.currentStep()) {
@@ -203,6 +216,18 @@ export class ListingCreatePage {
     }
 
     this.createError.set('Please fix the highlighted fields before continuing.');
+  }
+
+  private clearFormErrors(): void {
+    this.createError.set(null);
+    Object.values(this.form.controls).forEach(control => {
+      if (!control.errors?.['server']) {
+        return;
+      }
+
+      const { server, ...remainingErrors } = control.errors;
+      control.setErrors(Object.keys(remainingErrors).length ? remainingErrors : null);
+    });
   }
 
   prev(): void {

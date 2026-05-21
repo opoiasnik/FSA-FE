@@ -265,7 +265,7 @@ export class ProfilePage implements OnInit {
     this.uploading.set(true);
     this.profileService.uploadAvatar(file).subscribe({
       next: dto => {
-        this.userService.updateAvatarUrl(dto.avatarUrl);
+        this.userService.updateFromProfile(dto);
         this.uploading.set(false);
       },
       error: () => {

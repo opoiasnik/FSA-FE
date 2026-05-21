@@ -91,7 +91,22 @@ export class UserService {
   }
 
   updateAvatarUrl(url: string | null): void {
-    void this.setAvatarFromContentUrl(url);
+    void this.setAvatarFromContentUrl(this.withCacheBust(url));
+  }
+
+  updateFromProfile(dto: UserProfileDto): void {
+    this.userState.update(u => u ? { ...u, name: dto.name, surname: dto.surname, email: dto.email } : u);
+    this._createdAt.set(dto.createdAt);
+    this._phone.set(dto.phone);
+    this._bio.set(dto.bio);
+    this._emailVerified.set(dto.emailVerified);
+    this._emailVerificationPending.set(dto.emailVerificationPending);
+    this.updateNotificationPreferences(
+      dto.messageEmailNotifications,
+      dto.viewingEmailNotifications,
+      dto.viewingRequestEmailNotifications,
+    );
+    void this.setAvatarFromContentUrl(this.withCacheBust(dto.avatarUrl));
   }
 
   updateProfile(
@@ -166,18 +181,7 @@ export class UserService {
   private async loadUserProfile(): Promise<void> {
     try {
       const dto = await firstValueFrom(this.api.get<UserProfileDto>('/user'));
-      this.userState.update(u => u ? { ...u, name: dto.name, surname: dto.surname, email: dto.email } : u);
-      await this.setAvatarFromContentUrl(dto.avatarUrl);
-      this._createdAt.set(dto.createdAt);
-      this._phone.set(dto.phone);
-      this._bio.set(dto.bio);
-      this._emailVerified.set(dto.emailVerified);
-      this._emailVerificationPending.set(dto.emailVerificationPending);
-      this.updateNotificationPreferences(
-        dto.messageEmailNotifications,
-        dto.viewingEmailNotifications,
-        dto.viewingRequestEmailNotifications,
-      );
+      this.updateFromProfile(dto);
     } catch {
       // non-critical
     }
@@ -207,6 +211,15 @@ export class UserService {
     this.imageContentService.revokeObjectUrl(this.avatarObjectUrl);
     this.avatarObjectUrl = null;
     this._avatarUrl.set(null);
+  }
+
+  private withCacheBust(url: string | null | undefined): string | null {
+    if (!url) {
+      return null;
+    }
+
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}v=${Date.now()}`;
   }
 
   private readAccessTokenClaims(token: string): Record<string, unknown> | null {

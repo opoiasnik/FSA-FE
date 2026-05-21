@@ -1,22 +1,18 @@
-<div class="gallery" *ngIf="photos.length; else placeholderGallery">
-  <div class="gallery__photo gallery__main" *ngFor="let photo of photos | slice:0:1">
-    <img *ngIf="imageUrls[photo.id]" [src]="imageUrls[photo.id]" [alt]="photo.altText || title" />
+<section class="gallery" *ngIf="coverPhoto as cover; else placeholderGallery" aria-label="Listing photos">
+  <figure class="gallery__main">
+    <img *ngIf="imageUrls[cover.id]" [src]="imageUrls[cover.id]" [alt]="cover.altText || title" />
+  </figure>
+
+  <div class="gallery__thumbnails" *ngIf="thumbnailPhotos.length">
+    <figure class="gallery__thumbnail"
+            *ngFor="let photo of thumbnailPhotos; trackBy: trackPhoto">
+      <img *ngIf="imageUrls[photo.id]" [src]="imageUrls[photo.id]" [alt]="photo.altText || title" />
+    </figure>
   </div>
-  <div class="gallery__photo" *ngFor="let photo of photos | slice:1:5">
-    <img *ngIf="imageUrls[photo.id]" [src]="imageUrls[photo.id]" [alt]="photo.altText || title" />
-  </div>
-</div>
+</section>
 
 <ng-template #placeholderGallery>
-  <div class="gallery">
+  <section class="gallery" aria-label="Listing photos">
     <app-photo-placeholder class="gallery__main" [seed]="listingId" [rounded]="0" [label]="'Main photo'"></app-photo-placeholder>
-    <app-photo-placeholder [seed]="listingId + 1" [rounded]="0" [label]="'photo 2'"></app-photo-placeholder>
-    <app-photo-placeholder [seed]="listingId + 2" [rounded]="0" [label]="'photo 3'"></app-photo-placeholder>
-    <app-photo-placeholder [seed]="listingId + 3" [rounded]="0" [label]="'photo 4'"></app-photo-placeholder>
-    <app-photo-placeholder [seed]="listingId + 4" [rounded]="0" [label]="'photo 5'">
-      <button type="button" class="gallery__all ra-btn ra-btn--ghost ra-btn--sm">
-        <i class="pi pi-images"></i>Show all photos
-      </button>
-    </app-photo-placeholder>
-  </div>
+  </section>
 </ng-template>
