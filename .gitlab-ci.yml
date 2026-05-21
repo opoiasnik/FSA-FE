@@ -33,10 +33,15 @@ deploy:
     - fsa-poiasnik
   image: alpine/k8s:1.32.3
   before_script:
+    - apk add --no-cache git
     - mkdir -p ~/.kube
     - echo "$KUBECONFIG_BASE64" | base64 -d > ~/.kube/config
   script:
+    - git clone "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_NAMESPACE}/FSA-INFRA.git" infra
+    - kubectl apply -f infra/kubernetes/workload/04-app-frontend/
+    - kubectl apply -f infra/kubernetes/workload/05-ingress/app-ingress.yaml
     - kubectl set image deployment/fsa-fe fsa-fe="$ACR_REGISTRY/$IMAGE_NAME:latest" -n app
+    - kubectl rollout restart deployment/fsa-fe -n app
     - kubectl rollout status deployment/fsa-fe -n app --timeout=240s
   only:
     - main
