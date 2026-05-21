@@ -27,6 +27,7 @@ interface RealmRole {
 export class KeycloakRegistrationService {
   private readonly http = new HttpClient(inject(HttpBackend));
   private readonly realm = this.resolveRealm();
+  private readonly keycloakBasePath = this.resolveKeycloakBasePath();
 
   async register(request: RegisterUserRequest): Promise<void> {
     let adminToken: string | null = null;
@@ -52,7 +53,7 @@ export class KeycloakRegistrationService {
 
     const token = await firstValueFrom(
       this.http.post<AdminTokenResponse>(
-        '/realms/master/protocol/openid-connect/token',
+        `${this.keycloakBasePath}/realms/master/protocol/openid-connect/token`,
         body.toString(),
         { headers: this.formHeaders() },
       ),
@@ -64,7 +65,7 @@ export class KeycloakRegistrationService {
   private async createUser(request: RegisterUserRequest, authHeader: HttpHeaders): Promise<string> {
     const response = await firstValueFrom(
       this.http.post(
-        `/admin/realms/${this.realm}/users`,
+        `${this.keycloakBasePath}/admin/realms/${this.realm}/users`,
         {
           username: request.username,
           firstName: request.firstName,
@@ -84,7 +85,7 @@ export class KeycloakRegistrationService {
   private async assignRealmRole(keycloakId: string, role: RegistrationRole, authHeader: HttpHeaders): Promise<void> {
     const roles = await firstValueFrom(
       this.http.get<RealmRole[]>(
-        `/admin/realms/${this.realm}/roles`,
+        `${this.keycloakBasePath}/admin/realms/${this.realm}/roles`,
         { headers: authHeader },
       ),
     );
@@ -96,7 +97,7 @@ export class KeycloakRegistrationService {
 
     await firstValueFrom(
       this.http.post(
-        `/admin/realms/${this.realm}/users/${keycloakId}/role-mappings/realm`,
+        `${this.keycloakBasePath}/admin/realms/${this.realm}/users/${keycloakId}/role-mappings/realm`,
         [targetRole],
         { headers: authHeader.set('Content-Type', 'application/json') },
       ),
@@ -111,7 +112,7 @@ export class KeycloakRegistrationService {
     try {
       await firstValueFrom(
         this.http.delete(
-          `/admin/realms/${this.realm}/users/${keycloakId}`,
+          `${this.keycloakBasePath}/admin/realms/${this.realm}/users/${keycloakId}`,
           { headers: new HttpHeaders({ Authorization: `Bearer ${adminToken}` }) },
         ),
       );
@@ -130,5 +131,21 @@ export class KeycloakRegistrationService {
     return index >= 0
       ? environment.auth.issuer.substring(index + marker.length).split('/')[0]
       : 'rental';
+  }
+
+  private resolveKeycloakBasePath(): string {
+    const marker = '/realms/';
+    const index = environment.auth.issuer.lastIndexOf(marker);
+    if (index < 0) {
+      return '';
+    }
+
+    const baseUrl = environment.auth.issuer.substring(0, index);
+    try {
+      const url = new URL(baseUrl);
+      return url.origin === window.location.origin ? url.pathname : '';
+    } catch {
+      return baseUrl;
+    }
   }
 }
