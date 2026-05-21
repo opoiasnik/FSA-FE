@@ -16,7 +16,7 @@ interface PropertyTypeCard {
   styleUrl: './property-types.scss'
 })
 export class PropertyTypes {
-  readonly title = 'Browse by property type';
+  readonly title = 'Browse by property typeы';
   readonly subtitle = 'See apartments, houses and rooms for rent or sale.';
 
   readonly cards: PropertyTypeCard[] = [
