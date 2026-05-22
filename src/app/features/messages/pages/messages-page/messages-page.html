@@ -1,7 +1,9 @@
 <section class="inbox">
   <p-message *ngIf="error()" severity="warn" [text]="error() || ''"></p-message>
 
-  <div class="inbox__grid" *ngIf="!loading()">
+  <div class="inbox__grid"
+       [class.inbox__grid--empty]="!selected()"
+       *ngIf="!loading()">
     <app-message-thread-list
       [threads]="threads()"
       [selectedId]="selectedId()"

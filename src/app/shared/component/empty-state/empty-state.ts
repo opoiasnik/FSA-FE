@@ -16,13 +16,22 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
     </div>
   `,
   styles: [`
-    :host { display: block; }
+    :host {
+      display: flex;
+      min-height: 100%;
+    }
     .empty {
-      padding: 60px 32px;
+      flex: 1;
+      min-height: 360px;
+      padding: 56px 32px;
       text-align: center;
       border-radius: var(--r-xl);
       border: 1px dashed var(--border);
       background: var(--surface-soft);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .empty__icon {
       width: 64px; height: 64px;

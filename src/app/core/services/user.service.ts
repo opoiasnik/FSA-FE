@@ -22,6 +22,9 @@ export class UserService {
   private readonly _viewingEmailNotifications = signal(true);
   private readonly _viewingRequestEmailNotifications = signal(true);
   private avatarObjectUrl: string | null = null;
+  private avatarContentUrl: string | null = null;
+  private profileLoaded = false;
+  private profileLoading: Promise<void> | null = null;
   readonly avatarUrl = this._avatarUrl.asReadonly();
   readonly phone = this._phone.asReadonly();
   readonly bio = this._bio.asReadonly();
@@ -55,6 +58,12 @@ export class UserService {
   }
 
   async tryLogin(): Promise<UserModel | undefined> {
+    const currentUser = this.userState();
+    if (currentUser && this.isAccessTokenValid()) {
+      void this.ensureUserProfileLoaded();
+      return currentUser;
+    }
+
     await this.oauthService.loadDiscoveryDocumentAndTryLogin();
     this.cleanupOidcParams();
 
@@ -66,7 +75,7 @@ export class UserService {
 
     const user = this.setUserFromAccessToken(accessToken);
     if (user) {
-      await this.loadUserProfile();
+      await this.ensureUserProfileLoaded();
     }
     return user;
   }
@@ -80,7 +89,7 @@ export class UserService {
       throw new Error('Unable to read user claims from access token.');
     }
 
-    await this.loadUserProfile();
+    await this.ensureUserProfileLoaded(true);
     return user;
   }
 
@@ -91,10 +100,11 @@ export class UserService {
   }
 
   updateAvatarUrl(url: string | null): void {
-    void this.setAvatarFromContentUrl(this.withCacheBust(url));
+    void this.setAvatarFromContentUrl(url, true);
   }
 
   updateFromProfile(dto: UserProfileDto): void {
+    this.profileLoaded = true;
     this.userState.update(u => u ? { ...u, name: dto.name, surname: dto.surname, email: dto.email } : u);
     this._createdAt.set(dto.createdAt);
     this._phone.set(dto.phone);
@@ -106,7 +116,7 @@ export class UserService {
       dto.viewingEmailNotifications,
       dto.viewingRequestEmailNotifications,
     );
-    void this.setAvatarFromContentUrl(this.withCacheBust(dto.avatarUrl));
+    void this.setAvatarFromContentUrl(dto.avatarUrl);
   }
 
   updateProfile(
@@ -165,6 +175,8 @@ export class UserService {
     this._messageEmailNotifications.set(true);
     this._viewingEmailNotifications.set(true);
     this._viewingRequestEmailNotifications.set(true);
+    this.profileLoaded = false;
+    this.profileLoading = null;
   }
 
   private clearExpiredSession(): void {
@@ -176,6 +188,21 @@ export class UserService {
     const token = this.oauthService.getAccessToken();
     const expiration = this.oauthService.getAccessTokenExpiration();
     return !!token && expiration > Date.now();
+  }
+
+  private ensureUserProfileLoaded(force = false): Promise<void> {
+    if (!force && this.profileLoaded) {
+      return Promise.resolve();
+    }
+
+    if (!force && this.profileLoading) {
+      return this.profileLoading;
+    }
+
+    this.profileLoading = this.loadUserProfile().finally(() => {
+      this.profileLoading = null;
+    });
+    return this.profileLoading;
   }
 
   private async loadUserProfile(): Promise<void> {
@@ -193,23 +220,36 @@ export class UserService {
     this._viewingRequestEmailNotifications.set(viewingRequestEmails);
   }
 
-  private async setAvatarFromContentUrl(url: string | null | undefined): Promise<void> {
-    this.clearAvatarObjectUrl();
+  private async setAvatarFromContentUrl(url: string | null | undefined, forceReload = false): Promise<void> {
     if (!url) {
+      this.clearAvatarObjectUrl();
+      return;
+    }
+
+    if (!forceReload && this.avatarContentUrl === url && this._avatarUrl()) {
       return;
     }
 
     try {
-      this.avatarObjectUrl = await firstValueFrom(this.imageContentService.loadObjectUrl(url));
-      this._avatarUrl.set(this.avatarObjectUrl);
+      const contentUrl = forceReload ? this.withCacheBust(url) ?? url : url;
+      const nextObjectUrl = await firstValueFrom(
+        this.imageContentService.loadObjectUrl(contentUrl)
+      );
+      this.imageContentService.revokeObjectUrl(this.avatarObjectUrl);
+      this.avatarObjectUrl = nextObjectUrl;
+      this.avatarContentUrl = url;
+      this._avatarUrl.set(nextObjectUrl);
     } catch {
-      this._avatarUrl.set(null);
+      if (!this._avatarUrl()) {
+        this._avatarUrl.set(null);
+      }
     }
   }
 
   private clearAvatarObjectUrl(): void {
     this.imageContentService.revokeObjectUrl(this.avatarObjectUrl);
     this.avatarObjectUrl = null;
+    this.avatarContentUrl = null;
     this._avatarUrl.set(null);
   }
 

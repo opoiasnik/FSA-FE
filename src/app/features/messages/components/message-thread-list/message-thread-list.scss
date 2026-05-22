@@ -7,6 +7,12 @@
   flex-direction: column;
 }
 
+.inbox__threads app-empty-state {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
 .inbox__threads-head {
   padding: 18px 18px 12px;
   border-bottom: 1px solid var(--border);
@@ -71,6 +77,6 @@
 
 @media (max-width: 720px) {
   .inbox__threads {
-    max-height: 300px;
+    min-height: 420px;
   }
 }

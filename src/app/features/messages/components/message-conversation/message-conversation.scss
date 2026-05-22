@@ -58,7 +58,12 @@
 .inbox__conversation--empty {
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 32px;
+
+  app-empty-state {
+    width: 100%;
+    max-width: 620px;
+  }
 }
 
 @media (max-width: 720px) {
