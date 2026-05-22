@@ -39,6 +39,7 @@
           *ngSwitchCase="'notifications'"
           [notifications]="visibleNotifications()"
           [saving]="savingNotificationPreferences()"
+          [emailVerified]="emailVerified()"
           (toggled)="toggleNotificationPreference($event)">
         </app-profile-notifications-panel>
 

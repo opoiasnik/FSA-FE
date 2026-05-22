@@ -8,7 +8,9 @@ import { ViewingRequestResponse } from '../../../viewings/services/viewing.servi
 export interface ListingSidebarOwner {
   name: string;
   role: string;
+  phone?: string | null;
   avatarHue: number;
+  avatarUrl?: string | null;
   verified: boolean;
 }
 
@@ -37,4 +39,12 @@ export class ListingDetailSidebar {
 
   @Output() messagesOpened = new EventEmitter<void>();
   @Output() viewingOpened = new EventEmitter<void>();
+
+  showPhone = false;
+
+  togglePhone(): void {
+    if (this.owner.phone) {
+      this.showPhone = !this.showPhone;
+    }
+  }
 }

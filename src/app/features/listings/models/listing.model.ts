@@ -59,8 +59,11 @@ export interface CreateListingRequest {
 export interface ListingOwner {
   id?: number;
   name: string;
+  surname?: string | null;
   email: string;
+  phone?: string | null;
   role: 'OWNER' | 'USER';
+  avatarUrl?: string | null;
 }
 
 export interface ListingResponse extends CreateListingRequest {

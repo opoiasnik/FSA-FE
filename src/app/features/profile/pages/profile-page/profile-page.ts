@@ -100,13 +100,16 @@ export class ProfilePage implements OnInit {
   }
 
   saveProfile(): void {
+    const phone = this.form.phone.trim();
+    const bio = this.form.bio.trim();
+
     this.saving.set(true);
     this.profileService.updateProfile({
-      name: this.form.name,
-      surname: this.form.surname,
-      email: this.form.email,
-      phone: this.form.phone || undefined,
-      bio: this.form.bio || undefined
+      name: this.form.name.trim(),
+      surname: this.form.surname.trim(),
+      email: this.form.email.trim(),
+      phone: phone || undefined,
+      bio: bio || undefined
     }).subscribe({
       next: dto => {
         this.userService.updateProfile(

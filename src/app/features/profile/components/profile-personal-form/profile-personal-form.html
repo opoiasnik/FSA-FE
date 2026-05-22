@@ -2,18 +2,73 @@
   <h2>Personal info</h2>
   <p class="profile__sub">Information you can share with owners you message.</p>
 
-  <div class="grid-2">
-    <label class="field"><span>First name</span><input class="ra-input" [(ngModel)]="form.name" /></label>
-    <label class="field"><span>Last name</span><input class="ra-input" [(ngModel)]="form.surname" /></label>
-    <label class="field span-2"><span>Email</span><input class="ra-input" [(ngModel)]="form.email" /></label>
-    <label class="field"><span>Phone</span><input class="ra-input" [(ngModel)]="form.phone" /></label>
-    <label class="field span-2"><span>Short bio</span><textarea class="ra-input" rows="4" [(ngModel)]="form.bio"></textarea></label>
-  </div>
+  <form #profileForm="ngForm" (ngSubmit)="submit(profileForm.valid)" novalidate>
+    <div class="grid-2">
+      <label class="field">
+        <span>First name</span>
+        <input class="ra-input"
+               name="name"
+               required
+               maxlength="80"
+               [pattern]="personNamePattern"
+               [(ngModel)]="form.name"
+               #name="ngModel" />
+        <small *ngIf="name.invalid && name.touched">Enter a valid first name.</small>
+      </label>
 
-  <div class="profile__actions">
-    <button type="button" class="ra-btn" [disabled]="saving || !dirty" (click)="saved.emit()">
-      <i *ngIf="saving" class="pi pi-spin pi-spinner"></i>
-      Save changes
-    </button>
-  </div>
+      <label class="field">
+        <span>Last name</span>
+        <input class="ra-input"
+               name="surname"
+               required
+               maxlength="80"
+               [pattern]="personNamePattern"
+               [(ngModel)]="form.surname"
+               #surname="ngModel" />
+        <small *ngIf="surname.invalid && surname.touched">Enter a valid last name.</small>
+      </label>
+
+      <label class="field span-2">
+        <span>Email</span>
+        <input class="ra-input"
+               name="email"
+               type="email"
+               required
+               maxlength="254"
+               [(ngModel)]="form.email"
+               #email="ngModel" />
+        <small *ngIf="email.invalid && email.touched">Enter a valid email address.</small>
+      </label>
+
+      <label class="field">
+        <span>Phone</span>
+        <input class="ra-input"
+               name="phone"
+               type="tel"
+               maxlength="25"
+               [pattern]="phonePattern"
+               [(ngModel)]="form.phone"
+               #phone="ngModel" />
+        <small *ngIf="phone.invalid && phone.touched">Use numbers, spaces, +, (), dots or dashes.</small>
+      </label>
+
+      <label class="field span-2">
+        <span>Short bio</span>
+        <textarea class="ra-input"
+                  name="bio"
+                  rows="4"
+                  maxlength="1000"
+                  [(ngModel)]="form.bio"
+                  #bio="ngModel"></textarea>
+        <small *ngIf="bio.invalid && bio.touched">Bio must be 1000 characters or shorter.</small>
+      </label>
+    </div>
+
+    <div class="profile__actions">
+      <button type="submit" class="ra-btn" [disabled]="saving || !dirty || profileForm.invalid">
+        <i *ngIf="saving" class="pi pi-spin pi-spinner"></i>
+        Save changes
+      </button>
+    </div>
+  </form>
 </section>

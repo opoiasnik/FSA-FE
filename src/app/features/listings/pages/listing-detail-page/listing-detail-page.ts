@@ -7,6 +7,7 @@ import { MapPin } from '../../../../shared/component/map-view/map-view';
 import { formatAmount, fullAddress } from '../../models/listing.helpers';
 import { AccessService } from '../../../../core/access/access';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { ImageContentService } from '../../../../core/services/image-content.service';
 import { UserService } from '../../../../core/services/user.service';
 import { FavoriteStore } from '../../../favourites/services/favorite.store';
 import { MessageService } from '../../../messages/services/message.service';
@@ -31,6 +32,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly listingService = inject(ListingService);
   private readonly errorHandler = inject(ErrorHandlerService);
+  private readonly imageContentService = inject(ImageContentService);
   private readonly favoriteStore = inject(FavoriteStore);
   private readonly userService = inject(UserService);
   private readonly access = inject(AccessService);
@@ -58,8 +60,10 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   readonly currentViewingRequest = signal<ViewingRequestResponse | null>(null);
   readonly loadingCurrentViewingRequest = signal(false);
   readonly openingConversation = signal(false);
+  readonly ownerAvatarUrl = signal<string | null>(null);
   readonly today = new Date();
   private photoObjectUrls: string[] = [];
+  private ownerAvatarObjectUrl: string | null = null;
 
   readonly canBookViewing = computed(() => {
     return this.canBookViewingAccess() && !this.isOwnListing()
@@ -81,9 +85,11 @@ export class ListingDetailPage implements OnInit, OnDestroy {
     const item = this.listing();
     if (!item?.owner) return undefined;
     return {
-      name: item.owner.name,
+      name: [item.owner.name, item.owner.surname].filter(Boolean).join(' '),
       role: item.owner.role === 'OWNER' ? 'Private owner' : 'User',
+      phone: item.owner.phone,
       avatarHue: 200,
+      avatarUrl: this.ownerAvatarUrl(),
       verified: true
     };
   });
@@ -151,6 +157,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.revokePhotoObjectUrls();
+    this.revokeOwnerAvatarObjectUrl();
   }
 
   loadListing(id: number): void {
@@ -161,6 +168,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
       next: (listing) => {
         this.listing.set(listing);
         this.loadPhotoContents(listing);
+        this.loadOwnerAvatar(listing);
         if (!this.isOwnListing()) {
           this.loadCurrentViewingRequest(listing.id);
         }
@@ -225,6 +233,30 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   private revokePhotoObjectUrls(): void {
     this.photoObjectUrls.forEach(url => this.listingService.revokePhotoObjectUrl(url));
     this.photoObjectUrls = [];
+  }
+
+  private loadOwnerAvatar(listing: ListingResponse): void {
+    this.revokeOwnerAvatarObjectUrl();
+    this.ownerAvatarUrl.set(null);
+
+    const avatarUrl = listing.owner?.avatarUrl;
+    if (!avatarUrl) {
+      return;
+    }
+
+    this.imageContentService.loadObjectUrl(avatarUrl).subscribe({
+      next: objectUrl => {
+        this.revokeOwnerAvatarObjectUrl();
+        this.ownerAvatarObjectUrl = objectUrl;
+        this.ownerAvatarUrl.set(objectUrl);
+      },
+      error: () => {}
+    });
+  }
+
+  private revokeOwnerAvatarObjectUrl(): void {
+    this.imageContentService.revokeObjectUrl(this.ownerAvatarObjectUrl);
+    this.ownerAvatarObjectUrl = null;
   }
 
   openMessages(): void {

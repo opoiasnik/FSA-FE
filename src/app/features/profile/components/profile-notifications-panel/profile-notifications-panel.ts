@@ -23,6 +23,15 @@ export interface NotificationPref {
 export class ProfileNotificationsPanel {
   @Input() notifications: NotificationPref[] = [];
   @Input() saving = false;
+  @Input() emailVerified = false;
 
   @Output() toggled = new EventEmitter<NotificationPreferenceKey>();
+
+  toggle(key: NotificationPreferenceKey): void {
+    if (this.saving || !this.emailVerified) {
+      return;
+    }
+
+    this.toggled.emit(key);
+  }
 }

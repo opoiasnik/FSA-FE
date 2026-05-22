@@ -1,6 +1,8 @@
 <section>
   <h2>Notifications</h2>
-  <p class="profile__sub">Pick which updates should reach your email inbox.</p>
+  <p class="profile__sub">
+    {{ emailVerified ? 'Pick which updates should reach your email inbox.' : 'Verify your email address before enabling email notifications.' }}
+  </p>
 
   <table class="notif">
     <thead>
@@ -16,8 +18,8 @@
           <button type="button"
                   class="notif-toggle"
                   [class.notif-toggle--on]="n.enabled"
-                  [disabled]="saving"
-                  (click)="toggled.emit(n.key)"
+                  [disabled]="saving || !emailVerified"
+                  (click)="toggle(n.key)"
                   [attr.aria-pressed]="n.enabled">
             <span></span>
           </button>

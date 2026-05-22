@@ -29,6 +29,13 @@ h2 {
     font-weight: 600;
     margin-bottom: 6px;
   }
+
+  small {
+    display: block;
+    margin-top: 6px;
+    color: var(--danger);
+    font-size: 12px;
+  }
 }
 
 .profile__actions {

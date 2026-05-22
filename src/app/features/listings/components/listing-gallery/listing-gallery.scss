@@ -59,13 +59,14 @@
 }
 
 .gallery__thumbnails {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  width: min(100%, 520px);
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
 .gallery__thumbnail {
-  max-width: 140px;
+  width: 140px;
   aspect-ratio: 4 / 3;
   border: 1px solid var(--border);
 }
@@ -163,11 +164,12 @@
   }
 
   .gallery__thumbnails {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
     gap: 6px;
   }
 
   .gallery__thumbnail {
+    width: calc((100% - 12px) / 3);
     border-radius: var(--r-sm);
   }
 

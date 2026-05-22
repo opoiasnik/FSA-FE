@@ -23,4 +23,13 @@ export class ProfilePersonalForm {
   @Input() dirty = false;
 
   @Output() saved = new EventEmitter<void>();
+
+  readonly phonePattern = '^\\+?[0-9][0-9\\s().-]{6,24}$';
+  readonly personNamePattern = "^[A-Za-zÀ-ž][A-Za-zÀ-ž .'-]{0,79}$";
+
+  submit(valid: boolean | null): void {
+    if (valid) {
+      this.saved.emit();
+    }
+  }
 }
