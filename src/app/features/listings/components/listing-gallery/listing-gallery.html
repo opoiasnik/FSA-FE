@@ -1,12 +1,19 @@
-<section class="gallery" *ngIf="coverPhoto as cover; else placeholderGallery" aria-label="Listing photos">
+<section class="gallery"
+         [class.gallery--single]="!thumbnailPhotos.length"
+         *ngIf="coverPhoto as cover; else placeholderGallery"
+         aria-label="Listing photos">
   <figure class="gallery__main">
-    <img *ngIf="imageUrls[cover.id]" [src]="imageUrls[cover.id]" [alt]="cover.altText || title" />
+    <button type="button" class="gallery__image-button" (click)="openPhoto(0)">
+      <img *ngIf="imageUrls[cover.id]" [src]="imageUrls[cover.id]" [alt]="cover.altText || title" />
+    </button>
   </figure>
 
   <div class="gallery__thumbnails" *ngIf="thumbnailPhotos.length">
     <figure class="gallery__thumbnail"
-            *ngFor="let photo of thumbnailPhotos; trackBy: trackPhoto">
-      <img *ngIf="imageUrls[photo.id]" [src]="imageUrls[photo.id]" [alt]="photo.altText || title" />
+            *ngFor="let photo of thumbnailPhotos; let i = index; trackBy: trackPhoto">
+      <button type="button" class="gallery__image-button" (click)="openPhoto(i + 1)">
+        <img *ngIf="imageUrls[photo.id]" [src]="imageUrls[photo.id]" [alt]="photo.altText || title" />
+      </button>
     </figure>
   </div>
 </section>
@@ -16,3 +23,41 @@
     <app-photo-placeholder class="gallery__main" [seed]="listingId" [rounded]="0" [label]="'Main photo'"></app-photo-placeholder>
   </section>
 </ng-template>
+
+<section class="photo-viewer"
+         *ngIf="activePhotoIndex() !== null"
+         aria-modal="true"
+         role="dialog"
+         aria-label="Listing photo viewer"
+         (click)="closePhoto()">
+  <button type="button"
+          class="photo-viewer__close"
+          aria-label="Close photo viewer"
+          (click)="closePhoto(); $event.stopPropagation()">
+    <i class="pi pi-times"></i>
+  </button>
+
+  <button type="button"
+          class="photo-viewer__nav photo-viewer__nav--prev"
+          *ngIf="visiblePhotos.length > 1"
+          aria-label="Previous photo"
+          (click)="previousPhoto($event)">
+    <i class="pi pi-chevron-left"></i>
+  </button>
+
+  <figure class="photo-viewer__stage" (click)="$event.stopPropagation()">
+    <img [src]="imageUrls[visiblePhotos[activePhotoIndex() ?? 0].id]"
+         [alt]="visiblePhotos[activePhotoIndex() ?? 0].altText || title" />
+    <figcaption *ngIf="visiblePhotos.length > 1">
+      {{ (activePhotoIndex() ?? 0) + 1 }} / {{ visiblePhotos.length }}
+    </figcaption>
+  </figure>
+
+  <button type="button"
+          class="photo-viewer__nav photo-viewer__nav--next"
+          *ngIf="visiblePhotos.length > 1"
+          aria-label="Next photo"
+          (click)="nextPhoto($event)">
+    <i class="pi pi-chevron-right"></i>
+  </button>
+</section>

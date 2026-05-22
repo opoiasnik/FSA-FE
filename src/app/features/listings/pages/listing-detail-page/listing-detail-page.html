@@ -14,27 +14,30 @@
   </div>
 
   <ng-container *ngIf="listing() as item">
-    <app-listing-gallery
-      [listingId]="item.id"
-      [title]="item.title"
-      [photos]="item.photos ?? []"
-      [imageUrls]="photoImageUrls()">
-    </app-listing-gallery>
-
     <div class="layout">
-      <app-listing-detail-overview
-        [listing]="item"
-        [facts]="facts()"
-        [amenities]="amenities"
-        [mapPins]="mapPin()"
-        [address]="fullAddress()"
-        [saved]="saved()"
-        [ownListing]="isOwnListing()"
-        (saveToggled)="toggleSave()">
-      </app-listing-detail-overview>
+      <div class="layout__main">
+        <app-listing-gallery
+          [listingId]="item.id"
+          [title]="item.title"
+          [photos]="item.photos ?? []"
+          [imageUrls]="photoImageUrls()">
+        </app-listing-gallery>
+
+        <app-listing-detail-overview
+          [listing]="item"
+          [facts]="facts()"
+          [amenities]="amenities"
+          [address]="fullAddress()"
+          [saved]="saved()"
+          [ownListing]="isOwnListing()"
+          (saveToggled)="toggleSave()"
+          (shared)="shareListing()">
+        </app-listing-detail-overview>
+      </div>
 
       <app-listing-detail-sidebar
         *ngIf="owner() as own"
+        [listingId]="item.id"
         [listingType]="item.listingType"
         [owner]="own"
         [priceAmount]="priceAmount()"
@@ -51,6 +54,13 @@
         (messagesOpened)="openMessages()"
         (viewingOpened)="openViewingForm()">
       </app-listing-detail-sidebar>
+
+      <app-listing-location-section
+        class="layout__location"
+        [listingId]="item.id"
+        [mapPins]="mapPin()"
+        [address]="fullAddress()">
+      </app-listing-location-section>
     </div>
   </ng-container>
 </section>

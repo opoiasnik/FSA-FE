@@ -162,6 +162,10 @@ export class OwnerDashboardPage implements OnInit {
     void this.router.navigate(['/listings', id]);
   }
 
+  editListing(listing: ListingResponse): void {
+    void this.router.navigate(['/listings', listing.id, 'edit']);
+  }
+
   private loadStats(): void {
     this.ownerService.getStats().subscribe({
       next: stats => this.stats.set(stats),

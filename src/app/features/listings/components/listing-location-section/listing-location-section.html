@@ -1,0 +1,15 @@
+<section class="location">
+  <h2>Where you'll be</h2>
+  <div class="location__map">
+    <app-map-view
+      *ngIf="mapPins.length"
+      [pins]="mapPins"
+      [selectedId]="listingId"
+      [showPrices]="false">
+    </app-map-view>
+    <div *ngIf="!mapPins.length" class="location__empty">
+      Coordinates not provided for this listing.
+    </div>
+  </div>
+  <p class="location__address">{{ address }}</p>
+</section>

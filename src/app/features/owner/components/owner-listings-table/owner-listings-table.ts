@@ -18,6 +18,7 @@ export class OwnerListingsTable {
   @Input() canDeleteListing = false;
   @Output() exported = new EventEmitter<void>();
   @Output() opened = new EventEmitter<number>();
+  @Output() edited = new EventEmitter<ListingResponse>();
   @Output() statusToggled = new EventEmitter<ListingResponse>();
   @Output() deleted = new EventEmitter<ListingResponse>();
 
@@ -28,6 +29,11 @@ export class OwnerListingsTable {
   toggleListingStatus(event: MouseEvent, listing: ListingResponse): void {
     event.stopPropagation();
     this.statusToggled.emit(listing);
+  }
+
+  editListing(event: MouseEvent, listing: ListingResponse): void {
+    event.stopPropagation();
+    this.edited.emit(listing);
   }
 
   deleteListing(event: MouseEvent, listing: ListingResponse): void {

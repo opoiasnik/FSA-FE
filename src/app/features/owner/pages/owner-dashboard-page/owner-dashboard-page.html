@@ -31,6 +31,7 @@
     [canDeleteListing]="canDeleteListing()"
     (exported)="exportCsv()"
     (opened)="openListing($event)"
+    (edited)="editListing($event)"
     (statusToggled)="toggleListingStatus($event)"
     (deleted)="deleteListing($event)">
   </app-owner-listings-table>

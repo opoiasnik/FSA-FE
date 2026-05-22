@@ -30,6 +30,9 @@
       <a routerLink="/owner" class="ra-btn ra-btn--lg">
         <i class="pi pi-chart-line"></i>Open Owner Studio
       </a>
+      <a [routerLink]="['/listings', listingId, 'edit']" class="ra-btn ra-btn--ghost ra-btn--lg">
+        <i class="pi pi-pencil"></i>Edit listing
+      </a>
     </div>
 
     <ng-template #renterActions>

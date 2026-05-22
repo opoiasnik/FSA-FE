@@ -40,6 +40,10 @@ export class ListingService {
     return this.api.post<ListingResponse>(this.base, payload);
   }
 
+  update(id: number, payload: CreateListingRequest): Observable<ListingResponse> {
+    return this.api.put<ListingResponse>(`${this.base}/${id}`, payload);
+  }
+
   activate(id: number): Observable<ListingResponse> {
     return this.api.patch<ListingResponse>(`${this.base}/${id}/activate`);
   }

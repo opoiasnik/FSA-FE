@@ -11,6 +11,7 @@ import { PhotoPlaceholder } from '../../../../shared/component/photo-placeholder
 })
 export class ListingPhotoUploader {
   @Input() previews: string[] = [];
+  @Input() readonlyCount = 0;
   @Input() error: string | null = null;
 
   @Output() filesSelected = new EventEmitter<File[]>();

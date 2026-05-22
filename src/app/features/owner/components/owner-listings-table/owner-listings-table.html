@@ -40,6 +40,12 @@
         <td class="dash__table-actions">
           <button type="button"
                   class="dash__status-toggle"
+                  (click)="editListing($event, l)">
+            <i class="pi pi-pencil"></i>
+            Edit
+          </button>
+          <button type="button"
+                  class="dash__status-toggle"
                   [disabled]="!canToggleListingStatus(l)"
                   (click)="toggleListingStatus($event, l)">
             <i class="pi" [ngClass]="l.status === 'ACTIVE' ? 'pi-pause' : 'pi-play'"></i>

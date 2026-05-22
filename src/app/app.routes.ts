@@ -17,6 +17,7 @@ export const routes: Routes = [
   { path: 'home', component: HomePage },
   { path: 'listings', component: ListingSearchPage, canActivate: [isLoggedInWithToastGuard] },
   { path: 'listings/create', component: ListingCreatePage, canActivate: [isOwnerGuard] },
+  { path: 'listings/:id/edit', component: ListingCreatePage, canActivate: [isOwnerGuard] },
   { path: 'listings/:id', component: ListingDetailPage, canActivate: [isLoggedInWithToastGuard] },
   { path: 'favourites', component: FavouritesPage, canActivate: [isLoggedInWithToastGuard] },
   { path: 'viewings', component: ViewingsPage, canActivate: [isLoggedInWithToastGuard] },

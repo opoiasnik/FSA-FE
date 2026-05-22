@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
 import { forkJoin, of, switchMap } from 'rxjs';
@@ -13,7 +13,7 @@ import { ListingPhotoUploader } from '../../components/listing-photo-uploader/li
 import { ListingPriceStep } from '../../components/listing-price-step/listing-price-step';
 import { ListingReviewStep } from '../../components/listing-review-step/listing-review-step';
 import { ListingWizardStep, ListingWizardStepper } from '../../components/listing-wizard-stepper/listing-wizard-stepper';
-import { CreateListingRequest } from '../../models/listing.model';
+import { CreateListingRequest, ListingResponse } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
 
 interface WizardStep extends ListingWizardStep {
@@ -38,10 +38,11 @@ interface WizardStep extends ListingWizardStep {
   templateUrl: './listing-create-page.html',
   styleUrl: './listing-create-page.scss'
 })
-export class ListingCreatePage {
+export class ListingCreatePage implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly listingService = inject(ListingService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -56,15 +57,23 @@ export class ListingCreatePage {
 
   readonly currentStep = signal(0);
   readonly creating = signal(false);
+  readonly loadingListing = signal(false);
   readonly createError = signal<string | null>(null);
   readonly mediaError = signal<string | null>(null);
   readonly publishAttempted = signal(false);
+  readonly editListingId = signal<number | null>(null);
+  readonly editListing = signal<ListingResponse | null>(null);
+  readonly existingPhotoPreviews = signal<string[]>([]);
   readonly completedStepIdsState = signal<WizardStep['id'][]>([]);
   readonly selectedPhotos = signal<File[]>([]);
   readonly photoPreviews = signal<string[]>([]);
+  readonly allPhotoPreviews = computed(() => [...this.existingPhotoPreviews(), ...this.photoPreviews()]);
   readonly maxYearBuilt = new Date().getFullYear() + 1;
 
   readonly activeStep = computed(() => this.steps[this.currentStep()]);
+  readonly isEditMode = computed(() => this.editListingId() !== null);
+  readonly pageTitle = computed(() => this.isEditMode() ? 'Edit listing' : 'Publish a new listing');
+  readonly submitLabel = computed(() => this.isEditMode() ? 'Save changes' : 'Publish');
   readonly isLastStep = computed(() => this.currentStep() === this.steps.length - 1);
   readonly completedStepIds = computed(() => {
     const invalid = this.invalidStepIds();
@@ -120,10 +129,10 @@ export class ListingCreatePage {
 
   isStepValid(stepId: WizardStep['id']): boolean {
     if (stepId === 'media') {
-      return this.selectedPhotos().length > 0;
+      return this.hasAnyPhoto();
     }
     if (stepId === 'review') {
-      return this.form.valid && this.selectedPhotos().length > 0;
+      return this.form.valid && this.hasAnyPhoto();
     }
 
     const fields = this.stepRequiredFields[stepId];
@@ -165,6 +174,21 @@ export class ListingCreatePage {
     this.form.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.clearFormErrors());
+  }
+
+  ngOnInit(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (!Number.isFinite(id) || id <= 0) {
+      return;
+    }
+
+    this.editListingId.set(id);
+    this.loadListingForEdit(id);
+  }
+
+  ngOnDestroy(): void {
+    this.existingPhotoPreviews().forEach(url => this.listingService.revokePhotoObjectUrl(url));
+    this.photoPreviews().forEach(url => URL.revokeObjectURL(url));
   }
 
   goTo(index: number): void {
@@ -238,9 +262,9 @@ export class ListingCreatePage {
     this.publishAttempted.set(true);
     this.mediaError.set(null);
 
-    if (this.form.invalid || this.selectedPhotos().length === 0) {
+    if (this.form.invalid || !this.hasAnyPhoto()) {
       this.form.markAllAsTouched();
-      if (this.selectedPhotos().length === 0) {
+      if (!this.hasAnyPhoto()) {
         this.mediaError.set('Upload at least one listing photo before publishing.');
       }
       this.focusFirstInvalidStep();
@@ -257,7 +281,16 @@ export class ListingCreatePage {
       title: v.title,
       description: v.description,
       listingType: v.listingType,
-      address: { street: v.street, city: v.city, postalCode: v.postalCode, country: v.country, district: v.district || undefined },
+      address: {
+        street: v.street,
+        city: v.city,
+        postalCode: v.postalCode,
+        country: v.country,
+        district: v.district || undefined,
+        region: this.preservedAddressField('region'),
+        lat: this.preservedAddressField('lat'),
+        lng: this.preservedAddressField('lng'),
+      },
       price: { amount: Number(v.amount), currency: v.currency },
       features: {
         propertyType: v.propertyType,
@@ -274,10 +307,15 @@ export class ListingCreatePage {
       }
     };
 
-    this.listingService.create(payload).pipe(
+    const editId = this.editListingId();
+    const save$ = editId
+      ? this.listingService.update(editId, payload)
+      : this.listingService.create(payload);
+
+    save$.pipe(
       switchMap(listing => {
         const uploads = this.selectedPhotos().map((file, index) =>
-          this.listingService.uploadPhoto(listing.id, file, index === 0 ? 'Cover photo' : `Photo ${index + 1}`)
+          this.listingService.uploadPhoto(listing.id, file, this.photoAltText(index))
         );
         return uploads.length ? forkJoin(uploads).pipe(switchMap(() => of(listing))) : of(listing);
       })
@@ -293,6 +331,90 @@ export class ListingCreatePage {
         this.creating.set(false);
       }
     });
+  }
+
+  private loadListingForEdit(id: number): void {
+    this.loadingListing.set(true);
+    this.listingService.getById(id).subscribe({
+      next: listing => {
+        this.editListing.set(listing);
+        this.patchForm(listing);
+        this.loadExistingPhotoPreviews(listing);
+        this.completedStepIdsState.set(['basics', 'location', 'details', 'price', 'media']);
+        this.loadingListing.set(false);
+      },
+      error: error => {
+        this.createError.set(this.errorHandler.toMessage(error));
+        this.loadingListing.set(false);
+      }
+    });
+  }
+
+  private patchForm(listing: ListingResponse): void {
+    this.form.patchValue({
+      title: listing.title,
+      description: listing.description,
+      listingType: listing.listingType,
+      propertyType: listing.features.propertyType,
+      street: listing.address.street,
+      city: listing.address.city,
+      district: listing.address.district ?? '',
+      postalCode: listing.address.postalCode,
+      country: listing.address.country,
+      area: listing.features.area ?? null,
+      roomCount: listing.features.roomCount ?? null,
+      floor: listing.features.floor ?? null,
+      yearBuilt: listing.features.yearBuilt ?? null,
+      energyClass: listing.features.energyClass ?? '',
+      furnished: listing.features.furnished ?? false,
+      parkingAvailable: listing.features.parkingAvailable ?? false,
+      balcony: listing.features.balcony ?? false,
+      elevator: listing.features.elevator ?? false,
+      petsAllowed: listing.features.petsAllowed ?? false,
+      amount: listing.price.amount,
+      currency: listing.price.currency
+    });
+  }
+
+  private loadExistingPhotoPreviews(listing: ListingResponse): void {
+    this.existingPhotoPreviews().forEach(url => this.listingService.revokePhotoObjectUrl(url));
+    this.existingPhotoPreviews.set([]);
+    for (const photo of listing.photos ?? []) {
+      this.listingService.loadPhotoObjectUrl(photo.contentUrl).subscribe({
+        next: url => this.existingPhotoPreviews.update(urls => [...urls, url]),
+        error: () => {}
+      });
+    }
+  }
+
+  private hasAnyPhoto(): boolean {
+    return this.existingPhotoPreviews().length + this.selectedPhotos().length > 0;
+  }
+
+  private preservedAddressField<K extends 'region' | 'lat' | 'lng'>(field: K): ListingResponse['address'][K] | undefined {
+    const listing = this.editListing();
+    if (!listing || !this.isAddressUnchanged(listing)) {
+      return undefined;
+    }
+    return listing.address[field];
+  }
+
+  private isAddressUnchanged(listing: ListingResponse): boolean {
+    const v = this.form.getRawValue();
+    return this.sameAddressValue(v.street, listing.address.street)
+      && this.sameAddressValue(v.city, listing.address.city)
+      && this.sameAddressValue(v.postalCode, listing.address.postalCode)
+      && this.sameAddressValue(v.country, listing.address.country)
+      && this.sameAddressValue(v.district, listing.address.district ?? '');
+  }
+
+  private sameAddressValue(left: string | null | undefined, right: string | null | undefined): boolean {
+    return (left ?? '').trim().toLowerCase() === (right ?? '').trim().toLowerCase();
+  }
+
+  private photoAltText(index: number): string {
+    const offset = this.existingPhotoPreviews().length;
+    return offset + index === 0 ? 'Cover photo' : `Photo ${offset + index + 1}`;
   }
 
   private applyServerError(result: ErrorResult): void {
@@ -358,7 +480,7 @@ export class ListingCreatePage {
     URL.revokeObjectURL(previews[index]);
     this.selectedPhotos.update(files => files.filter((_, i) => i !== index));
     this.photoPreviews.update(urls => urls.filter((_, i) => i !== index));
-    if (this.publishAttempted() && this.selectedPhotos().length === 0) {
+    if (this.publishAttempted() && !this.hasAnyPhoto()) {
       this.mediaError.set('Upload at least one listing photo before publishing.');
     }
   }

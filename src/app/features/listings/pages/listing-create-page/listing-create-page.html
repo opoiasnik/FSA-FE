@@ -2,7 +2,7 @@
   <div class="wizard__head">
     <div>
       <div class="ra-eyebrow">Owner studio</div>
-      <h1>Publish a new listing</h1>
+      <h1>{{ pageTitle() }}</h1>
     </div>
   </div>
 
@@ -33,7 +33,8 @@
 
       <app-listing-photo-uploader
         *ngIf="activeStep().id === 'media'"
-        [previews]="photoPreviews()"
+        [previews]="allPhotoPreviews()"
+        [readonlyCount]="existingPhotoPreviews().length"
         [error]="mediaError()"
         (filesSelected)="addPhotos($event)"
         (photoRemoved)="removePhoto($event)">
@@ -42,7 +43,7 @@
       <app-listing-review-step
         *ngIf="activeStep().id === 'review'"
         [form]="form"
-        [photoPreviews]="photoPreviews()">
+        [photoPreviews]="allPhotoPreviews()">
       </app-listing-review-step>
     </form>
 
@@ -53,7 +54,7 @@
         <i class="pi pi-arrow-left"></i>Back
       </button>
       <button type="button" class="ra-btn" (click)="next()" [disabled]="creating() || !canProceed()">
-        {{ isLastStep() ? 'Publish' : 'Continue' }}<i class="pi pi-arrow-right"></i>
+        {{ isLastStep() ? submitLabel() : 'Continue' }}<i class="pi pi-arrow-right"></i>
       </button>
     </div>
   </div>

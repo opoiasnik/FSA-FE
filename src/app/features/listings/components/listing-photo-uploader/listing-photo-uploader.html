@@ -16,7 +16,11 @@
     <div class="photo-preview" *ngFor="let preview of previews; let i = index">
       <img [src]="preview" [alt]="i === 0 ? 'Cover photo preview' : 'Photo preview ' + (i + 1)" />
       <span>{{ i === 0 ? 'cover' : 'photo ' + (i + 1) }}</span>
-      <button type="button" class="photo-preview__remove" (click)="photoRemoved.emit(i)" aria-label="Remove photo">
+      <button *ngIf="i >= readonlyCount"
+              type="button"
+              class="photo-preview__remove"
+              (click)="photoRemoved.emit(i - readonlyCount)"
+              aria-label="Remove photo">
         <i class="pi pi-times"></i>
       </button>
     </div>

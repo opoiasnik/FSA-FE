@@ -9,12 +9,13 @@
     </div>
 
     <div class="actions">
-      <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm"><i class="pi pi-share-alt"></i>Share</button>
+      <button type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="shared.emit()">
+        <i class="pi pi-share-alt"></i>Share
+      </button>
       <button *ngIf="!ownListing" type="button" class="ra-btn ra-btn--ghost ra-btn--sm" (click)="saveToggled.emit()">
         <i class="pi" [class.pi-heart-fill]="saved" [class.pi-heart]="!saved" [style.color]="saved ? 'var(--accent)' : ''"></i>
         {{ saved ? 'Saved' : 'Save' }}
       </button>
-      <button *ngIf="!ownListing" type="button" class="ra-btn ra-btn--ghost ra-btn--sm"><i class="pi pi-flag"></i>Report</button>
     </div>
   </div>
 
@@ -39,14 +40,5 @@
         <span>{{ a.label }}</span>
       </div>
     </div>
-  </section>
-
-  <section class="block">
-    <h2>Where you'll be</h2>
-    <div class="map-wrap">
-      <app-map-view *ngIf="mapPins.length" [pins]="mapPins" [selectedId]="listing.id" [showPrices]="false"></app-map-view>
-      <div *ngIf="!mapPins.length" class="map-empty">Coordinates not provided for this listing.</div>
-    </div>
-    <p class="address-hint">{{ address }}</p>
   </section>
 </main>

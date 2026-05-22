@@ -20,6 +20,7 @@ export interface ListingSidebarOwner {
   styleUrls: ['./listing-detail-sidebar.scss']
 })
 export class ListingDetailSidebar {
+  @Input({ required: true }) listingId!: number;
   @Input({ required: true }) listingType!: ListingType;
   @Input({ required: true }) owner!: ListingSidebarOwner;
   @Input() priceAmount = '';

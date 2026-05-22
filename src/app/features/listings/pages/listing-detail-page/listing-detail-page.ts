@@ -14,6 +14,7 @@ import { ViewingRequestResponse, ViewingService, ViewingStatus } from '../../../
 import { ListingDetailSidebar, ListingSidebarOwner } from '../../components/listing-detail-sidebar/listing-detail-sidebar';
 import { ListingAmenity, ListingDetailOverview, ListingFact } from '../../components/listing-detail-overview/listing-detail-overview';
 import { ListingGallery } from '../../components/listing-gallery/listing-gallery';
+import { ListingLocationSection } from '../../components/listing-location-section/listing-location-section';
 import { ListingViewingDialog } from '../../components/listing-viewing-dialog/listing-viewing-dialog';
 import { ListingResponse } from '../../models/listing.model';
 import { ListingService } from '../../services/listing.service';
@@ -21,7 +22,7 @@ import { ListingService } from '../../services/listing.service';
 @Component({
   selector: 'app-listing-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, MessageModule, SkeletonModule, ListingGallery, ListingDetailOverview, ListingDetailSidebar, ListingViewingDialog],
+  imports: [CommonModule, RouterLink, MessageModule, SkeletonModule, ListingGallery, ListingDetailOverview, ListingDetailSidebar, ListingLocationSection, ListingViewingDialog],
   templateUrl: './listing-detail-page.html',
   styleUrl: './listing-detail-page.scss'
 })
@@ -179,6 +180,31 @@ export class ListingDetailPage implements OnInit, OnDestroy {
     const item = this.listing();
     if (!item) return;
     this.favoriteStore.toggle(item.id);
+  }
+
+  async shareListing(): Promise<void> {
+    const item = this.listing();
+    if (!item) {
+      return;
+    }
+
+    const url = window.location.href;
+    const data = {
+      title: item.title,
+      text: `${item.title} in ${item.address.city}`,
+      url
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(data);
+        return;
+      }
+
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // Sharing can be cancelled by the user.
+    }
   }
 
   private loadPhotoContents(listing: ListingResponse): void {

@@ -3,7 +3,7 @@
 }
 
 .detail {
-  max-width: 1280px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 0 8px 40px;
 }
@@ -35,8 +35,18 @@
 
 .layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 40px;
+  grid-template-columns: minmax(0, 620px) 380px;
+  justify-content: center;
+  gap: 48px;
+  align-items: start;
+}
+
+.layout__main {
+  min-width: 0;
+}
+
+.layout__location {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 960px) {
