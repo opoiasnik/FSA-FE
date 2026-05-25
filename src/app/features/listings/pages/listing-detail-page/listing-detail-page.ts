@@ -86,12 +86,13 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   readonly owner = computed<ListingSidebarOwner | undefined>(() => {
     const item = this.listing();
     if (!item?.owner) return undefined;
+    const avatarUrl = this.ownerAvatarUrl() ?? (this.isOwnListing() ? this.userService.avatarUrl() : null);
     return {
       name: [item.owner.name, item.owner.surname].filter(Boolean).join(' '),
       role: item.owner.role === 'OWNER' ? 'Private owner' : 'User',
       phone: item.owner.phone,
       avatarHue: 200,
-      avatarUrl: this.ownerAvatarUrl(),
+      avatarUrl,
       verified: true
     };
   });
