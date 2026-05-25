@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="RentArea">
+  <defs>
+    <linearGradient id="bg" x1="10" y1="8" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0f766e"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="17" y1="19" x2="47" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fef3c7"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <path d="M14 31.5 32 16l18 15.5-3.5 4.1L32 23.1 17.5 35.6 14 31.5Z" fill="url(#roof)"/>
+  <path d="M21 34.2c0-1.2 1-2.2 2.2-2.2h17.6c1.2 0 2.2 1 2.2 2.2V49H21V34.2Z" fill="#fff"/>
+  <path d="M28 49V37.8c0-.7.6-1.3 1.3-1.3h5.4c.7 0 1.3.6 1.3 1.3V49h-8Z" fill="#0f766e"/>
+  <circle cx="35.2" cy="43.1" r="1.1" fill="#fef3c7"/>
+  <path d="M45 20.8h4.3v8.6L45 25.8v-5Z" fill="#fef3c7"/>
+</svg>
