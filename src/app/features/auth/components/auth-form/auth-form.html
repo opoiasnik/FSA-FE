@@ -7,12 +7,14 @@
         <span>First name <span class="req">*</span></span>
         <input class="ra-input" [class.ra-input--invalid]="isInvalid('firstName')"
                formControlName="firstName" placeholder="John" />
+        <small *ngIf="errorMessage('firstName') as message" class="field__error">{{ message }}</small>
       </label>
 
       <label class="field">
         <span>Last name <span class="req">*</span></span>
         <input class="ra-input" [class.ra-input--invalid]="isInvalid('lastName')"
                formControlName="lastName" placeholder="Doe" />
+        <small *ngIf="errorMessage('lastName') as message" class="field__error">{{ message }}</small>
       </label>
     </ng-container>
 
@@ -21,12 +23,14 @@
       <input class="ra-input" [class.ra-input--invalid]="isInvalid('username')"
              formControlName="username" [placeholder]="isRegister ? 'johndoe' : 'owner or user'"
              autocomplete="username" />
+      <small *ngIf="errorMessage('username') as message" class="field__error">{{ message }}</small>
     </label>
 
     <label class="field" *ngIf="isRegister">
       <span>Email <span class="req">*</span></span>
       <input class="ra-input" [class.ra-input--invalid]="isInvalid('email')"
              formControlName="email" type="email" placeholder="john@example.com" />
+      <small *ngIf="errorMessage('email') as message" class="field__error">{{ message }}</small>
     </label>
 
     <label class="field" [class.span-2]="isRegister">
@@ -40,6 +44,7 @@
           <i class="pi" [class.pi-eye-slash]="!showPassword" [class.pi-eye]="showPassword"></i>
         </button>
       </div>
+      <small *ngIf="errorMessage('password') as message" class="field__error">{{ message }}</small>
     </label>
   </fieldset>
 

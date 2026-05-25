@@ -4,7 +4,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 export interface ApiErrorPayload {
   type?: string;
   message?: string;
+  errorMessage?: string;
   field?: string;
+  params?: string[];
   timestamp?: string;
 }
 
@@ -20,14 +22,14 @@ export class ErrorHandlerService {
     if (error instanceof HttpErrorResponse) {
       const payload = error.error as ApiErrorPayload | undefined;
       return {
-        message: payload?.message ?? this.fromStatus(error.status),
+        message: this.fromPayload(payload) ?? this.fromStatus(error.status),
         field: payload?.field
       };
     }
     if (error && typeof error === 'object') {
       const e = error as { error?: ApiErrorPayload; message?: string; status?: number };
       return {
-        message: e.error?.message ?? e.message ?? (e.status ? this.fromStatus(e.status) : 'Unexpected error.'),
+        message: this.fromPayload(e.error) ?? e.message ?? (e.status ? this.fromStatus(e.status) : 'Unexpected error.'),
         field: e.error?.field
       };
     }
@@ -45,7 +47,7 @@ export class ErrorHandlerService {
 
     if (error && typeof error === 'object') {
       const e = error as { error?: ApiErrorPayload; message?: string; status?: number };
-      return e.error?.message
+      return this.fromPayload(e.error)
           ?? e.message
           ?? (e.status ? this.fromStatus(e.status) : 'Unexpected error.');
     }
@@ -55,10 +57,58 @@ export class ErrorHandlerService {
 
   private fromHttpError(error: HttpErrorResponse): string {
     const payload = error.error as ApiErrorPayload | undefined;
-    if (payload?.message) {
-      return payload.message;
+    return this.fromPayload(payload) ?? this.fromStatus(error.status);
+  }
+
+  private fromPayload(payload: ApiErrorPayload | undefined): string | null {
+    if (!payload) {
+      return null;
     }
-    return this.fromStatus(error.status);
+
+    if (payload.message) {
+      return this.humanize(payload.message);
+    }
+
+    if (payload.errorMessage) {
+      return this.humanize(payload.errorMessage, payload);
+    }
+
+    return null;
+  }
+
+  private humanize(message: string, payload?: ApiErrorPayload): string {
+    switch (message) {
+      case 'error-username-invalid-character':
+        return 'Username can contain only letters, numbers, dots, underscores, and hyphens.';
+      case 'error-user-attribute-required':
+        return `${this.fieldLabel(payload?.field ?? payload?.params?.[0])} is required.`;
+      case 'error-invalid-email':
+      case 'error-email-invalid':
+        return 'Enter a valid email address.';
+      case 'error-user-exists':
+      case 'error-username-exists':
+        return 'User with this username already exists.';
+      case 'error-email-exists':
+        return 'User with this email already exists.';
+      default:
+        return message.startsWith('error-')
+          ? message
+              .replace(/^error-/, '')
+              .replaceAll('-', ' ')
+              .replace(/^\w/, char => char.toUpperCase())
+          : message;
+    }
+  }
+
+  private fieldLabel(field: string | undefined): string {
+    switch (field) {
+      case 'username': return 'Username';
+      case 'email': return 'Email';
+      case 'firstName': return 'First name';
+      case 'lastName': return 'Last name';
+      case 'password': return 'Password';
+      default: return 'This field';
+    }
   }
 
   private fromStatus(status: number): string {

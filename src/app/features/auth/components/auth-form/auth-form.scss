@@ -77,6 +77,15 @@ fieldset {
   &:focus { box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1) !important; }
 }
 
+.field__error {
+  display: block;
+  margin-top: 6px;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
 .auth-submit {
   width: 100%;
   justify-content: center;

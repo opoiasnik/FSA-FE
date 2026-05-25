@@ -43,6 +43,31 @@ export class AuthForm {
     return !!c && c.invalid && c.touched;
   }
 
+  errorMessage(field: string): string | null {
+    const c = this.form.get(field);
+    if (!c || !this.isInvalid(field)) {
+      return null;
+    }
+
+    if (c.errors?.['server']) {
+      return c.errors['server'];
+    }
+    if (c.errors?.['required']) {
+      return 'This field is required.';
+    }
+    if (c.errors?.['email']) {
+      return 'Enter a valid email address.';
+    }
+    if (c.errors?.['minlength']) {
+      return `Use at least ${c.errors['minlength'].requiredLength} characters.`;
+    }
+    if (c.errors?.['pattern']) {
+      return 'Use only letters, numbers, dots, underscores, and hyphens.';
+    }
+
+    return null;
+  }
+
   setRole(role: AuthRole): void {
     this.form.get('role')?.setValue(role);
   }
