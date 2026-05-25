@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { MessageService } from 'primeng/api';
 import { UserService } from '../../../core/services/user.service';
 import { FavoriteResponse, FavoriteService } from './favorite.service';
 
@@ -6,6 +7,7 @@ import { FavoriteResponse, FavoriteService } from './favorite.service';
 export class FavoriteStore {
   private readonly favoriteService = inject(FavoriteService);
   private readonly userService = inject(UserService);
+  private readonly toast = inject(MessageService);
 
   private readonly _items = signal<FavoriteResponse[]>([]);
   private readonly _loaded = signal(false);
@@ -33,11 +35,35 @@ export class FavoriteStore {
   toggle(listingId: number): void {
     if (this.isFavorite(listingId)) {
       this.favoriteService.remove(listingId).subscribe({
-        next: () => this._items.update(list => list.filter(f => f.listing.id !== listingId))
+        next: () => {
+          this._items.update(list => list.filter(f => f.listing.id !== listingId));
+          this.toast.add({
+            severity: 'info',
+            summary: 'Removed from favourites',
+            detail: 'The listing was removed from your shortlist.'
+          });
+        },
+        error: () => this.toast.add({
+          severity: 'error',
+          summary: 'Favourite not updated',
+          detail: 'Could not remove this listing from favourites.'
+        })
       });
     } else {
       this.favoriteService.add(listingId).subscribe({
-        next: created => this._items.update(list => [...list, created])
+        next: created => {
+          this._items.update(list => [...list, created]);
+          this.toast.add({
+            severity: 'success',
+            summary: 'Saved to favourites',
+            detail: 'The listing was added to your shortlist.'
+          });
+        },
+        error: () => this.toast.add({
+          severity: 'error',
+          summary: 'Favourite not updated',
+          detail: 'Could not save this listing.'
+        })
       });
     }
   }

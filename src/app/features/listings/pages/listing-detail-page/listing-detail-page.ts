@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MessageModule } from 'primeng/message';
+import { MessageService as ToastService } from 'primeng/api';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MapPin } from '../../../../shared/component/map-view/map-view';
 import { formatAmount, fullAddress } from '../../models/listing.helpers';
@@ -37,6 +38,7 @@ export class ListingDetailPage implements OnInit, OnDestroy {
   private readonly userService = inject(UserService);
   private readonly access = inject(AccessService);
   private readonly messageService = inject(MessageService);
+  private readonly toast = inject(ToastService);
   private readonly viewingService = inject(ViewingService);
 
   readonly listing = signal<ListingResponse | null>(null);
@@ -206,10 +208,20 @@ export class ListingDetailPage implements OnInit, OnDestroy {
     try {
       if (navigator.share) {
         await navigator.share(data);
+        this.toast.add({
+          severity: 'success',
+          summary: 'Listing shared',
+          detail: 'The listing link was shared.'
+        });
         return;
       }
 
       await navigator.clipboard.writeText(url);
+      this.toast.add({
+        severity: 'success',
+        summary: 'Link copied',
+        detail: 'The listing link was copied to your clipboard.'
+      });
     } catch {
       // Sharing can be cancelled by the user.
     }
@@ -267,10 +279,15 @@ export class ListingDetailPage implements OnInit, OnDestroy {
     this.messageService.openConversation({ listingId: item.id }).subscribe({
       next: conversation => {
         this.openingConversation.set(false);
+        this.toast.add({
+          severity: 'success',
+          summary: 'Conversation ready',
+          detail: 'You can now message the owner.'
+        });
         void this.router.navigate(['/messages', conversation.id]);
       },
       error: err => {
-        this.error.set(this.toMessage(err));
+        this.showError('Conversation not opened', err);
         this.openingConversation.set(false);
       }
     });
@@ -319,9 +336,19 @@ export class ListingDetailPage implements OnInit, OnDestroy {
         this.viewingForm.set(false);
         this.viewingDate.set(null);
         this.viewingNote.set('');
+        this.toast.add({
+          severity: 'success',
+          summary: 'Viewing requested',
+          detail: 'The owner will see your viewing request.'
+        });
       },
       error: (err) => {
         this.viewingError.set(this.toMessage(err));
+        this.toast.add({
+          severity: 'error',
+          summary: 'Viewing not requested',
+          detail: this.toMessage(err)
+        });
         this.creatingViewing.set(false);
       }
     });
@@ -329,6 +356,12 @@ export class ListingDetailPage implements OnInit, OnDestroy {
 
   private toMessage(error: unknown): string {
     return this.errorHandler.toMessage(error);
+  }
+
+  private showError(summary: string, error: unknown): void {
+    const detail = this.toMessage(error);
+    this.error.set(detail);
+    this.toast.add({ severity: 'error', summary, detail });
   }
 
   private loadCurrentViewingRequest(listingId: number): void {

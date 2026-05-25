@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
+import { MessageService } from 'primeng/api';
 import { AccessService } from '../../../../core/access/access';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ListingResponse } from '../../../listings/models/listing.model';
@@ -27,6 +28,7 @@ export class OwnerDashboardPage implements OnInit {
   private readonly ownerService = inject(OwnerService);
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly access = inject(AccessService);
+  private readonly toast = inject(MessageService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -86,15 +88,29 @@ export class OwnerDashboardPage implements OnInit {
 
   approveViewing(id: number): void {
     this.viewingService.approve(id).subscribe({
-      next: updated => this.viewingRequests.update(list => list.map(v => v.id === id ? updated : v)),
-      error: err => this.error.set(this.toMessage(err))
+      next: updated => {
+        this.viewingRequests.update(list => list.map(v => v.id === id ? updated : v));
+        this.toast.add({
+          severity: 'success',
+          summary: 'Viewing approved',
+          detail: 'The request status was updated.'
+        });
+      },
+      error: err => this.showError('Could not approve viewing', err)
     });
   }
 
   rejectViewing(id: number): void {
     this.viewingService.reject(id).subscribe({
-      next: updated => this.viewingRequests.update(list => list.map(v => v.id === id ? updated : v)),
-      error: err => this.error.set(this.toMessage(err))
+      next: updated => {
+        this.viewingRequests.update(list => list.map(v => v.id === id ? updated : v));
+        this.toast.add({
+          severity: 'warn',
+          summary: 'Viewing rejected',
+          detail: 'The request status was updated.'
+        });
+      },
+      error: err => this.showError('Could not reject viewing', err)
     });
   }
 
@@ -104,8 +120,15 @@ export class OwnerDashboardPage implements OnInit {
       : this.listingService.activate(listing.id);
 
     request$.subscribe({
-      next: updated => this.listings.update(items => items.map(item => item.id === updated.id ? updated : item)),
-      error: err => this.error.set(this.toMessage(err))
+      next: updated => {
+        this.listings.update(items => items.map(item => item.id === updated.id ? updated : item));
+        this.toast.add({
+          severity: updated.status === 'ACTIVE' ? 'success' : 'info',
+          summary: updated.status === 'ACTIVE' ? 'Listing activated' : 'Listing deactivated',
+          detail: `"${updated.title}" is now ${updated.status.toLowerCase()}.`
+        });
+      },
+      error: err => this.showError('Listing status not updated', err)
     });
   }
 
@@ -116,14 +139,28 @@ export class OwnerDashboardPage implements OnInit {
     }
 
     this.listingService.delete(listing.id).subscribe({
-      next: () => this.listings.update(items => items.filter(item => item.id !== listing.id)),
-      error: err => this.error.set(this.toMessage(err))
+      next: () => {
+        this.listings.update(items => items.filter(item => item.id !== listing.id));
+        this.toast.add({
+          severity: 'success',
+          summary: 'Listing deleted',
+          detail: `"${listing.title}" is no longer visible.`
+        });
+      },
+      error: err => this.showError('Listing not deleted', err)
     });
   }
 
   exportCsv(): void {
     const rows = this.listings();
-    if (!rows.length) return;
+    if (!rows.length) {
+      this.toast.add({
+        severity: 'info',
+        summary: 'Nothing to export',
+        detail: 'You do not have any listings yet.'
+      });
+      return;
+    }
 
     const header = [
       'ID', 'Title', 'City', 'Address', 'Price', 'Currency', 'Deal',
@@ -152,6 +189,11 @@ export class OwnerDashboardPage implements OnInit {
       .join('\r\n');
 
     this.downloadCsv(csv);
+    this.toast.add({
+      severity: 'success',
+      summary: 'CSV exported',
+      detail: 'Your listings report was downloaded.'
+    });
   }
 
   createListing(): void {
@@ -190,5 +232,11 @@ export class OwnerDashboardPage implements OnInit {
 
   private toMessage(error: unknown): string {
     return this.errorHandler.toMessage(error);
+  }
+
+  private showError(summary: string, error: unknown): void {
+    const detail = this.toMessage(error);
+    this.error.set(detail);
+    this.toast.add({ severity: 'error', summary, detail });
   }
 }

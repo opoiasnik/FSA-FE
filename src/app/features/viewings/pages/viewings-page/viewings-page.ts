@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
+import { MessageService } from 'primeng/api';
 import { SkeletonModule } from 'primeng/skeleton';
 import { AccessService } from '../../../../core/access/access';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
@@ -20,6 +21,7 @@ export class ViewingsPage implements OnInit {
   private readonly viewingService = inject(ViewingService);
   private readonly access = inject(AccessService);
   private readonly errorHandler = inject(ErrorHandlerService);
+  private readonly toast = inject(MessageService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -41,26 +43,53 @@ export class ViewingsPage implements OnInit {
 
   cancel(id: number): void {
     this.viewingService.cancel(id).subscribe({
-      next: updated => this.items.update(list => list.map(v => v.id === id ? updated : v)),
-      error: err => this.error.set(this.errorHandler.toMessage(err))
+      next: updated => {
+        this.items.update(list => list.map(v => v.id === id ? updated : v));
+        this.toast.add({
+          severity: 'info',
+          summary: 'Viewing cancelled',
+          detail: 'The viewing request was cancelled.'
+        });
+      },
+      error: err => this.showError('Could not cancel viewing', err)
     });
   }
 
   approve(id: number): void {
     this.viewingService.approve(id).subscribe({
-      next: updated => this.items.update(list => list.map(v => v.id === id ? updated : v)),
-      error: err => this.error.set(this.errorHandler.toMessage(err))
+      next: updated => {
+        this.items.update(list => list.map(v => v.id === id ? updated : v));
+        this.toast.add({
+          severity: 'success',
+          summary: 'Viewing approved',
+          detail: 'The requester can now see the approved status.'
+        });
+      },
+      error: err => this.showError('Could not approve viewing', err)
     });
   }
 
   reject(id: number): void {
     this.viewingService.reject(id).subscribe({
-      next: updated => this.items.update(list => list.map(v => v.id === id ? updated : v)),
-      error: err => this.error.set(this.errorHandler.toMessage(err))
+      next: updated => {
+        this.items.update(list => list.map(v => v.id === id ? updated : v));
+        this.toast.add({
+          severity: 'warn',
+          summary: 'Viewing rejected',
+          detail: 'The viewing request was rejected.'
+        });
+      },
+      error: err => this.showError('Could not reject viewing', err)
     });
   }
 
   open(listingId: number): void {
     void this.router.navigate(['/listings', listingId]);
+  }
+
+  private showError(summary: string, error: unknown): void {
+    const detail = this.errorHandler.toMessage(error);
+    this.error.set(detail);
+    this.toast.add({ severity: 'error', summary, detail });
   }
 }

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { MessageService } from 'primeng/api';
 import { UserService } from '../../../../core/services/user.service';
 import { AuthLayout } from '../../components/auth-layout/auth-layout';
 import { AuthForm } from '../../components/auth-form/auth-form';
@@ -18,6 +19,7 @@ export class LoginPage {
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly toast = inject(MessageService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -38,15 +40,25 @@ export class LoginPage {
 
     try {
       await this.userService.loginWithPassword(username, password);
+      this.toast.add({
+        severity: 'success',
+        summary: 'Signed in',
+        detail: 'Welcome back.'
+      });
       const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/home';
       await this.router.navigateByUrl(returnUrl);
     } catch (err: unknown) {
       const status = (err as { status?: number })?.status;
-      this.error.set(
+      const message =
         status === 400 || status === 401
           ? 'Invalid username or password.'
-          : 'Login failed. Please try again.',
-      );
+          : 'Login failed. Please try again.';
+      this.error.set(message);
+      this.toast.add({
+        severity: 'error',
+        summary: 'Sign in failed',
+        detail: message
+      });
     } finally {
       this.loading.set(false);
     }

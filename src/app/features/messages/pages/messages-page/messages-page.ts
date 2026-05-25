@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageModule } from 'primeng/message';
+import { MessageService as ToastService } from 'primeng/api';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ImageContentService } from '../../../../core/services/image-content.service';
 import { ListingService } from '../../../listings/services/listing.service';
@@ -25,6 +26,7 @@ export class MessagesPage implements OnInit, OnDestroy {
   private readonly listingService = inject(ListingService);
   private readonly imageContentService = inject(ImageContentService);
   private readonly errorHandler = inject(ErrorHandlerService);
+  private readonly toast = inject(ToastService);
   private photoObjectUrls: string[] = [];
   private avatarObjectUrls: string[] = [];
 
@@ -96,9 +98,20 @@ export class MessagesPage implements OnInit, OnDestroy {
           .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)));
         this.selectedId.set(updated.id);
         this.sending.set(false);
+        this.toast.add({
+          severity: 'success',
+          summary: 'Message sent',
+          detail: 'Your message was added to the conversation.'
+        });
       },
       error: err => {
-        this.error.set(this.toMessage(err));
+        const detail = this.toMessage(err);
+        this.error.set(detail);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Message not sent',
+          detail
+        });
         this.sending.set(false);
       }
     });

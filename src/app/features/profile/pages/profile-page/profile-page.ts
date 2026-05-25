@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { AccessService } from '../../../../core/access/access';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { UserService } from '../../../../core/services/user.service';
 import { ProfileHeader } from '../../components/profile-header/profile-header';
 import { NotificationPref, NotificationPreferenceKey, ProfileNotificationsPanel } from '../../components/profile-notifications-panel/profile-notifications-panel';
@@ -29,6 +30,7 @@ export class ProfilePage implements OnInit {
   private readonly access = inject(AccessService);
   private readonly profileService = inject(ProfileService);
   private readonly messageService = inject(MessageService);
+  private readonly errorHandler = inject(ErrorHandlerService);
 
   readonly tab = signal<ProfileTabId>('profile');
   readonly user = this.userService.getUserSignal();
@@ -130,9 +132,19 @@ export class ProfilePage implements OnInit {
         this.emailVerificationRequested.set(false);
         this.verificationCode.set('');
         this.saving.set(false);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Profile saved',
+          detail: 'Your personal details were updated.'
+        });
       },
-      error: () => {
+      error: err => {
         this.saving.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Profile not saved',
+          detail: this.toMessage(err)
+        });
       }
     });
   }
@@ -176,8 +188,13 @@ export class ProfilePage implements OnInit {
           detail: 'Enter the code from your email to verify the address.'
         });
       },
-      error: () => {
+      error: err => {
         this.sendingEmailCode.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Verification email not sent',
+          detail: this.toMessage(err)
+        });
       }
     });
   }
@@ -209,8 +226,13 @@ export class ProfilePage implements OnInit {
           detail: 'Your email address is now verified.'
         });
       },
-      error: () => {
+      error: err => {
         this.confirmingEmailCode.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Email not verified',
+          detail: this.toMessage(err)
+        });
       }
     });
   }
@@ -257,9 +279,19 @@ export class ProfilePage implements OnInit {
           dto.viewingRequestEmailNotifications,
         );
         this.savingNotificationPreferences.set(false);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Notifications updated',
+          detail: 'Your email notification preferences were saved.'
+        });
       },
-      error: () => {
+      error: err => {
         this.savingNotificationPreferences.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Notifications not updated',
+          detail: this.toMessage(err)
+        });
       }
     });
   }
@@ -270,10 +302,24 @@ export class ProfilePage implements OnInit {
       next: dto => {
         this.userService.updateFromProfile(dto);
         this.uploading.set(false);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Avatar updated',
+          detail: 'Your profile photo was uploaded.'
+        });
       },
-      error: () => {
+      error: err => {
         this.uploading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Avatar not uploaded',
+          detail: this.toMessage(err)
+        });
       }
     });
+  }
+
+  private toMessage(error: unknown): string {
+    return this.errorHandler.toMessage(error);
   }
 }

@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
+import { MessageService } from 'primeng/api';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { ErrorHandlerService, ErrorResult } from '../../../../core/services/error-handler.service';
 import { ListingBasicsStep } from '../../components/listing-basics-step/listing-basics-step';
@@ -45,6 +46,7 @@ export class ListingCreatePage implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toast = inject(MessageService);
 
   readonly steps: WizardStep[] = [
     { id: 'basics', title: 'Basics', sub: 'Title, description, deal type' },
@@ -322,12 +324,24 @@ export class ListingCreatePage implements OnInit, OnDestroy {
     ).subscribe({
       next: () => {
         this.creating.set(false);
+        this.toast.add({
+          severity: 'success',
+          summary: this.isEditMode() ? 'Listing updated' : 'Listing published',
+          detail: this.isEditMode()
+            ? 'Your listing changes were saved.'
+            : 'Your listing is now visible to renters.'
+        });
         void this.router.navigate(['/owner']);
       },
       error: (error) => {
         const result = this.errorHandler.toResult(error);
         this.publishAttempted.set(true);
         this.applyServerError(result);
+        this.toast.add({
+          severity: 'error',
+          summary: this.isEditMode() ? 'Listing not updated' : 'Listing not published',
+          detail: result.message
+        });
         this.creating.set(false);
       }
     });

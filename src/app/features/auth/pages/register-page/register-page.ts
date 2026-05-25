@@ -3,6 +3,7 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MessageService } from 'primeng/api';
 import { KeycloakRegistrationService } from '../../../../core/auth/keycloak-registration.service';
 import { ErrorHandlerService, ErrorResult } from '../../../../core/services/error-handler.service';
 import { AuthLayout } from '../../components/auth-layout/auth-layout';
@@ -21,6 +22,7 @@ export class RegisterPage {
   private readonly registrationService = inject(KeycloakRegistrationService);
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toast = inject(MessageService);
 
   readonly loading = signal(false);
   readonly error   = signal<string | null>(null);
@@ -51,6 +53,11 @@ export class RegisterPage {
     try {
       await this.registrationService.register(this.form.getRawValue());
       this.success.set(true);
+      this.toast.add({
+        severity: 'success',
+        summary: 'Account created',
+        detail: 'You can sign in with your new account.'
+      });
       setTimeout(() => void this.router.navigate(['/login']), 2000);
     } catch (err: unknown) {
       const status = (err as { status?: number })?.status;
@@ -58,6 +65,11 @@ export class RegisterPage {
         ? { message: 'User with this username or email already exists.', field: 'username' }
         : this.errorHandler.toResult(err);
       this.applyServerError(result);
+      this.toast.add({
+        severity: 'error',
+        summary: 'Registration failed',
+        detail: result.message
+      });
     } finally {
       this.loading.set(false);
     }
