@@ -53,7 +53,7 @@
       <button type="button" class="ra-btn ra-btn--ghost" (click)="prev()" [disabled]="currentStep() === 0">
         <i class="pi pi-arrow-left"></i>Back
       </button>
-      <button type="button" class="ra-btn" (click)="next()" [disabled]="creating() || !canProceed()">
+      <button type="button" class="ra-btn" (click)="next()" [disabled]="creating() || !canProceedSig()">
         {{ isLastStep() ? submitLabel() : 'Continue' }}<i class="pi pi-arrow-right"></i>
       </button>
     </div>

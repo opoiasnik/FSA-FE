@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
 import { MessageService } from 'primeng/api';
 import { forkJoin, of, switchMap } from 'rxjs';
@@ -172,6 +172,17 @@ export class ListingCreatePage implements OnInit, OnDestroy {
     currency: ['EUR', [Validators.required]]
   });
 
+  private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+  private readonly formStatus = toSignal(this.form.statusChanges, { initialValue: this.form.status });
+
+  readonly canProceedSig = computed(() => {
+    this.formValue();
+    this.formStatus();
+    this.existingPhotoPreviews();
+    this.selectedPhotos();
+    return this.isStepValid(this.activeStep().id);
+  });
+
   constructor() {
     this.form.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -334,15 +345,17 @@ export class ListingCreatePage implements OnInit, OnDestroy {
         void this.router.navigate(['/owner']);
       },
       error: (error) => {
-        const result = this.errorHandler.toResult(error);
-        this.publishAttempted.set(true);
-        this.applyServerError(result);
-        this.toast.add({
-          severity: 'error',
-          summary: this.isEditMode() ? 'Listing not updated' : 'Listing not published',
-          detail: result.message
-        });
         this.creating.set(false);
+        queueMicrotask(() => {
+          const result = this.errorHandler.toResult(error);
+          this.publishAttempted.set(true);
+          this.applyServerError(result);
+          this.toast.add({
+            severity: 'error',
+            summary: this.isEditMode() ? 'Listing not updated' : 'Listing not published',
+            detail: result.message
+          });
+        });
       }
     });
   }
