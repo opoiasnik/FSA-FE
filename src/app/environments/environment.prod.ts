@@ -2,9 +2,9 @@ export const environment = {
   production: true,
   apiUrl: '/api',
   auth: {
-    issuer: 'https://poiasniko.20.107.204.3.nip.io/auth/realms/rental',
-    redirectUri: 'https://poiasniko.20.107.204.3.nip.io/',
-    postLogoutRedirectUri: 'https://poiasniko.20.107.204.3.nip.io/',
+    issuer: 'https://rent-area.com/auth/realms/rental',
+    redirectUri: 'https://rent-area.com/',
+    postLogoutRedirectUri: 'https://rent-area.com/',
     clientId: 'rental-client',
     responseType: 'code',
     scope: 'openid profile email',
