@@ -13,13 +13,22 @@
   <p class="todo-note" *ngIf="!previews.length">No photos selected yet.</p>
 
   <div class="media-grid" *ngIf="previews.length; else emptyPhotos">
-    <div class="photo-preview" *ngFor="let preview of previews; let i = index">
+    <div class="photo-preview"
+         *ngFor="let preview of previews; let i = index"
+         [class.is-draggable]="i >= readonlyCount"
+         [class.is-dragging]="dragSrcIndex() === i"
+         [class.drag-over]="dragOverIndex() === i && dragSrcIndex() !== i"
+         [attr.draggable]="i >= readonlyCount ? true : null"
+         (dragstart)="i >= readonlyCount && onDragStart($event, i)"
+         (dragover)="i >= readonlyCount && onDragOver($event, i)"
+         (drop)="i >= readonlyCount && onDrop($event, i)"
+         (dragend)="onDragEnd()">
       <img [src]="preview" [alt]="i === 0 ? 'Cover photo preview' : 'Photo preview ' + (i + 1)" />
       <span>{{ i === 0 ? 'cover' : 'photo ' + (i + 1) }}</span>
-      <button *ngIf="i >= readonlyCount"
-              type="button"
+      <i *ngIf="i >= readonlyCount" class="pi pi-arrows-alt photo-preview__drag-handle" aria-hidden="true"></i>
+      <button type="button"
               class="photo-preview__remove"
-              (click)="photoRemoved.emit(i - readonlyCount)"
+              (click)="photoRemoved.emit(i)"
               aria-label="Remove photo">
         <i class="pi pi-times"></i>
       </button>

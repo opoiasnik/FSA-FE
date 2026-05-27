@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
 import { MessageService } from 'primeng/api';
-import { forkJoin, of, switchMap } from 'rxjs';
+import { of, switchMap } from 'rxjs';
 import { ErrorHandlerService, ErrorResult } from '../../../../core/services/error-handler.service';
 import { ListingBasicsStep } from '../../components/listing-basics-step/listing-basics-step';
 import { ListingDetailsStep } from '../../components/listing-details-step/listing-details-step';
@@ -66,6 +66,7 @@ export class ListingCreatePage implements OnInit, OnDestroy {
   readonly editListingId = signal<number | null>(null);
   readonly editListing = signal<ListingResponse | null>(null);
   readonly existingPhotoPreviews = signal<string[]>([]);
+  readonly existingPhotoIds = signal<number[]>([]);
   readonly completedStepIdsState = signal<WizardStep['id'][]>([]);
   readonly selectedPhotos = signal<File[]>([]);
   readonly photoPreviews = signal<string[]>([]);
@@ -202,6 +203,7 @@ export class ListingCreatePage implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.existingPhotoPreviews().forEach(url => this.listingService.revokePhotoObjectUrl(url));
     this.photoPreviews().forEach(url => URL.revokeObjectURL(url));
+    this.existingPhotoIds.set([]);
   }
 
   goTo(index: number): void {
@@ -317,7 +319,10 @@ export class ListingCreatePage implements OnInit, OnDestroy {
         petsAllowed: v.petsAllowed,
         energyClass: v.energyClass || undefined,
         yearBuilt: v.yearBuilt != null ? Number(v.yearBuilt) : undefined
-      }
+      },
+      // In edit mode, tell the backend which existing photos to keep.
+      // Photos not in this list will be deleted server-side.
+      photoIdsToKeep: this.isEditMode() ? this.existingPhotoIds() : undefined,
     };
 
     const editId = this.editListingId();
@@ -327,10 +332,17 @@ export class ListingCreatePage implements OnInit, OnDestroy {
 
     save$.pipe(
       switchMap(listing => {
-        const uploads = this.selectedPhotos().map((file, index) =>
-          this.listingService.uploadPhoto(listing.id, file, this.photoAltText(index))
-        );
-        return uploads.length ? forkJoin(uploads).pipe(switchMap(() => of(listing))) : of(listing);
+        const files = this.selectedPhotos();
+        if (!files.length) return of(listing);
+        // Upload sequentially — prevents race condition on position assignment
+        // (parallel uploads would read the same list size and produce duplicate positions)
+        let chain$ = this.listingService.uploadPhoto(listing.id, files[0], this.photoAltText(0));
+        for (let i = 1; i < files.length; i++) {
+          const file = files[i];
+          const idx = i;
+          chain$ = chain$.pipe(switchMap(() => this.listingService.uploadPhoto(listing.id, file, this.photoAltText(idx))));
+        }
+        return chain$.pipe(switchMap(() => of(listing)));
       })
     ).subscribe({
       next: () => {
@@ -406,9 +418,14 @@ export class ListingCreatePage implements OnInit, OnDestroy {
   private loadExistingPhotoPreviews(listing: ListingResponse): void {
     this.existingPhotoPreviews().forEach(url => this.listingService.revokePhotoObjectUrl(url));
     this.existingPhotoPreviews.set([]);
+    this.existingPhotoIds.set([]);
     for (const photo of listing.photos ?? []) {
+      const photoId = photo.id;
       this.listingService.loadPhotoObjectUrl(photo.contentUrl).subscribe({
-        next: url => this.existingPhotoPreviews.update(urls => [...urls, url]),
+        next: url => {
+          this.existingPhotoPreviews.update(urls => [...urls, url]);
+          this.existingPhotoIds.update(ids => [...ids, photoId]);
+        },
         error: () => {}
       });
     }
@@ -502,14 +519,45 @@ export class ListingCreatePage implements OnInit, OnDestroy {
     }
   }
 
-  removePhoto(index: number): void {
-    const previews = this.photoPreviews();
-    URL.revokeObjectURL(previews[index]);
-    this.selectedPhotos.update(files => files.filter((_, i) => i !== index));
-    this.photoPreviews.update(urls => urls.filter((_, i) => i !== index));
+  removePhoto(absoluteIndex: number): void {
+    const readonlyCount = this.existingPhotoPreviews().length;
+    if (absoluteIndex < readonlyCount) {
+      // Existing (server-side) photo — mark for removal via photoIdsToKeep
+      const url = this.existingPhotoPreviews()[absoluteIndex];
+      this.listingService.revokePhotoObjectUrl(url);
+      this.existingPhotoPreviews.update(urls => urls.filter((_, i) => i !== absoluteIndex));
+      this.existingPhotoIds.update(ids => ids.filter((_, i) => i !== absoluteIndex));
+    } else {
+      // New (not yet uploaded) photo
+      const newIndex = absoluteIndex - readonlyCount;
+      URL.revokeObjectURL(this.photoPreviews()[newIndex]);
+      this.selectedPhotos.update(files => files.filter((_, i) => i !== newIndex));
+      this.photoPreviews.update(urls => urls.filter((_, i) => i !== newIndex));
+    }
     if (this.publishAttempted() && !this.hasAnyPhoto()) {
       this.mediaError.set('Upload at least one listing photo before publishing.');
     }
+  }
+
+  reorderPhotos(event: { from: number; to: number }): void {
+    const readonlyCount = this.existingPhotoPreviews().length;
+    const from = event.from - readonlyCount;
+    const to = event.to - readonlyCount;
+    if (from < 0 || to < 0) return;
+
+    this.selectedPhotos.update(files => {
+      const arr = [...files];
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      return arr;
+    });
+
+    this.photoPreviews.update(urls => {
+      const arr = [...urls];
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      return arr;
+    });
   }
 
   private focusFirstInvalidStep(): void {

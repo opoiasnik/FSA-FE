@@ -37,7 +37,8 @@
         [readonlyCount]="existingPhotoPreviews().length"
         [error]="mediaError()"
         (filesSelected)="addPhotos($event)"
-        (photoRemoved)="removePhoto($event)">
+        (photoRemoved)="removePhoto($event)"
+        (photosReordered)="reorderPhotos($event)">
       </app-listing-photo-uploader>
 
       <app-listing-review-step

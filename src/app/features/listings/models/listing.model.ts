@@ -54,6 +54,7 @@ export interface CreateListingRequest {
   address: Address;
   price: Price;
   features: PropertyFeatures;
+  photoIdsToKeep?: number[];
 }
 
 export interface ListingOwner {
