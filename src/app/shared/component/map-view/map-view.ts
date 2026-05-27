@@ -74,8 +74,11 @@ export class MapView implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.map && (changes['pins'] || changes['selectedId'])) {
-      this.renderPins();
+    if (!this.map) return;
+    if (changes['pins']) {
+      this.renderPins(true);
+    } else if (changes['selectedId']) {
+      this.renderPins(false);
     }
   }
 
@@ -84,7 +87,7 @@ export class MapView implements AfterViewInit, OnChanges, OnDestroy {
     this.map?.remove();
   }
 
-  private renderPins(): void {
+  private renderPins(fitBounds = true): void {
     if (!this.map || !this.markersLayer) return;
     this.markersLayer.clearLayers();
     this.destroyPreviews();
@@ -120,8 +123,10 @@ export class MapView implements AfterViewInit, OnChanges, OnDestroy {
       marker.on('click', () => this.zone.run(() => this.pinSelect.emit(pin.id)));
     });
 
-    const bounds = L.latLngBounds(valid.map(p => [p.lat, p.lng] as L.LatLngTuple));
-    this.map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+    if (fitBounds) {
+      const bounds = L.latLngBounds(valid.map(p => [p.lat, p.lng] as L.LatLngTuple));
+      this.map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+    }
   }
 
   private createPinElement(pin: MapPin): HTMLElement {
