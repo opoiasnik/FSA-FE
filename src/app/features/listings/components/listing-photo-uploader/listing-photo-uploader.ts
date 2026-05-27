@@ -18,6 +18,7 @@ export class ListingPhotoUploader {
   @Output() photoRemoved = new EventEmitter<number>();
   @Output() photosReordered = new EventEmitter<{ from: number; to: number }>();
 
+  readonly isFileDragOver = signal(false);
   readonly dragSrcIndex = signal<number | null>(null);
   readonly dragOverIndex = signal<number | null>(null);
 
@@ -27,9 +28,37 @@ export class ListingPhotoUploader {
     input.value = '';
   }
 
+  onFileDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'copy';
+    }
+    this.isFileDragOver.set(true);
+  }
+
+  onFileDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isFileDragOver.set(false);
+  }
+
+  onFilesDropped(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isFileDragOver.set(false);
+
+    const files = Array.from(event.dataTransfer?.files ?? []);
+    if (files.length) {
+      this.filesSelected.emit(files);
+    }
+  }
+
   onDragStart(event: DragEvent, index: number): void {
     this.dragSrcIndex.set(index);
     if (event.dataTransfer) {
+      event.dataTransfer.clearData();
+      event.dataTransfer.setData('text/plain', String(index));
       event.dataTransfer.effectAllowed = 'move';
     }
   }

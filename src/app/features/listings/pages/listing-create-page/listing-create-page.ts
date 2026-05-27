@@ -320,8 +320,6 @@ export class ListingCreatePage implements OnInit, OnDestroy {
         energyClass: v.energyClass || undefined,
         yearBuilt: v.yearBuilt != null ? Number(v.yearBuilt) : undefined
       },
-      // In edit mode, tell the backend which existing photos to keep.
-      // Photos not in this list will be deleted server-side.
       photoIdsToKeep: this.isEditMode() ? this.existingPhotoIds() : undefined,
     };
 
@@ -334,8 +332,6 @@ export class ListingCreatePage implements OnInit, OnDestroy {
       switchMap(listing => {
         const files = this.selectedPhotos();
         if (!files.length) return of(listing);
-        // Upload sequentially — prevents race condition on position assignment
-        // (parallel uploads would read the same list size and produce duplicate positions)
         let chain$ = this.listingService.uploadPhoto(listing.id, files[0], this.photoAltText(0));
         for (let i = 1; i < files.length; i++) {
           const file = files[i];
@@ -522,13 +518,11 @@ export class ListingCreatePage implements OnInit, OnDestroy {
   removePhoto(absoluteIndex: number): void {
     const readonlyCount = this.existingPhotoPreviews().length;
     if (absoluteIndex < readonlyCount) {
-      // Existing (server-side) photo — mark for removal via photoIdsToKeep
       const url = this.existingPhotoPreviews()[absoluteIndex];
       this.listingService.revokePhotoObjectUrl(url);
       this.existingPhotoPreviews.update(urls => urls.filter((_, i) => i !== absoluteIndex));
       this.existingPhotoIds.update(ids => ids.filter((_, i) => i !== absoluteIndex));
     } else {
-      // New (not yet uploaded) photo
       const newIndex = absoluteIndex - readonlyCount;
       URL.revokeObjectURL(this.photoPreviews()[newIndex]);
       this.selectedPhotos.update(files => files.filter((_, i) => i !== newIndex));
@@ -540,24 +534,38 @@ export class ListingCreatePage implements OnInit, OnDestroy {
   }
 
   reorderPhotos(event: { from: number; to: number }): void {
+    const { from, to } = event;
     const readonlyCount = this.existingPhotoPreviews().length;
-    const from = event.from - readonlyCount;
-    const to = event.to - readonlyCount;
-    if (from < 0 || to < 0) return;
 
-    this.selectedPhotos.update(files => {
-      const arr = [...files];
-      const [moved] = arr.splice(from, 1);
-      arr.splice(to, 0, moved);
-      return arr;
-    });
-
-    this.photoPreviews.update(urls => {
-      const arr = [...urls];
-      const [moved] = arr.splice(from, 1);
-      arr.splice(to, 0, moved);
-      return arr;
-    });
+    if (from < readonlyCount && to < readonlyCount) {
+      this.existingPhotoIds.update(ids => {
+        const arr = [...ids];
+        const [moved] = arr.splice(from, 1);
+        arr.splice(to, 0, moved);
+        return arr;
+      });
+      this.existingPhotoPreviews.update(urls => {
+        const arr = [...urls];
+        const [moved] = arr.splice(from, 1);
+        arr.splice(to, 0, moved);
+        return arr;
+      });
+    } else if (from >= readonlyCount && to >= readonlyCount) {
+      const newFrom = from - readonlyCount;
+      const newTo = to - readonlyCount;
+      this.selectedPhotos.update(files => {
+        const arr = [...files];
+        const [moved] = arr.splice(newFrom, 1);
+        arr.splice(newTo, 0, moved);
+        return arr;
+      });
+      this.photoPreviews.update(urls => {
+        const arr = [...urls];
+        const [moved] = arr.splice(newFrom, 1);
+        arr.splice(newTo, 0, moved);
+        return arr;
+      });
+    }
   }
 
   private focusFirstInvalidStep(): void {

@@ -1,5 +1,9 @@
 <section>
-  <div class="dropzone">
+  <div class="dropzone"
+       [class.dropzone--over]="isFileDragOver()"
+       (dragover)="onFileDragOver($event)"
+       (dragleave)="onFileDragLeave($event)"
+       (drop)="onFilesDropped($event)">
     <i class="pi pi-cloud-upload"></i>
     <div class="dropzone__title">Drop photos here or click to upload</div>
     <div class="dropzone__hint">JPG or PNG, up to 10 MB each &middot; 5-20 photos</div>
@@ -15,17 +19,17 @@
   <div class="media-grid" *ngIf="previews.length; else emptyPhotos">
     <div class="photo-preview"
          *ngFor="let preview of previews; let i = index"
-         [class.is-draggable]="i >= readonlyCount"
+         [class.is-draggable]="true"
          [class.is-dragging]="dragSrcIndex() === i"
          [class.drag-over]="dragOverIndex() === i && dragSrcIndex() !== i"
-         [attr.draggable]="i >= readonlyCount ? true : null"
-         (dragstart)="i >= readonlyCount && onDragStart($event, i)"
-         (dragover)="i >= readonlyCount && onDragOver($event, i)"
-         (drop)="i >= readonlyCount && onDrop($event, i)"
+         draggable="true"
+         (dragstart)="onDragStart($event, i)"
+         (dragover)="onDragOver($event, i)"
+         (drop)="onDrop($event, i)"
          (dragend)="onDragEnd()">
-      <img [src]="preview" [alt]="i === 0 ? 'Cover photo preview' : 'Photo preview ' + (i + 1)" />
+      <img [src]="preview" [alt]="i === 0 ? 'Cover photo preview' : 'Photo preview ' + (i + 1)" draggable="false" />
       <span>{{ i === 0 ? 'cover' : 'photo ' + (i + 1) }}</span>
-      <i *ngIf="i >= readonlyCount" class="pi pi-arrows-alt photo-preview__drag-handle" aria-hidden="true"></i>
+      <i class="pi pi-arrows-alt photo-preview__drag-handle" aria-hidden="true"></i>
       <button type="button"
               class="photo-preview__remove"
               (click)="photoRemoved.emit(i)"
