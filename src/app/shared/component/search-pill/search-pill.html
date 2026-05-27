@@ -1,8 +1,11 @@
 <form [formGroup]="form" class="search-pill" (ngSubmit)="emit()">
 
   <div class="search-pill__where">
-    <div class="search-pill__label">{{ label }}</div>
-    <input class="search-pill__input" formControlName="q" [placeholder]="placeholder" />
+    <i class="pi pi-map-marker search-pill__pin"></i>
+    <div class="search-pill__field">
+      <div class="search-pill__label">{{ label }}</div>
+      <input class="search-pill__input" formControlName="q" [placeholder]="placeholder" />
+    </div>
   </div>
 
   <ng-container *ngIf="showFilters">
@@ -33,6 +36,7 @@
 
   <button type="submit" class="search-pill__submit">
     <i class="pi pi-search"></i>
+    <span class="search-pill__submit-text">Search</span>
   </button>
 
 </form>
