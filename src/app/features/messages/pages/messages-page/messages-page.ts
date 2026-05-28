@@ -179,6 +179,8 @@ export class MessagesPage implements OnInit, OnDestroy {
   private markSelectedRead(): void {
     const id = this.selectedId();
     if (!id) return;
+    const selected = this.selected();
+    if (!selected?.unreadCount) return;
 
     this.messageService.markRead(id).subscribe({
       next: conversation => {
